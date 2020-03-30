@@ -13,7 +13,7 @@ class LogoutController extends Controller
         Auth::logout();
         
         // Redirect to the login page with a success message
-        flash("auth.logged_out")->success();
+        flash(__("auth.logged_out"))->success();
         return redirect()->route("login");
     }
 }
