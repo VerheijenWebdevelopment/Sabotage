@@ -64,7 +64,5 @@ return [
     // Logout
 
     "logged_out" => "See you later alligator",
-
-
-
+    
 ];
