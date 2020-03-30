@@ -19,6 +19,7 @@ class UserSeeder extends Seeder
             "username" => "Haskabab",
             "email" => "verheijen.webdevelopment@gmail.com",
             "password" => bcrypt("engeland"),
+            "recovery_code" => "aids",
         ]);
     }
 }

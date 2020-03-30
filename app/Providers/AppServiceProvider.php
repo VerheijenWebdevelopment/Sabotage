@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\UserService;
+
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->registerServices();
     }
 
     /**
@@ -24,5 +26,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+    }
+
+    private function registerServices()
+    {
+        $this->app->singleton("users", function() {
+            return new UserService;
+        });
     }
 }

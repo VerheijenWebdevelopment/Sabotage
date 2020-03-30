@@ -20,7 +20,7 @@ mix.js('resources/js/app.js', 'public/js')
 
 mix.disableNotifications().browserSync({
     proxy: 'saboteur.test',
-    port: 6666
+    port: 666
 });
 
 mix.webpackConfig({

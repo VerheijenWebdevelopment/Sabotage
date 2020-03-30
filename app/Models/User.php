@@ -2,19 +2,24 @@
 
 namespace App\Models;
 
+use Cviebrock\EloquentSluggable\Sluggable;
+
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
+    use Sluggable;
     use Notifiable;
 
     protected $fillable = [
+        'slug',
         'name', 
         'email', 
         'password',
         'username',
+        'recovery_code',
     ];
     protected $hidden = [
         'password',
@@ -23,4 +28,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    //
+    // Slug
+    //
+    
+    public function sluggable()
+    {
+        return ["slug" => ["source" => "username"]];
+    }
+
+    //
+    // Relationships
+    //
 }
