@@ -1,6 +1,6 @@
 <?php
 
-namespace Tessify\Core\Mail\Auth;
+namespace App\Mail\Auth;
 
 use App\Models\User;
 
@@ -29,8 +29,9 @@ class RecoverAccountMail extends Mailable
      * @return $this
      */
     public function build()
-    {
-        return $this->subject(__('auth.recover_account_subject'))
+    {   
+        return $this->from([env("MAIL_FROM_ADDRESS"), env("MAIL_FROM_NAME")])
+                    ->subject(__('auth.recover_account_subject'))
                     ->markdown('emails.auth.recover-account', [
                         'user' => $this->user,
                         'titleText' => __('auth.recover_email_title'),

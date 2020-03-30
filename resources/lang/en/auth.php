@@ -47,6 +47,9 @@ return [
     "recover_email_title" => "Recover your Saboteur account",
     "recover_email_button" => "Reset my password",
     "recover_email_text" => "Hi :name! We have received a request to recover your account.\nClick on the button below to reset your password.",
+    "recover_email_sent_title" => "Thank you",
+    "recover_email_sent_text" => "An email with instructions should arrive in your inbox shortly.",
+    "recover_email_sent_back" => "Go back to the login page",
 
     // Reset
 

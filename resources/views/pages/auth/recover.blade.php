@@ -8,21 +8,21 @@
     <div class="content-section__wrapper">
         <div class="content-section">
 
-            <div id="forgot-password">
+            <div id="recover-account">
 
                 @include("partials.feedback")
 
                 <form action="{{ route('recover-account.post') }}" method="post">
                     @csrf
 
-                    <forgot-password-form
+                    <recover-account-form
                         :errors="{{ $errors->toJson() }}"
                         title-text="@lang('auth.recover_title')"
                         email-text="@lang('auth.recover_email')"
                         back-text="@lang('auth.recover_back')"
                         back-href="{{ route('login') }}"
                         submit-text="@lang('auth.recover_submit')">
-                    </forgot-password-form>
+                    </recover-account-form>
 
                 </form>
 

@@ -1,10 +1,10 @@
 <template>
-    <div id="forgot-password-form__wrapper">
+    <div id="recover-account-form__wrapper">
 
         <!-- Form -->
-        <div id="forgot-password-form" class="elevation-1">
+        <div id="recover-account-form" class="elevation-1">
 
-            <h1 id="forgot-password-form__title">{{ titleText }}</h1>
+            <h1 id="recover-account-form__title">{{ titleText }}</h1>
 
             <!-- Email -->
             <div class="form-field">
@@ -49,7 +49,7 @@
             "submitText",
         ],
         data: () => ({
-            tag: "[forgot-password-form]",
+            tag: "[recover-account-form]",
             form: {
                 email: ""
             }
@@ -85,8 +85,8 @@
 </script>
 
 <style lang="scss">
-    #forgot-password-form__wrapper {
-        #forgot-password-form {
+    #recover-account-form__wrapper {
+        #recover-account-form {
             width: 650px;
             padding: 25px;
             border-radius: 3px;
@@ -100,8 +100,8 @@
         }
     }
     @media (max-width: 650px) {
-        #forgot-password-form__wrapper {
-            #forgot-password-form {
+        #recover-account-form__wrapper {
+            #recover-account-form {
                 width: 100%;
             }
             .form-controls {
@@ -110,7 +110,7 @@
         }
     }
     @media (max-width: 455px) {
-        #forgot-password-form__wrapper {
+        #recover-account-form__wrapper {
             .form-controls {
                 flex-direction: column-reverse;
                 .form-controls__left {

@@ -62,12 +62,7 @@
 }
 
 //
-// Layout styling
-//
-
-
-//
-// Login
+// Login page
 //
 
 #login {
@@ -117,5 +112,28 @@
                 }
             }
         }
+    }
+}
+
+//
+// Recover account page
+//
+
+#recover-mail-sent {
+    width: 600px;
+    padding: 25px;
+    margin: 0 auto;
+    border-radius: 3px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    #recover-mail-sent__title {
+        text-align: center;
+    }
+    #recover-mail-sent__text {
+        text-align: center;
+        margin: 0 0 15px 0;
+    }
+    #recover-mail-sent__actions {
+        text-align: center;
     }
 }
