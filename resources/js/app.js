@@ -17,16 +17,25 @@ Vue.use(Vuetify);
 
 // Pusher
 window.Pusher = require('pusher-js');
+let useTLSOverride = process.env.MIX_WEBSOCKET_USE_TLS === "true" ? true : false;
+if (useTLSOverride) {
+    window.Pusher.Runtime.getProtocol = function() {
+        return "http:";
+    }
+}
 
 // Echo
 import Echo from "laravel-echo";
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: process.env.MIX_PUSHER_APP_KEY,
-    cluster: process.env.MIX_PUSHER_APP_CLUSTER,
     wsHost: window.location.hostname,
-    wsPort: 6001,
-    disableStats: true,
+    wsPort: process.env.MIX_WEBSOCKET_PORT_WS,
+    wssPort: process.env.MIX_WEBSOCKET_PORT_WSS,
+    disableStats: false,
+    encrypted: process.env.MIX_WEBSOCKET_ENCRYPTED == "true" ? true : false,
+    enabledTransports: ["ws", "wss"],
+    cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 });
 
 // Automatically load all vue components

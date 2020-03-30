@@ -38,3 +38,9 @@ Route::group(["middleware" => "auth"], function() {
     Route::get("lobby", "Game\LobbyController@getLobby")->name("lobby");
 
 });
+
+Route::group(["prefix" => "api"], function() {
+    
+    Route::post("send-message", "Api\Game\ChatController@postSendMessage")->name("api.chat.send-message.post");
+    
+});

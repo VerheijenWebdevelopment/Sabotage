@@ -31,7 +31,8 @@ h6 {
 }
 
 h1 {
-  font-size: 2em;
+  font-size: 4em;
+  font-weight: 700;
 }
 
 h2 {
@@ -824,6 +825,7 @@ i {
 
 #app .v-application--wrap #content-wrapper {
   flex: 1;
+  width: 1000px;
   padding: 50px 0;
   box-sizing: border-box;
 }
@@ -834,5 +836,32 @@ i {
   box-sizing: border-box;
   padding: 50px 0 25px 0;
   color: gray;
+}
+
+#lobby {
+  width: 100%;
+}
+
+#lobby #lobby-header {
+  margin: 0 0 50px 0;
+}
+
+#lobby #lobby-header #lobby-header__title {
+  margin: 0;
+  text-align: center;
+}
+
+#lobby #lobby-content {
+  display: flex;
+  flex-direction: row;
+}
+
+#lobby #lobby-content #lobby-content__left {
+  flex: 1;
+}
+
+#lobby #lobby-content #lobby-content__right {
+  flex: 0 0 300px;
+  margin: 0 0 0 30px;
 }
 
