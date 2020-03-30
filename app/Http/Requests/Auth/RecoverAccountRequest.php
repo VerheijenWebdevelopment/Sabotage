@@ -26,9 +26,6 @@ class RecoverAccountRequest extends FormRequest
     {
         return [
             "email" => "required|email|exists:users,email",
-            "recovery_code" => "required",
-            "password" => "required|confirmed",
-            "password_confirmation" => "required",
         ];
     }
 }

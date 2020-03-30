@@ -11,7 +11,6 @@
             @include("partials.feedback")
 
             <div id="login" class="elevation-1">
-                
 
                 <form action="{{ route('login.post') }}" method="post">
                     @csrf
@@ -31,6 +30,7 @@
                     </login-form>
 
                 </form>
+                
             </div>
 
         </div>

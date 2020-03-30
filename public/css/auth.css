@@ -782,20 +782,32 @@ i {
 }
 
 #app .v-application--wrap #content-wrapper #logo {
-  color: #000;
   margin: 0 0 50px 0;
-  text-decoration: none;
   box-sizing: border-box;
 }
 
-#app .v-application--wrap #content-wrapper #logo #logo-text {
+#app .v-application--wrap #content-wrapper #logo a,
+#app .v-application--wrap #content-wrapper #logo a:active,
+#app .v-application--wrap #content-wrapper #logo a:visited,
+#app .v-application--wrap #content-wrapper #logo a:link {
+  color: #000;
+  text-decoration: none;
+}
+
+#app .v-application--wrap #content-wrapper #logo a #logo-text,
+#app .v-application--wrap #content-wrapper #logo a:active #logo-text,
+#app .v-application--wrap #content-wrapper #logo a:visited #logo-text,
+#app .v-application--wrap #content-wrapper #logo a:link #logo-text {
   font-size: 3em;
   text-align: center;
   margin: 0 0 -15px 0;
   font-family: "Special Elite", cursive;
 }
 
-#app .v-application--wrap #content-wrapper #logo h2 {
+#app .v-application--wrap #content-wrapper #logo a h2,
+#app .v-application--wrap #content-wrapper #logo a:active h2,
+#app .v-application--wrap #content-wrapper #logo a:visited h2,
+#app .v-application--wrap #content-wrapper #logo a:link h2 {
   margin: 0;
   font-size: 1.2em;
   font-weight: 300;

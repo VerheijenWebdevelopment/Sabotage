@@ -23,10 +23,12 @@
             <div id="content-wrapper">
                 
                 <!-- Logo -->
-                <a id="logo" href="{{ route('login') }}">
-                    <div id="logo-text">Saboteur</div>
-                    <h2 id="page-subtitle">Ben jij een sneaky kaboutertje?</h2>
-                </a>
+                <div id="logo">
+                    <a href="{{ route('login') }}">
+                        <div id="logo-text">Saboteur</div>
+                        <h2 id="page-subtitle">Ben jij een sneaky kaboutertje?</h2>
+                    </a>
+                </div>
 
                 <!-- Page content -->
                 @yield("content")

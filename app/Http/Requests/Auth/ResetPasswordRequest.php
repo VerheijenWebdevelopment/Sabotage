@@ -26,7 +26,9 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             "email" => "required|email|exists:users,email",
-            "code" => "required",
+            "recovery_code" => "required",
+            "password" => "required|confirmed",
+            "password_confirmation" => "required",
         ];
     }
 }

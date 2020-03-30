@@ -2,17 +2,17 @@
 
 namespace App\Services;
 
+use Str;
+use App\Models\User;
+use App\Jobs\Auth\SendRecoverAccountEmail;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\RecoverAccountRequest;
+
 /*
 |--------------------------------------------------------------------------
 | User Service
 |--------------------------------------------------------------------------
 */
-
-use Str;
-use App\Models\User;
-use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Requests\Auth\RecoverAccountRequest;
-use App\Http\Jobs\Auth\SendRecoverAccountEmail;
 
 class UserService
 {
