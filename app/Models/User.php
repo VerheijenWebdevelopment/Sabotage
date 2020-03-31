@@ -15,17 +15,19 @@ class User extends Authenticatable
 
     protected $fillable = [
         'slug',
-        'name', 
-        'email', 
+        'name',
+        'email',
         'password',
         'username',
         'recovery_code',
+        'is_admin',
     ];
     protected $hidden = [
         'password',
         'remember_token',
     ];
     protected $casts = [
+        'is_admin' => 'boolean',
         'email_verified_at' => 'datetime',
     ];
 
@@ -35,7 +37,7 @@ class User extends Authenticatable
     
     public function sluggable()
     {
-        return ["slug" => ["source" => "username"]];
+        return ['slug' => ['source' => 'username']];
     }
 
     //
