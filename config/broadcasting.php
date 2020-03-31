@@ -41,6 +41,10 @@ return [
                 'port' => env('WEBSOCKET_BROADCAST_PORT'),
                 'scheme' => env('WEBSOCKET_SCHEME'),
                 'useTLS' => env('WEBSOCKET_ENCRYPTED'),
+                'curl_options' => [
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                ]
             ],
         ],
 
