@@ -25,13 +25,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->defineGates();
     }
 
     private function registerServices()
     {
         $this->app->singleton("users", function() {
             return new UserService;
+        });
+    }
+
+    private function defineGates()
+    {
+        Gate::define("viewWebSocketsDashboard", function($user) {
+            return $user->is_admin;
         });
     }
 }
