@@ -2557,10 +2557,14 @@ __webpack_require__.r(__webpack_exports__);
         console.warn(this.tag + " request failed: ", error);
       }.bind(this));
     },
-    startListening: function startListening() {// Echo.presence('chat')
-      //     .listen('App\\Events\\Chat\\MessageSent', function(e) {
-      //         console.log(this.tag+" received message sent event", e);
-      //     }.bind(this));
+    startListening: function startListening() {
+      Echo["private"]('chat').listen('Chat\\MessageSent', function (e) {
+        console.log(this.tag + " received 'Chat\\MessageSent' event", e);
+        this.messages.push({
+          user: e.user.username,
+          text: e.message
+        });
+      }.bind(this));
     }
   },
   mounted: function mounted() {
@@ -2632,7 +2636,18 @@ __webpack_require__.r(__webpack_exports__);
         this.users.push(user);
       }.bind(this)).leaving(function (user) {
         console.log(this.tag + " User leaving 'Online' channel: ", user);
+        var index = this.getUserIndexById(user.id);
+        this.users.splice(index, 1);
       }.bind(this));
+    },
+    getUserIndexById: function getUserIndexById(id) {
+      for (var i = 0; i < this.users.length; i++) {
+        if (this.users[i].id === id) {
+          return i;
+        }
+      }
+
+      return false;
     }
   },
   mounted: function mounted() {
@@ -4715,7 +4730,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#chat-online-users {\n  border-radius: 3px;\n  background-color: #fff;\n}\n#chat-online-users #chat-online-users__header {\n  padding: 15px 25px;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__header #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#chat-online-users #chat-online-users__content #online-users .user {\n  padding: 15px 25px;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__content #online-users .user:last-child {\n  border-bottom: 0;\n}\n#chat-online-users #chat-online-users__content #no-online-users {\n  padding: 15px 25px;\n  text-align: center;\n  box-sizing: border-box;\n}", ""]);
+exports.push([module.i, "#chat-online-users {\n  border-radius: 3px;\n  background-color: #fff;\n}\n#chat-online-users #chat-online-users__header {\n  padding: 15px 25px;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__header #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#chat-online-users #chat-online-users__content #online-users .user {\n  display: flex;\n  padding: 15px 25px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__content #online-users .user:last-child {\n  border-bottom: 0;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#chat-online-users #chat-online-users__content #no-online-users {\n  padding: 15px 25px;\n  text-align: center;\n  box-sizing: border-box;\n}", ""]);
 
 // exports
 
@@ -42414,7 +42429,9 @@ var render = function() {
               { attrs: { id: "online-users" } },
               _vm._l(_vm.users, function(user, ui) {
                 return _c("div", { key: ui, staticClass: "user" }, [
-                  _vm._v("\n                " + _vm._s(user) + "\n            ")
+                  _c("div", { staticClass: "user-name" }, [
+                    _vm._v(_vm._s(user.username))
+                  ])
                 ])
               }),
               0

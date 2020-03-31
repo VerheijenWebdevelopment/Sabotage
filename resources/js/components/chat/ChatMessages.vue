@@ -86,11 +86,14 @@
                     }.bind(this));
             },
             startListening() {
-                // Echo.presence('chat')
-                //     .listen('App\\Events\\Chat\\MessageSent', function(e) {
-                //         console.log(this.tag+" received message sent event", e);
-
-                //     }.bind(this));
+                Echo.private('chat')
+                    .listen('Chat\\MessageSent', function(e) {
+                        console.log(this.tag+" received 'Chat\\MessageSent' event", e);
+                        this.messages.push({
+                            user: e.user.username,
+                            text: e.message,
+                        });
+                    }.bind(this));
             },
         },
         mounted() {
