@@ -1,4 +1,4 @@
-@extends("layouts.game")
+@extends("layouts.lobby")
 
 @section("title")
     - Lobby
@@ -17,7 +17,9 @@
             <div id="lobby-content__left">
 
                 <!-- Leaderboards -->
-                <leaderboards :users="{{ $users->toJson() }}"></leaderboards>
+                <div id="leaderboards-wrapper">
+                    <leaderboards :users="{{ $users->toJson() }}"></leaderboards>
+                </div>
 
             </div>
         </div>

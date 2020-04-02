@@ -9,7 +9,7 @@
         <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
         
         {{-- Laravel Mix - CSS File --}}
-        <link rel="stylesheet" href="{{ mix('css/game.css') }}">
+        <link rel="stylesheet" href="{{ mix('css/lobby.css') }}">
 
         {{-- Font Awesome --}}
         <script defer src="https://use.fontawesome.com/releases/v5.8.2/js/all.js" integrity="sha384-DJ25uNYET2XCl5ZF++U8eNxPWqcKohUUBUpKGlNLMchM7q4Wjg2CUpjHLaL8yYPH" crossorigin="anonymous"></script>
@@ -30,6 +30,13 @@
                         </a>
                     </div>
                     <ul id="topnav-links">
+                        <li><a href="{{ route('lobby') }}">Lobby</a></li>
+                        <li><a href="{{ route('lobby.leaderboards') }}">Leaderboards</a>
+                        @if (auth()->user()->is_admin)
+                            <li><a href="{{ route('horizon.index') }}">Horizon</a></li>
+                            <li><a href="{{ url('/laravel-websockets') }}">Websockets</a></li>
+                        @endif
+                        <li><a href="{{ route('settings') }}">Settings</a></li>
                         <li><a href="{{ route('logout') }}">Logout</a></li>
                     </ul>
                 </div>
@@ -39,7 +46,7 @@
             <div id="content-wrapper">
                 @yield("content")
             </div>
-            
+
             <!-- Footer -->
             <div id="footer-wrapper">
                 <footer id="footer">

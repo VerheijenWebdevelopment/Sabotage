@@ -13,6 +13,7 @@ return [
     "middleware_login_required" => "You must be logged in to view that page.",
     "middleware_guest_required" => "You can't be logged in if you want to view that page.",
 
+
     // Login
 
     "login_title" => "Login",

@@ -53,7 +53,12 @@
                 </div>
                 <!-- Waiting for start -->
                 <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
-                    Waiting for game master to start the game.
+                    <span v-if="mutableGames[activeGameIndex].status === 'open'">
+                        Waiting for game master to start the game.
+                    </span>
+                    <span v-if="mutableGames[activeGameIndex].status === 'ongoing'">
+                        Game has started
+                    </span>
                 </div>
             </div>
 
@@ -94,12 +99,12 @@
                         {{ game.players.length }} {{ getPlayerText(game.players.length) }}
                     </div>
                     <div class="game-status">
-                        <div class="game-status-pill">
+                        <div class="game-status-pill" :class="game.status">
                             {{ game.status }}
                         </div>
                     </div>
                     <div class="game-actions">
-                        <v-btn small depressed color="success" @click="onClickJoin(gi)" :disabled="hasJoinedGame">
+                        <v-btn small depressed color="success" @click="onClickJoin(gi)" :disabled="hasJoinedGame || game.status !== 'open'">
                             Join
                         </v-btn>
                     </div>
@@ -121,6 +126,7 @@
         props: [
             "user",
             "games",
+            "gameHref",
             "createApiEndpoint",
             "deleteApiEndpoint",
             "joinApiEndpoint",
@@ -148,6 +154,7 @@
                 console.log(this.tag+" initializing");
                 console.log(this.tag+" user: ", this.user);
                 console.log(this.tag+" games: ", this.games);
+                console.log(this.tag+" game href: ", this.gameHref);
                 console.log(this.tag+" create api endpoint: ", this.createApiEndpoint);
                 console.log(this.tag+" delete api endpoint: ", this.deleteApiEndpoint);
                 console.log(this.tag+" join api endpoint: ", this.joinApiEndpoint);
@@ -168,44 +175,14 @@
             },
             startListening() {
                 
-                // Start listening on the lobby's channel
+                // Start listening for events on the lobby channel
                 Echo.private("lobby")
-
                     // Game created event
-                    .listen("Game\\GameCreated", function(e) {
-                        console.log(this.tag+" [event] game created", e);
-                        // Add game to list of mutable games
-                        let game = e.game;
-                        game.players = [e.player];
-                        this.mutableGames.push(game);
-                        // Toast message
-                        this.$toasted.show(e.user.username+" created a new game!", { duration: 3000 });
-                    }.bind(this))
-
+                    .listen("Game\\GameCreated", this.onGameCreated)
                     // Game deleted event
-                    .listen("Game\\GameDeleted", function(e) {
-                        console.log(this.tag+" [event] game deleted", e);
-                        // Grab game's index by it's ID
-                        let gameIndex = this.findGameIndexById(e.game_id);
-                        if (gameIndex !== false) {
-                            // Remove the game from the list of games
-                            this.mutableGames.splice(gameIndex, 1);
-                            // If this was the player's current game, reset current game
-                            if (this.activeGameIndex === gameIndex) this.activeGameIndex = null;
-                            // Toast message
-                            this.$toasted.show(e.user.username+" deleted game #"+e.game_id, { duration: 3000 });
-                        }
-                    }.bind(this))
-
+                    .listen("Game\\GameDeleted", this.onGameDeleted)
                     // Game started event
-                    .listen("Game\\GameStarted", function(e) {
-                        console.log(this.tag+" [event] game started", e);
-                        // If this is the player's current game, redirect the user to the started game
-                        
-                        // Toast message
-                        this.$toasted.show("Game #"+e.game.id+" has started!", { duration: 3000 });
-                    }.bind(this))
-
+                    .listen("Game\\GameStarted", this.onGameStarted)
                     // Player joined game event
                     .listen("Game\\PlayerJoinedGame", this.onPlayerJoinedGame)
                     // Player left game event
@@ -213,12 +190,62 @@
 
             },
             onGameCreated(e) {
+                console.log(this.tag+" [event] game created", e);
+                
+                // Grab the game so we can make changes to it and add the player that created
+                // the game to it's list of players
+                let game = e.game;
+                game.players = [e.player];
 
+                // Add game to list of mutable games
+                this.mutableGames.push(game);
+
+                // Toast message
+                this.$toasted.show(e.user.username+" created a new game!", { duration: 3000 });
             },
             onGameDeleted(e) {
+                console.log(this.tag+" [event] game deleted", e);
 
+                // Grab game's index by it's ID & make sure we got it
+                let gameIndex = this.findGameIndexById(e.game_id);
+                if (gameIndex !== false) {
+
+                    // Remove the game from the list of games
+                    this.mutableGames.splice(gameIndex, 1);
+
+                    // If this was the player's current game, reset current game
+                    if (this.activeGameIndex === gameIndex) this.activeGameIndex = null;
+                    
+                    // Toast message
+                    this.$toasted.show(e.user.username+" deleted game #"+e.game_id, { duration: 3000 });
+                }
             },
             onGameStarted(e) {
+                console.log(this.tag+" [event] game started", e);
+
+                // Grab the game's index & make sure we get it
+                let gameIndex = this.findGameIndexById(e.game.id);
+                if (gameIndex !== false) {
+                    console.log("game index: ", gameIndex);
+
+                    // Update the game's status
+                    this.mutableGames[gameIndex].status = "ongoing";
+
+                    // Toast message
+                    this.$toasted.show("Game #"+e.game.id+" has started!", { duration: 3000 });
+
+                    // If this is the user's currently active game
+                    if (this.activeGameIndex === gameIndex) {
+                        console.log("redirecting");
+
+                        // Wait 1 second and then redirect the user to the game
+                        setTimeout(function() {
+                            window.location.href = this.gameHref;
+                        }.bind(this), 1000);
+
+                    }
+
+                }
 
             },
             onPlayerJoinedGame(e) {
@@ -366,6 +393,33 @@
             },
             onClickStart() {
                 console.log(this.tag+" clicked start button");
+
+                // Compose payload to send to API
+                let payload = new FormData();
+                payload.append("game_id", this.mutableGames[this.activeGameIndex].id);
+
+                // Make API request
+                this.axios.post(this.startApiEndpoint, payload)
+
+                    // Request succeeded
+                    .then(function(response) {
+                        // Operation succeeded
+                        if (response.data.status === "success") {
+                            console.log(this.tag+" operation succeeded", response.data);
+                            
+                            // Redirect the user to the game
+                            window.location.href = this.gameHref;
+
+                        // Operation failed
+                        } else {
+                            console.warn(this.tag+" operation failed", response.data.error);
+                        }
+                    }.bind(this))
+
+                    // Request failed
+                    .catch(function(error) {
+                        console.warn(this.tag+" request failed", error);
+                    }.bind(this));
 
             },
             findGameIndexById(id) {
@@ -551,6 +605,14 @@
                             border-radius: 3px;
                             box-sizing: border-box;
                             background-color: #ddd;
+                            &.open {
+                                color: #fff;
+                                background-color: #228900;
+                            }
+                            &.ongoing {
+                                color: #fff;
+                                background-color: #00a6ff;
+                            }
                         }
                     }
                     .game-actions {

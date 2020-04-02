@@ -691,4 +691,14 @@ i {
     margin: 0 auto;
 }
 
+//
+// Page header
+//
 
+#page-header {
+    margin: 0 0 30px 0;
+    #page-header__title {
+        margin: 0;
+        text-align: center;
+    }
+}

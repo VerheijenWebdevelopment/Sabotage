@@ -54,6 +54,8 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'guest' => \App\Http\Middleware\IsGuest::class,
         'auth' => \App\Http\Middleware\IsAuthenticated::class,
+        'playing' => \App\Http\Middleware\IsPlaying::class,
+        'idle' => \App\Http\Middleware\IsNotPlaying::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,

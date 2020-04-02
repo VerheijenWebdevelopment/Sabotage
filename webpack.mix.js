@@ -15,8 +15,9 @@ const webpack = require('webpack');
 mix.setPublicPath('public');
 
 mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/auth.scss', 'public/css')
-    .sass('resources/sass/game.scss', 'public/css');
+   .sass('resources/sass/auth.scss', 'public/css')
+   .sass('resources/sass/game.scss', 'public/css')
+   .sass('resources/sass/lobby.scss', 'public/css');
 
 mix.disableNotifications().browserSync({
     proxy: 'saboteur.test',

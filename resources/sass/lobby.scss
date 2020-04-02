@@ -1,13 +1,4 @@
 //
-// Game template styling
-//
-
-@import "general";
-
-//
-// Layout styling
-//
-//
 // Lobby template styling
 //
 
@@ -95,3 +86,118 @@
         }
     }
 }
+
+//
+// Lobby
+//
+
+#lobby {
+    width: 100%;
+    #lobby-header {
+        margin: 0 0 50px 0;
+        #lobby-header__title {
+            margin: 0;
+            text-align: center;
+        }
+    }
+    #lobby-content {
+        display: flex;
+        flex-direction: row;
+        #lobby-content__left {
+            flex: 1;
+        }
+        #lobby-content__right {
+            flex: 0 0 300px;
+            margin: 0 0 0 30px;
+        }
+    }
+}
+
+//
+// Leaderboards
+//
+
+#leaderboards-wrapper {
+    width: 600px;
+    margin: 0 auto;
+}
+
+//
+// Settings
+//
+
+#settings {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: 0 -15px -30px -15px;
+    .setting-wrapper {
+        flex: 0 0 33.33%;
+        padding: 0 15px 30px 15px;
+        box-sizing: border-box;
+        .setting {
+            padding: 30px;
+            display: flex;
+            color: #000000;
+            border-radius: 3px;
+            flex-direction: row;
+            align-items: center;
+            text-decoration: none;
+            box-sizing: border-box;
+            background-color: #fff;
+            justify-content: center;
+            transition: all .3s;
+            &:hover {
+                background-color: hsl(0, 0%, 95%);
+            }
+            .setting-icon {
+                flex: 0 0 25px;
+                font-size: 2em;
+                margin: 0 15px 0 0;
+            }
+            .setting-text {
+                font-size: 1.2em;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+//
+// Profile
+//
+
+#profile {
+    width: 650px;
+    margin: 0 auto;
+    #profile-avatar {
+        width: 200px;
+        height: 200px;
+        border-radius: 100px;
+        margin: 0 auto 30px auto;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-color: hsl(0, 0%, 100%);
+    }
+    #profile-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
+//
+// Change password
+//
+
+#change-password {
+    width: 650px;
+    margin: 0 auto;
+}
+
+//
+//
+//
+

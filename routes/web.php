@@ -35,9 +35,21 @@ Route::group(["middleware" => "auth"], function() {
 
     Route::get("logout", "Auth\LogoutController@getLogout")->name("logout");
 
-    Route::group(["prefix" => "lobby"], function() {
-        Route::get("/", "Game\LobbyController@getLobby")->name("lobby");
-        Route::get("leaderboards", "Game\LobbyController@getLeaderboards")->name("lobby.leaderboards");
+    Route::group(["prefix" => "lobby", "middleware" => "idle"], function() {
+        Route::get("/", "Lobby\LobbyController@getLobby")->name("lobby");
+        Route::get("leaderboards", "Lobby\LobbyController@getLeaderboards")->name("lobby.leaderboards");
+        Route::group(["prefix" => "settings"], function() {
+            Route::get("/", "Lobby\SettingsController@getOverview")->name("settings");
+            Route::get("profile", "Lobby\SettingsController@getProfile")->name("settings.profile");
+            Route::get("update-profile", "Lobby\SettingsController@getUpdateProfile")->name("settings.update-profile");
+            Route::post("update-profile", "Lobby\SettingsController@postUpdateProfile")->name("settings.update-profile.post");
+            Route::get("change-password", "Lobby\SettingsController@getChangePassword")->name("settings.change-password");
+            Route::post("change-password", "Lobby\SettingsController@postChangePassword")->name("settings.change-password.post");
+        });
+    });
+    
+    Route::group(["prefix" => "game", "middleware" => "playing"], function() {
+        Route::get("/", "Game\GameController@getGame")->name("game");
     });
 
 });

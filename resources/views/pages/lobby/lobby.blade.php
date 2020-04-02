@@ -1,4 +1,4 @@
-@extends("layouts.game")
+@extends("layouts.lobby")
 
 @section("title")
     - Lobby
@@ -9,8 +9,11 @@
 
         <!-- Header -->
         <div id="lobby-header">
-            <h1 id="lobby-header__title">Lobby</h1>
+            <h1 id="lobby-header__title">@lang("lobby.title")</h1>
         </div>
+
+        <!-- Feedback -->
+        @include("partials.feedback")
 
         <!-- Content -->
         <div id="lobby-content">
@@ -20,6 +23,7 @@
                 <game-overview
                     :user="{{ $user->toJson() }}"
                     :games="{{ $games->toJson() }}"
+                    game-href="{{ route('game') }}"
                     create-api-endpoint="{{ route('api.games.create.post') }}"
                     delete-api-endpoint="{{ route('api.games.delete.post') }}"
                     join-api-endpoint="{{ route('api.games.join.post') }}"

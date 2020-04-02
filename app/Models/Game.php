@@ -4,6 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Game Model
+ * 
+ * Statuses are hardcoded; possibilities:
+ *  - open
+ *  - ongoing
+ *  - completed
+ */
+
 class Game extends Model
 {
     protected $table = "games";
@@ -11,7 +20,11 @@ class Game extends Model
     protected $fillable = [
         "game_master_id",
         "status",
-        "turn",
+        "round",
+        "player_turn_index",
+        "gold_location_index",
+        "board",
+        "deck",
     ];
 
     //
@@ -26,5 +39,33 @@ class Game extends Model
     public function players()
     {
         return $this->hasMany(Player::class);
+    }
+
+    //
+    // Accessors
+    //
+
+    public function getBoardAttribute($value)
+    {
+        return json_decode(unserialize($value));
+    }
+
+    public function getDeckAttribute($value)
+    {
+        return json_decode(unserialize($value));
+    }
+
+    //
+    // Mutators
+    //
+
+    public function setDeckAttribute($value)
+    {
+        $this->attributes["deck"] = serialize(json_encode($value));
+    }
+
+    public function setBoardAttribute($value)
+    {
+        $this->attributes["board"] = serialize(json_encode($value));
     }
 }

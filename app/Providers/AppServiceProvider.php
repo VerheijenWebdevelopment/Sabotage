@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Services\UserService;
 use App\Services\GameService;
+use App\Services\RoleService;
+use App\Services\CardService;
 use App\Services\PlayerService;
+use App\Services\UploaderService;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +46,18 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton("players", function() {
             return new PlayerService;
+        });
+
+        $this->app->singleton("cards", function() {
+            return new CardService;
+        });
+
+        $this->app->singleton("roles", function() {
+            return new RoleService;
+        });
+
+        $this->app->singleton("uploader", function() {
+            return new UploaderService;
         });
     }
 

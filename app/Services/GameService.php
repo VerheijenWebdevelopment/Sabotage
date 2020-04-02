@@ -3,14 +3,21 @@
 namespace App\Services;
 
 use Players;
+use Exception;
+
+use App\Models\User;
 use App\Models\Game;
 use App\Models\Player;
+
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
+
 use App\Events\Game\GameCreated;
 use App\Events\Game\GameDeleted;
+use App\Events\Game\GameStarted;
 use App\Events\Game\PlayerLeftGame;
 use App\Events\Game\PlayerJoinedGame;
+
 use App\Http\Requests\Api\Game\JoinGameRequest;
 use App\Http\Requests\Api\Game\LeaveGameRequest;
 use App\Http\Requests\Api\Game\CreateGameRequest;
@@ -80,9 +87,7 @@ class GameService implements ModelServiceContract
 
     public function createFromRequest(CreateGameRequest $request)
     {
-        $game = Game::create([
-            "game_master_id" => auth()->user()->id,
-        ]);
+        $game = Game::create(["game_master_id" => auth()->user()->id]);
         
         $player = $this->join($game);
 
@@ -157,9 +162,47 @@ class GameService implements ModelServiceContract
 
         return false;
     }
-
+    
     public function startFromRequest(StartGameRequest $request)
     {
+        $game = $this->find($request->game_id);
 
+        if ($game->status == "open")
+        {
+            $game->status = "ongoing";
+            $game->save();
+        }
+
+        broadcast(new GameStarted(auth()->user(), $game))->toOthers();
+
+        return $game;
+    }
+
+    public function getActiveGame(User $user = null)
+    {
+        if (is_null($user)) $user = auth()->user();
+
+        foreach ($this->getAllPreloaded() as $game)
+        {
+            if ($game->status === "ongoing")
+            {
+                foreach ($game->players as $player)
+                {
+                    if ($player->user_id == $user->id)
+                    {
+                        return $game;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function userHasActiveGame(User $user = null)
+    {
+        if (is_null($user)) $user = auth()->user();
+
+        return $this->getActiveGame($user) ? true : false;
     }
 }

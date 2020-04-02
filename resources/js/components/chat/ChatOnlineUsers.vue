@@ -12,6 +12,7 @@
             <!-- Online users -->
             <div id="online-users" v-if="users.length > 0">
                 <div class="user" v-for="(user, ui) in users" :key="ui">
+                    <div class="user-avatar"></div>
                     <div class="user-name">{{ user.username }}</div>
                 </div>
             </div>
@@ -74,7 +75,7 @@
                     }
                 }
                 return false;
-            }
+            },
         },
         mounted() {
             this.initialize();
@@ -104,6 +105,13 @@
                     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                     &:last-child {
                         border-bottom: 0;
+                    }
+                    .user-avatar {
+                        height: 24px;
+                        flex: 0 0 24px;
+                        margin: 0 10px 0 0;
+                        border-radius: 12px;
+                        background-color: hsl(0, 0%, 80%);
                     }
                     .user-name {
                         flex: 1;

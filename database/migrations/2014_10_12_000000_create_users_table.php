@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('recovery_code')->nullable();
             $table->string('username');
+            $table->string('avatar_url')->nullable();
             $table->boolean('is_admin')->default(false);
             $table->unsignedInteger('highscore')->default(0);
             $table->unsignedInteger('games_played')->default(0);

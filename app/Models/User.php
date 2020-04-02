@@ -19,6 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
+        'avatar_url',
         'recovery_code',
         'is_admin',
         'highscore',

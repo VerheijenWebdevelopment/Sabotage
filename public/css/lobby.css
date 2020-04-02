@@ -768,13 +768,9 @@ i {
   text-align: center;
 }
 
-h1 {
-  font-size: 2em;
-}
-
 #app {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   font-family: "Roboto", sans-serif;
   background-color: #f2f2f2;
 }
@@ -788,135 +784,191 @@ h1 {
   justify-content: center;
 }
 
-#app .v-application--wrap #content-wrapper {
-  flex: 1;
+#app .v-application--wrap #topnav-wrapper {
+  width: 100%;
+  flex: 0 0 80px;
+  background-color: #e6e6e6;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav {
+  height: 100%;
+  color: #000;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  width: 1000px;
+  margin: 0 auto;
+  align-items: center;
+  flex-direction: row;
 }
 
-#app .v-application--wrap #content-wrapper #logo {
-  margin: 0 0 50px 0;
-  box-sizing: border-box;
-}
-
-#app .v-application--wrap #content-wrapper #logo a,
-#app .v-application--wrap #content-wrapper #logo a:active,
-#app .v-application--wrap #content-wrapper #logo a:visited,
-#app .v-application--wrap #content-wrapper #logo a:link {
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link {
   color: #000;
   text-decoration: none;
 }
 
-#app .v-application--wrap #content-wrapper #logo a #logo-text,
-#app .v-application--wrap #content-wrapper #logo a:active #logo-text,
-#app .v-application--wrap #content-wrapper #logo a:visited #logo-text,
-#app .v-application--wrap #content-wrapper #logo a:link #logo-text {
-  font-size: 3em;
-  text-align: center;
-  margin: 0 0 -15px 0;
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a #topnav-logo__text,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active #topnav-logo__text,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited #topnav-logo__text,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link #topnav-logo__text {
+  font-size: 1.5em;
   font-family: "Special Elite", cursive;
 }
 
-#app .v-application--wrap #content-wrapper #logo a h2,
-#app .v-application--wrap #content-wrapper #logo a:active h2,
-#app .v-application--wrap #content-wrapper #logo a:visited h2,
-#app .v-application--wrap #content-wrapper #logo a:link h2 {
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links {
+  flex: 1;
+  display: flex;
+  list-style: none;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li {
+  margin: 0 0 0 20px;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li:first-child {
   margin: 0;
-  font-size: 1.2em;
-  font-weight: 300;
-  text-align: center;
-  color: gray;
-  font-family: "Roboto", sans-serif;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link {
+  color: #333;
+  font-size: 1em;
+  font-weight: 400;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link:hover {
+  color: #000;
+}
+
+#app .v-application--wrap #content-wrapper {
+  flex: 1;
+  width: 1000px;
+  padding: 50px 0;
+  box-sizing: border-box;
 }
 
 #app .v-application--wrap #footer-wrapper {
-  flex: 0 0 50px;
+  flex: 0 0 100px;
 }
 
 #app .v-application--wrap #footer-wrapper #footer {
   font-size: 0.8em;
   text-align: center;
   box-sizing: border-box;
-  padding: 100px 0 50px 0;
+  padding: 50px 0 25px 0;
   color: gray;
 }
 
-#login {
-  width: 500px;
-  padding: 25px;
-  display: flex;
-  margin: 0 auto;
-  border-radius: 3px;
-  flex-direction: row;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-
-#login form {
+#lobby {
   width: 100%;
 }
 
-#login .form-controls {
-  margin: 15px 0 15px 0;
+#lobby #lobby-header {
+  margin: 0 0 50px 0;
 }
 
-#login #no-account {
-  margin: 30px 0 0 0;
+#lobby #lobby-header #lobby-header__title {
+  margin: 0;
+  text-align: center;
 }
 
-@media (max-width: 850px) {
-  #login {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  #login #login-left,
-  #login #login-right {
-    flex: 0 0 100%;
-  }
-
-  #login #login-right {
-    border-left: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-  }
+#lobby #lobby-content {
+  display: flex;
+  flex-direction: row;
 }
 
-@media (max-width: 395px) {
-  #login #login-left .form-controls {
-    flex-wrap: wrap;
-  }
-
-  #login #login-left .form-controls .form-controls__left,
-  #login #login-left .form-controls .form-controls__right {
-    flex: 0 0 100%;
-  }
-
-  #login #login-left .form-controls .form-controls__right {
-    margin: 20px 0 -10px 0;
-    justify-content: flex-start;
-  }
+#lobby #lobby-content #lobby-content__left {
+  flex: 1;
 }
 
-#recover-mail-sent {
+#lobby #lobby-content #lobby-content__right {
+  flex: 0 0 300px;
+  margin: 0 0 0 30px;
+}
+
+#leaderboards-wrapper {
   width: 600px;
-  padding: 25px;
   margin: 0 auto;
-  border-radius: 3px;
+}
+
+#settings {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  margin: 0 -15px -30px -15px;
+}
+
+#settings .setting-wrapper {
+  flex: 0 0 33.33%;
+  padding: 0 15px 30px 15px;
   box-sizing: border-box;
-  background-color: #ffffff;
 }
 
-#recover-mail-sent #recover-mail-sent__title {
-  text-align: center;
+#settings .setting-wrapper .setting {
+  padding: 30px;
+  display: flex;
+  color: #000000;
+  border-radius: 3px;
+  flex-direction: row;
+  align-items: center;
+  text-decoration: none;
+  box-sizing: border-box;
+  background-color: #fff;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
-#recover-mail-sent #recover-mail-sent__text {
-  text-align: center;
-  margin: 0 0 15px 0;
+#settings .setting-wrapper .setting:hover {
+  background-color: #f2f2f2;
 }
 
-#recover-mail-sent #recover-mail-sent__actions {
-  text-align: center;
+#settings .setting-wrapper .setting .setting-icon {
+  flex: 0 0 25px;
+  font-size: 2em;
+  margin: 0 15px 0 0;
+}
+
+#settings .setting-wrapper .setting .setting-text {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+#profile {
+  width: 650px;
+  margin: 0 auto;
+}
+
+#profile #profile-avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  margin: 0 auto 30px auto;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-color: white;
+}
+
+#profile #profile-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+#change-password {
+  width: 650px;
+  margin: 0 auto;
 }
 
