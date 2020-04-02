@@ -10,7 +10,7 @@
         <div id="chat-messages__content">
 
             <!-- Messages -->
-            <div class="chat-message__wrapper" v-for="(message, mi) in messages" :key="mi">
+            <div class="chat-message__wrapper" v-for="(message, mi) in messages.slice().reverse()" :key="mi">
                 <div class="chat-message">
                     <div class="chat-message__author" v-if="message.user === null">You</div>
                     <div class="chat-message__author" v-if="message.user !== null">{{ message.user }}</div>
@@ -25,10 +25,10 @@
 
         </div>
 
-        <!-- Submit -->
+        <!-- Send message form -->
         <div id="chat-messages__form">
             <div id="chat-messages__form-left">
-                <input type="text" id="chat-messages__form-input" v-model="form.message" placeholder="...">
+                <input type="text" id="chat-messages__form-input" v-model="form.message" placeholder="..." @keydown.enter="onClickSend">
             </div>
             <div id="chat-messages__form-right">
                 <v-btn small text color="primary" @click="onClickSend" :disabled="sendButtonDisabled">
@@ -36,7 +36,7 @@
                 </v-btn>
             </div>
         </div>
-
+        
     </div>
 </template>
 
@@ -66,34 +66,46 @@
             onClickSend() {
                 console.log(this.tag+" clicked send message button");
                 
+                // Extract the message and immediately reset it (so it feels like it's instant)
+                let message = this.form.message;
+                this.form.message = "";
+
+                // Compose a payload
                 let payload = new FormData();
                 payload.append("message", this.form.message);
                 
+                // Send API request
                 this.axios.post(this.sendMessageApiEndpoint, payload)
+
+                    // Request succeeded
                     .then(function(response) {
                         console.log(this.tag+" request succeeded", response.data);
                         
-                        this.messages.push({
-                            user: null,
-                            text: this.form.message,
-                        });
-                        
-                        this.form.message = "";
+                        // Add your own message to the chatbox (as we won't be receiving an event ourselves)
+                        this.messages.push({ user: null, text: this.form.message });
 
                     }.bind(this))
+
+                    // Request failed
                     .catch(function(error) {
                         console.warn(this.tag+" request failed: ", error);
                     }.bind(this));
+                
             },
             startListening() {
+
+                // Listen on the chat channel
                 Echo.private('chat')
+
+                    // Message received
                     .listen('Chat\\MessageSent', function(e) {
                         console.log(this.tag+" received 'Chat\\MessageSent' event", e);
-                        this.messages.push({
-                            user: e.user.username,
-                            text: e.message,
-                        });
+
+                        // Add message to the list of messages
+                        this.messages.push({ user: e.user.username, text: e.message });
+
                     }.bind(this));
+
             },
         },
         mounted() {

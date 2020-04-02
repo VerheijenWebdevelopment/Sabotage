@@ -43,4 +43,14 @@ class User extends Authenticatable
     //
     // Relationships
     //
+
+    public function players()
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function startedGames()
+    {
+        return $this->hasMany(Game::class, "id", "game_master_id");
+    }
 }

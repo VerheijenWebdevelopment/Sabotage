@@ -40,22 +40,32 @@
             },
             startListening() {
                 console.log(this.tag+" Started listening for events");
+
                 // Online presence channel
                 Echo.join('online')
+                    
+                    // When we succesfully connect to the channel
                     .here(function(users) {
                         console.log(this.tag+" Connected to the 'online' channel");
                         console.log("Users currently in 'Online' channel: ", users);
                         this.users = users;
                     }.bind(this))
+
+                    // When a user joins the channel
                     .joining(function(user) {
                         console.log(this.tag+" User joining 'Online' channel: ", user);
                         this.users.push(user);
+                        this.$toasted.show(user.username+" is online!", { duration: 3000 });
                     }.bind(this))
+                    
+                    // When a user leaves the channel
                     .leaving(function(user) {
                         console.log(this.tag+" User leaving 'Online' channel: ", user);
                         let index = this.getUserIndexById(user.id);
                         this.users.splice(index, 1);
+                        this.$toasted.show(user.username+" is offline", { duration: 3000 });
                     }.bind(this));
+
             },
             getUserIndexById(id) {
                 for (let i = 0; i < this.users.length; i++) {

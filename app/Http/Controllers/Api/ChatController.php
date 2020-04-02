@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\Game;
+namespace App\Http\Controllers\Api;
 
 use Auth;
 use App\Events\Chat\MessageSent;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Game\Chat\SendMessageRequest;
+use App\Http\Requests\Api\Chat\SendMessageRequest;
 
 class ChatController extends Controller
 {

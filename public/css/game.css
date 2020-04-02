@@ -761,7 +761,7 @@ i {
 
 #app {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   font-family: "Roboto", sans-serif;
   background-color: #f2f2f2;
 }
@@ -777,12 +777,13 @@ i {
 
 #app .v-application--wrap #topnav-wrapper {
   width: 100%;
+  flex: 0 0 80px;
   background-color: #e6e6e6;
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav {
+  height: 100%;
   color: #000;
-  height: 80px;
   display: flex;
   width: 1000px;
   margin: 0 auto;
@@ -815,12 +816,30 @@ i {
   justify-content: flex-end;
 }
 
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li {
+  margin: 0 0 0 20px;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li:first-child {
+  margin: 0;
+}
+
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link {
-  color: #000;
+  color: #333;
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.3s;
   text-decoration: none;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link:hover {
+  color: #000;
 }
 
 #app .v-application--wrap #content-wrapper {
@@ -828,6 +847,10 @@ i {
   width: 1000px;
   padding: 50px 0;
   box-sizing: border-box;
+}
+
+#app .v-application--wrap #footer-wrapper {
+  flex: 0 0 100px;
 }
 
 #app .v-application--wrap #footer-wrapper #footer {

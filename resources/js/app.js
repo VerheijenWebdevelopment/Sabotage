@@ -38,6 +38,10 @@ window.Echo = new Echo({
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 });
 
+// Toasted
+import Toasted from 'vue-toasted';
+Vue.use(Toasted);
+
 // Automatically load all vue components
 const files = require.context('./', true, /\.vue$/i);
 files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\UserService;
+use App\Services\GameService;
+use App\Services\PlayerService;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -28,11 +30,19 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->defineGates();
     }
-
+    
     private function registerServices()
     {
         $this->app->singleton("users", function() {
             return new UserService;
+        });
+
+        $this->app->singleton("games", function() {
+            return new GameService;
+        });
+
+        $this->app->singleton("players", function() {
+            return new PlayerService;
         });
     }
 

@@ -1,5 +1,10 @@
 <?php
 
+use App\Broadcasting\ChatChannel;
+use App\Broadcasting\GameChannel;
+use App\Broadcasting\LobbyChannel;
+use App\Broadcasting\OnlineChannel;
+use App\Broadcasting\PlayerChannel;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -13,16 +18,14 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-// Broadcast::channel('App.User.{id}', function ($user, $id) {
-//     return (int) $user->id === (int) $id;
-// });
+// Online users channel
+Broadcast::channel("online", OnlineChannel::class);
 
-Broadcast::channel('online', function($user) {
-    if (auth()->check()) {
-        return $user->toArray();
-    }
-});
+// Global chat channel
+Broadcast::channel("chat", ChatChannel::class);
 
-Broadcast::channel('chat', function($user) {
-    return auth()->check();
-});
+// Lobby channel
+Broadcast::channel("lobby", LobbyChannel::class);
+
+// Game channel
+Broadcast::channel("game.{game}", GameChannel::class);

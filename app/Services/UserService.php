@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Str;
 use App\Models\User;
+use App\Traits\ModelServiceGetters;
+use App\Contracts\ModelServiceContract;
 use App\Jobs\Auth\SendRecoverAccountEmail;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\RecoverAccountRequest;
@@ -14,8 +16,24 @@ use App\Http\Requests\Auth\RecoverAccountRequest;
 |--------------------------------------------------------------------------
 */
 
-class UserService
+class UserService implements ModelServiceContract
 {
+    use ModelServiceGetters;
+
+    private $model;
+    private $records;
+    private $preloadedRecords;
+
+    public function __construct()
+    {
+        $this->model =  "App\Models\User";
+    }
+
+    public function preload($instance)
+    {
+        return $instance;
+    }
+
     public function findByEmail($email)
     {
         return User::where("email", $email)->first();

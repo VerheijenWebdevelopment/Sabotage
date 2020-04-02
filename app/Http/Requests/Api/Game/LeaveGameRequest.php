@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\Game\Chat;
+namespace App\Http\Requests\Api\Game;
 
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class SendMessageRequest extends FormRequest
+class LeaveGameRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,7 @@ class SendMessageRequest extends FormRequest
     public function rules()
     {
         return [
-            "message" => "required",
+            "game_id" => "required|exists:games,id",
         ];
     }
 }

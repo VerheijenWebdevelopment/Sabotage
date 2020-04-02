@@ -229,6 +229,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'Users' => \App\Facades\UsersFacade::class,
+        'Games' => \App\Facades\GamesFacade::class,
+        'Players' => \App\Facades\PlayersFacade::class,
 
     ],
 

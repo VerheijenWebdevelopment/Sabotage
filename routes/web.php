@@ -35,12 +35,23 @@ Route::group(["middleware" => "auth"], function() {
 
     Route::get("logout", "Auth\LogoutController@getLogout")->name("logout");
 
-    Route::get("lobby", "Game\LobbyController@getLobby")->name("lobby");
+    Route::group(["prefix" => "lobby"], function() {
+        Route::get("/", "Game\LobbyController@getLobby")->name("lobby");
+        Route::get("leaderboards", "Game\LobbyController@getLeaderboards")->name("lobby.leaderboards");
+    });
 
 });
 
 Route::group(["prefix" => "api"], function() {
+
+    Route::post("send-message", "Api\ChatController@postSendMessage")->name("api.chat.send-message.post");
     
-    Route::post("send-message", "Api\Game\ChatController@postSendMessage")->name("api.chat.send-message.post");
-    
+    Route::group(["prefix" => "games"], function() {
+        Route::post("create", "Api\GameController@postCreateGame")->name("api.games.create.post");
+        Route::post("delete", "Api\GameController@postDeleteGame")->name("api.games.delete.post");
+        Route::post("join", "Api\GameController@postJoinGame")->name("api.games.join.post");
+        Route::post("leave", "Api\GameController@postLeaveGame")->name("api.games.leave.post");
+        Route::post("start", "Api\GameController@postStartGame")->name("api.games.start.post");
+    });
+
 });

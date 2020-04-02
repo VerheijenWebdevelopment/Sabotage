@@ -16,6 +16,17 @@
         <div id="lobby-content">
             <div id="lobby-content__left">
                 
+                <!-- Open & ongoing games -->
+                <game-overview
+                    :user="{{ $user->toJson() }}"
+                    :games="{{ $games->toJson() }}"
+                    create-api-endpoint="{{ route('api.games.create.post') }}"
+                    delete-api-endpoint="{{ route('api.games.delete.post') }}"
+                    join-api-endpoint="{{ route('api.games.join.post') }}"
+                    leave-api-endpoint="{{ route('api.games.leave.post') }}"
+                    start-api-endpoint="{{ route('api.games.start.post') }}">
+                </game-overview>
+
                 <!-- Chat messages -->
                 <chat-messages
                     send-message-api-endpoint="{{ route('api.chat.send-message.post') }}">
