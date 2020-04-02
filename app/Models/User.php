@@ -21,6 +21,8 @@ class User extends Authenticatable
         'username',
         'recovery_code',
         'is_admin',
+        'highscore',
+        'games_played',
     ];
     protected $hidden = [
         'password',

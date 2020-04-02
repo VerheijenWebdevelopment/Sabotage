@@ -16,7 +16,8 @@
         <div id="lobby-content">
             <div id="lobby-content__left">
 
-                Coming soon!           
+                <!-- Leaderboards -->
+                <leaderboards :users="{{ $users->toJson() }}"></leaderboards>
 
             </div>
         </div>

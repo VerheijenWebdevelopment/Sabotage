@@ -110,7 +110,7 @@
             <div id="game-overview__no-games" v-if="mutableGames.length === 0">
                 There are no open or ongoing games
             </div>
-        
+
         </div>
 
     </div>
@@ -207,34 +207,48 @@
                     }.bind(this))
 
                     // Player joined game event
-                    .listen("Game\\PlayerJoinedGame", function(e) {
-                        console.log(this.tag+" [event] player joined game", e);
-                        // Add player to game's list of players
-                        let gameIndex = this.findGameIndexById(e.game.id);
-                        if (gameIndex !== false) this.mutableGames[gameIndex].players.push(e.player);
-                        // Toast message
-                        this.$toasted.show(e.user.username+" joined Game #"+e.game.id, { duration: 3000 });
-                    }.bind(this))
-
+                    .listen("Game\\PlayerJoinedGame", this.onPlayerJoinedGame)
                     // Player left game event
-                    .listen("Game\\PlayerLeftGame", function(e) {
-                        console.log(this.tag+" [event] player left game", e);
-                        // Grab the index of the game that the player left
-                        let gameIndex = this.findGameIndexById(e.game.id);
-                        if (gameIndex !== false) {
-                            // Grab the index of the player that left the game
-                            let playerIndex = this.findPlayerIndexById(gameIndex, e.player_id);
-                            if (playerIndex !== false) {
-                                // Extract the player's username
-                                let username = this.mutableGames[gameIndex].players[playerIndex].username;
-                                // Remove the player from the game's list of player
-                                this.mutableGames[gameIndex].players.splice(playerIndex, 1);
-                                // Toast message
-                                this.$toasted.show(username+" left Game #"+e.game.id, { duration: 3000 });
-                            }
-                        }
-                    }.bind(this));
+                    .listen("Game\\PlayerLeftGame", this.onPlayerLeftGame);
 
+            },
+            onGameCreated(e) {
+
+            },
+            onGameDeleted(e) {
+
+            },
+            onGameStarted(e) {
+
+            },
+            onPlayerJoinedGame(e) {
+                console.log(this.tag+" [event] player joined game", e);
+                // Add player to game's list of players
+                let gameIndex = this.findGameIndexById(e.game.id);
+                if (gameIndex !== false) this.mutableGames[gameIndex].players.push(e.player);
+                // Toast message
+                this.$toasted.show(e.user.username+" joined Game #"+e.game.id, { duration: 3000 });
+            },
+            onPlayerLeftGame(e) {
+                console.log(this.tag+" [event] player left game", e);
+                // Grab the index of the game that the player left
+                let gameIndex = this.findGameIndexById(e.game.id);
+                console.log("game index: ", gameIndex);
+                if (gameIndex !== false) {
+                    // Grab the index of the player that left the game
+                    let playerIndex = this.findPlayerIndexById(gameIndex, e.player_id);
+                    console.log("player index: ", playerIndex);
+                    if (playerIndex !== false) {
+                        // Extract the player's username
+                        let username = this.mutableGames[gameIndex].players[playerIndex].user.username;
+                        console.log(this.mutableGames[gameIndex], this.mutableGames[gameIndex].players[playerIndex]);
+                        console.log("username: ", username);
+                        // Remove the player from the game's list of player
+                        this.mutableGames[gameIndex].players.splice(playerIndex, 1);
+                        // Toast message
+                        this.$toasted.show(username+" left Game #"+e.game.id, { duration: 3000 });
+                    }
+                }
             },
             userHasJoinedGame(game) {
                 if (game.players.length > 0) {
