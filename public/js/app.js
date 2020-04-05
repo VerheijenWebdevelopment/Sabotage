@@ -2677,6 +2677,667 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/Game.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["game", "player", "playerRole", "hand", "roles", "cards", "performActionApiEndpoint", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl"],
+  data: function data() {
+    return {
+      tag: "[game]",
+      turn: 1,
+      round: 1,
+      phase: null,
+      playersTurn: 1,
+      mutablePlayers: [],
+      mutableGame: null,
+      mutablePlayer: null,
+      mutablePlayerRole: null,
+      mutableHand: [],
+      selectRole: {
+        loading: false,
+        selectedCardIndex: null
+      },
+      foldCard: {
+        loading: false
+      },
+      playCard: {
+        loading: false,
+        dialogs: {
+          selectPlayer: {
+            show: false,
+            selectedPlayer: null
+          },
+          selectGoldLocation: {
+            show: false,
+            selectedLocation: null
+          },
+          placeTunnel: {
+            show: false,
+            selectedPosition: null
+          }
+        }
+      }
+    };
+  },
+  computed: {
+    playerAtPlay: function playerAtPlay() {
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].player_number == this.playersTurn) return this.mutablePlayers[i];
+      }
+
+      return false;
+    },
+    myTurn: function myTurn() {
+      return this.playerAtPlay.id === this.player.id;
+    },
+    hasSelectedRole: function hasSelectedRole() {
+      return this.mutablePlayerRole !== null;
+    },
+    numRoleCardOptions: function numRoleCardOptions() {
+      return this.mutableGame.num_available_roles - this.mutableGame.players_with_selected_roles;
+    },
+    selectedRoleCard: function selectedRoleCard() {
+      if (this.selectRole.selectedCardIndex !== null) {
+        return this.selectRole.selectedCardIndex + 1;
+      }
+
+      return false;
+    },
+    allPlayersHaveRoles: function allPlayersHaveRoles() {
+      if (this.mutableGame !== null && this.mutablePlayers !== null) {
+        return this.mutableGame.players_with_selected_roles.length === this.mutablePlayers.length;
+      }
+
+      return false;
+    },
+    selectedHandCards: function selectedHandCards() {
+      var out = [];
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          out.push(this.mutableHand[i]);
+        }
+      }
+
+      return out;
+    },
+    selectedHandCardIndex: function selectedHandCardIndex() {
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          return i;
+        }
+      }
+
+      return false;
+    }
+  },
+  methods: {
+    initialize: function initialize() {
+      console.log(this.tag + " initializing");
+      console.log(this.tag + " game: ", this.game);
+      console.log(this.tag + " player: ", this.player);
+      console.log(this.tag + " player role: ", this.playerRole);
+      console.log(this.tag + " hand: ", this.hand);
+      console.log(this.tag + " roles: ", this.roles);
+      console.log(this.tag + " cards: ", this.cards);
+      console.log(this.tag + " perform action api endpoint: ", this.performActionApiEndpoint); // console.log(this.tag+" ");
+
+      this.initializeData();
+      this.startListening();
+    },
+    initializeData: function initializeData() {
+      // Make the game mutable
+      this.mutableGame = this.game; // Make current player mutable
+
+      this.mutablePlayer = this.player; // Make current player's role mutable (if it has been selected, otherwise leave it at null)
+
+      if (this.playerRole) this.mutablePlayerRole = this.playerRole; // Make game's players mutable
+
+      if (this.game !== undefined && this.game !== null) {
+        for (var i = 0; i < this.game.players.length; i++) {
+          this.mutablePlayers.push(this.game.players[i]);
+        }
+      } // Make the player's hand mutable
+
+
+      if (this.hand !== undefined && this.hand !== null && this.hand && this.hand.length > 0) {
+        this.initializeHand(this.hand);
+      } // Initialize the game's state
+
+
+      this.turn = this.game.turn;
+      this.round = this.game.round;
+      this.phase = this.game.phase;
+      this.playersTurn = this.game.player_turn;
+    },
+    initializeHand: function initializeHand(hand) {
+      this.mutableHand = [];
+
+      for (var i = 0; i < hand.length; i++) {
+        var card = this.getCardById(hand[i]);
+
+        if (card) {
+          var cardEntry = {
+            data: card,
+            selected: false
+          };
+          this.mutableHand.push(cardEntry);
+        }
+      }
+    },
+    startListening: function startListening() {
+      // Connect to the game's channel
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+    },
+    onPlayerSelectedRole: function onPlayerSelectedRole(e) {
+      console.log(this.tag + "[event] player selected role", e); // Add player's ID to the list of players who have selected a role
+
+      this.mutableGame.players_with_selected_roles.push(e.player.id);
+      this.mutableGame.num_available_roles -= 1; // Switch to the main phase when all players have selected their roles
+
+      if (this.mutableGame.players_with_selected_roles.length === this.mutableGame.players.length) {
+        setTimeout(function () {
+          this.phase = "main";
+        }.bind(this), 2000);
+      }
+    },
+    onTurnEnded: function onTurnEnded(e) {
+      console.log(this.tag + "[event] turn ended", e); // Set the number of the player who's turn it is currently
+
+      this.playersTurn = e.game.player_turn;
+    },
+    onRoundEnded: function onRoundEnded(e) {
+      console.log(this.tag + "[event] round ended", e);
+    },
+    onGameEnded: function onGameEnded(e) {
+      console.log(this.tag + "[event] game ended", e);
+    },
+    onClickRoleCard: function onClickRoleCard(index) {
+      console.log(this.tag + " clicked role card", index); // Save the index of the selected role card
+
+      this.selectRole.selectedCardIndex = index; // Indicate we're doing stuff
+
+      this.selectRole.loading = true; // Perform the action
+
+      this.sendPerformActionRequest("selected_role_card", {
+        index: index
+      }) // If we succeeded to perform the action
+      .then(function (response) {
+        console.log(this.tag + " succeeded to select role!", response); // Save the assigned role & the player's hand
+
+        this.mutablePlayerRole = response.data.role; // Initialize the player's hand
+
+        this.initializeHand(response.data.hand); // Add player's id to the game's list of players with selected roles
+
+        this.mutableGame.players_with_selected_roles.push(this.mutablePlayer.id);
+        this.mutableGame.num_available_roles -= 1; // Indicate we're done doing stuff
+
+        this.selectRole.loading = false; // Switch to the main phase when all players have selected their roles
+
+        if (this.mutableGame.players_with_selected_roles.length === this.mutableGame.players.length) {
+          setTimeout(function () {
+            this.phase = "main";
+          }.bind(this), 2000);
+        }
+      }.bind(this)) // If we failed to perform the action; let's make the user be stuck here because wtf
+      ["catch"](function (error) {
+        console.warn(this.tag + " failed to select role!", error);
+      }.bind(this));
+    },
+    onClickHandCard: function onClickHandCard(index) {
+      console.log(this.tag + " clicked card in hand", index);
+      this.mutableHand[index].selected = !this.mutableHand[index].selected;
+    },
+    onClickFoldCard: function onClickFoldCard() {
+      console.log(this.tag + " clicked fold card button"); // Start loading
+
+      this.foldCard.loading = true; // Perform the action
+
+      this.sendPerformActionRequest("fold_card", {
+        index: this.selectedHandCardIndex
+      }) // Action succeeded
+      .then(function (response) {
+        console.log(this.tag + " card fold succeeded", response); // Remove the card from the user's hand
+
+        this.mutableHand.splice(this.selectedHandCardIndex, 1);
+        var cardEntry = {
+          data: response.data.new_card,
+          selected: false
+        };
+        console.log("card entry: ", cardEntry);
+        console.log(this.mutableHand.length); // Add the drawn card to the user's hand
+
+        this.mutableHand.push(cardEntry);
+        console.log(this.mutableHand.length); // Stop loading
+
+        this.foldCard.loading = false;
+      }.bind(this)) // Action failed
+      ["catch"](function (error) {
+        console.warn(this.tag + " failed to fold card!", error); // Stop loading
+
+        this.foldCard.loading = false;
+      }.bind(this));
+    },
+    onClickPlayCard: function onClickPlayCard() {
+      console.log(this.tag + " clicked play card button");
+    },
+    sendPerformActionRequest: function sendPerformActionRequest(action, data) {
+      return new Promise(function (resolve, reject) {
+        // Compose the payload to send to the API
+        var payload = new FormData();
+        payload.append("game_id", this.game.id);
+        payload.append("action", action);
+        payload.append("data", JSON.stringify(data)); // Send API request
+
+        this.axios.post(this.performActionApiEndpoint, payload) // Request succeeded
+        .then(function (response) {
+          // Operation succeeded
+          if (response.data.status === 'success') {
+            console.log(this.tag + " operation succeeded: ", response.data); // Resolve promise
+
+            resolve(response.data);
+          } // Operation failed
+          else {
+              console.warn(this.tag + " operation failed: ", response.data.error); // Toast the error message
+
+              this.$toasted.show("API operation failed: " + response.data.error, {
+                duration: 3000
+              }); // Reject promise
+
+              reject(response.data.error);
+            }
+        }.bind(this)) // Request failed
+        ["catch"](function (error) {
+          console.warn(this.tag + " request failed, error: ", error); // Toast the error
+
+          this.$toasted.show("API request failed: " + error, {
+            duration: 3000
+          }); // Reject promise
+
+          reject(error);
+        }.bind(this));
+      }.bind(this));
+    },
+    getRoleLabelById: function getRoleLabelById(id) {
+      for (var i = 0; i < this.roles.length; i++) {
+        if (this.roles[i].id === id) {
+          return this.roles[i].label;
+        }
+      }
+
+      return "Unknown role";
+    },
+    getCardById: function getCardById(id) {
+      for (var i = 0; i < this.cards.length; i++) {
+        if (this.cards[i].id === id) {
+          return this.cards[i];
+        }
+      }
+
+      return false;
+    }
+  },
+  mounted: function mounted() {
+    this.initialize();
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["game", "player", "value", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl"],
+  data: function data() {
+    return {
+      tag: "[game-players]",
+      onlinePlayers: []
+    };
+  },
+  methods: {
+    initialize: function initialize() {
+      console.log(this.tag + " initializing");
+      console.log(this.tag + " game: ", this.game);
+      console.log(this.tag + " value: ", this.value);
+      console.log(this.tag + " cart icon url: ", this.cartIconUrl);
+      console.log(this.tag + " light icon url: ", this.lightIconUrl);
+      console.log(this.tag + " pickaxe icon url: ", this.pickaxeIconUrl);
+      this.startListening();
+    },
+    startListening: function startListening() {
+      // Join the Game's channel
+      Echo.join("game-chat." + this.game.id) // When we join the channel
+      .here(this.onJoin) // When player joins the channel
+      .joining(this.onUserJoined) // When player leaves the channel
+      .leaving(this.onUserLeft);
+    },
+    onJoin: function onJoin(players) {
+      console.log(this.tag + " joined the game channel", players);
+
+      for (var i = 0; i < players.length; i++) {
+        this.onlinePlayers.push(players[i].id);
+      }
+    },
+    onUserJoined: function onUserJoined(player) {
+      console.log(this.tag + " user joined the game channel", player);
+      this.onlinePlayers.push(player.id);
+    },
+    onUserLeft: function onUserLeft(player) {
+      console.log(this.tag + " user left the game channel", player);
+
+      for (var i = 0; i < this.onlinePlayers.length; i++) {
+        if (this.onlinePlayers[i] === player.id) {
+          this.onlinePlayers.splice(i, 1);
+          break;
+        }
+      }
+    },
+    isOnline: function isOnline(player) {
+      for (var i = 0; i < this.onlinePlayers.length; i++) {
+        if (this.onlinePlayers[i] === player.id) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+  },
+  mounted: function mounted() {
+    this.initialize();
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=script&lang=js&":
 /*!************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=script&lang=js& ***!
@@ -2878,7 +3539,12 @@ __webpack_require__.r(__webpack_exports__);
     return {
       tag: "[game-overview]",
       mutableGames: [],
-      activeGameIndex: null
+      activeGameIndex: null,
+      createLoading: false,
+      deleteLoading: false,
+      startLoading: false,
+      leaveLoading: false,
+      joinLoading: false
     };
   },
   computed: {
@@ -2960,10 +3626,10 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " [event] game started", e); // Grab the game's index & make sure we get it
 
       var gameIndex = this.findGameIndexById(e.game.id);
+      console.log("game index: ", gameIndex);
 
       if (gameIndex !== false) {
-        console.log("game index: ", gameIndex); // Update the game's status
-
+        // Update the game's status
         this.mutableGames[gameIndex].status = "ongoing"; // Toast message
 
         this.$toasted.show("Game #" + e.game.id + " has started!", {
@@ -2972,10 +3638,9 @@ __webpack_require__.r(__webpack_exports__);
 
         if (this.activeGameIndex === gameIndex) {
           console.log("redirecting"); // Wait 1 second and then redirect the user to the game
+          // setTimeout(function() {
 
-          setTimeout(function () {
-            window.location.href = this.gameHref;
-          }.bind(this), 1000);
+          window.location.href = this.gameHref; // }.bind(this), 1000);
         }
       }
     },
@@ -3029,7 +3694,8 @@ __webpack_require__.r(__webpack_exports__);
       return game.game_master_id === this.user.id;
     },
     onClickCreate: function onClickCreate() {
-      console.log(this.tag + " clicked create button"); // Make API request
+      console.log(this.tag + " clicked create button");
+      this.createLoading = true; // Make API request
 
       this.axios.post(this.createApiEndpoint).then(function (response) {
         console.log(this.tag + " create request succeeded", response.data);
@@ -3038,15 +3704,19 @@ __webpack_require__.r(__webpack_exports__);
           console.log(this.tag + " create operation succeeded");
           this.mutableGames.push(response.data.game);
           this.activeGameIndex = this.mutableGames.length - 1;
+          this.createLoading = false;
         } else {
           console.warn(this.tag + " create operation failed: ", response.data.error);
+          this.createLoading = false;
         }
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " create request failed", error);
+        this.createLoading = false;
       }.bind(this));
     },
     onClickDelete: function onClickDelete() {
-      console.log(this.tag + " clicked delete button"); // Compose payload
+      console.log(this.tag + " clicked delete button");
+      this.deleteLoading = true; // Compose payload
 
       var payload = new FormData();
       payload.append("game_id", this.mutableGames[this.activeGameIndex].id); // Make API request
@@ -3058,15 +3728,19 @@ __webpack_require__.r(__webpack_exports__);
           console.log(this.tag + " delete operation succeeded");
           this.mutableGames.splice(this.activeGameIndex, 1);
           this.activeGameIndex = null;
+          this.deleteLoading = false;
         } else {
           console.warn(this.tag + " delete operation failed: ", response.data.error);
+          this.deleteLoading = false;
         }
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " delete request failed", error);
+        this.deleteLoading = false;
       }.bind(this));
     },
     onClickJoin: function onClickJoin(index) {
-      console.log(this.tag + " clicked join button", index); // Compose payload
+      console.log(this.tag + " clicked join button", index);
+      this.joinLoading = true; // Compose payload
 
       var payload = new FormData();
       payload.append("game_id", this.mutableGames[index].id); // Make API request
@@ -3080,15 +3754,19 @@ __webpack_require__.r(__webpack_exports__);
           this.mutableGames[index].players.push(response.data.player); // Save the game as the currently active game
 
           this.activeGameIndex = index;
+          this.joinLoading = false;
         } else {
           console.warn(this.tag + " join operation failed: ", response.data.error);
+          this.joinLoading = false;
         }
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " join request failed", error);
+        this.joinLoading = false;
       }.bind(this));
     },
     onClickLeave: function onClickLeave() {
-      console.log(this.tag + " clicked leave button"); // Compose payload
+      console.log(this.tag + " clicked leave button");
+      this.leaveLoading = true; // Compose payload
 
       var payload = new FormData();
       payload.append("game_id", this.mutableGames[this.activeGameIndex].id); // Make API request
@@ -3108,15 +3786,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
           this.activeGameIndex = null;
+          this.leaveLoading = false;
         } else {
           console.warn(this.tag + " leave operation failed: ", response.data.error);
+          this.leaveLoading = false;
         }
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " leave request failed", error);
+        this.leaveLoading = false;
       }.bind(this));
     },
     onClickStart: function onClickStart() {
-      console.log(this.tag + " clicked start button"); // Compose payload to send to API
+      console.log(this.tag + " clicked start button");
+      this.startLoading = true; // Compose payload to send to API
 
       var payload = new FormData();
       payload.append("game_id", this.mutableGames[this.activeGameIndex].id); // Make API request
@@ -3125,15 +3807,18 @@ __webpack_require__.r(__webpack_exports__);
       .then(function (response) {
         // Operation succeeded
         if (response.data.status === "success") {
-          console.log(this.tag + " operation succeeded", response.data); // Redirect the user to the game
+          console.log(this.tag + " operation succeeded", response.data);
+          this.startLoading = false; // Redirect the user to the game
 
           window.location.href = this.gameHref; // Operation failed
         } else {
           console.warn(this.tag + " operation failed", response.data.error);
+          this.startLoading = false;
         }
       }.bind(this)) // Request failed
       ["catch"](function (error) {
         console.warn(this.tag + " request failed", error);
+        this.startLoading = false;
       }.bind(this));
     },
     findGameIndexById: function findGameIndexById(id) {
@@ -5497,6 +6182,44 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 // module
 exports.push([module.i, "#chat-online-users {\n  border-radius: 3px;\n  background-color: #fff;\n}\n#chat-online-users #chat-online-users__header {\n  padding: 15px 25px;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__header #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#chat-online-users #chat-online-users__content #online-users .user {\n  display: flex;\n  padding: 15px 25px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__content #online-users .user:last-child {\n  border-bottom: 0;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-avatar {\n  height: 24px;\n  flex: 0 0 24px;\n  margin: 0 10px 0 0;\n  border-radius: 12px;\n  background-color: #cccccc;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#chat-online-users #chat-online-users__content #no-online-users {\n  padding: 15px 25px;\n  text-align: center;\n  box-sizing: border-box;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #top {\n  width: 100%;\n  padding: 25px;\n  display: flex;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n}\n#game #top #game-info {\n  top: 20px;\n  left: 25px;\n  position: absolute;\n}\n#game #top #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #top #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #top #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #top #player-area {\n  flex: 1;\n}\n#game #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #role-selection h1 {\n  text-align: center;\n}\n#game #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #role-selection #role-cards {\n  width: 100%;\n}\n#game #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n}\n#game #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 0 0 0 15px;\n}\n#game #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-ui #board-area {\n  flex: 1;\n  padding: 30px;\n  position: relative;\n  box-sizing: border-box;\n}\n#game #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#game-players {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-players .game-player {\n  display: flex;\n  flex: 0 0 250px;\n  align-items: center;\n  flex-direction: row;\n}\n#game-players .game-player.you .game-player__avatar {\n  border: 2px solid #ffd900;\n}\n#game-players .game-player .game-player__avatar {\n  height: 40px;\n  flex: 0 0 40px;\n  position: relative;\n  border-radius: 20px;\n  border: 2px solid #000;\n  background-color: #333;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__avatar .game-player__online-indicator {\n  width: 10px;\n  height: 10px;\n  right: -10px;\n  bottom: -10px;\n  position: absolute;\n  border-radius: 5px;\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__avatar .game-player__online-indicator.online {\n  background-color: #1ac000;\n}\n#game-players .game-player .game-player__text {\n  flex: 1;\n  margin: 0 0 0 15px;\n}\n#game-players .game-player .game-player__text .game-player__number {\n  font-size: 0.7em;\n  color: rgba(255, 255, 255, 0.25);\n}\n#game-players .game-player .game-player__text .game-player__username {\n  font-size: 1em;\n  font-weight: 500;\n}\n#game-players .game-player .game-player__text .game-player__score {\n  font-size: 0.8em;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-players .game-player .game-player__text .game-player__tools {\n  display: flex;\n  flex-direction: row;\n}\n#game-players .game-player .game-player__text .game-player__tools .tool.available .tool-image {\n  background-color: #1ac000;\n}\n#game-players .game-player .game-player__text .game-player__tools .tool.blocked .tool-image {\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__text .game-player__tools .tool .tool-image {\n  width: 50px;\n  height: 50px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}", ""]);
 
 // exports
 
@@ -41906,6 +42629,66 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./Game.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./GamePlayers.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=style&index=0&lang=scss&":
 /*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=style&index=0&lang=scss& ***!
@@ -43436,6 +44219,529 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=template&id=787446d4&":
+/*!************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/Game.vue?vue&type=template&id=787446d4& ***!
+  \************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { attrs: { id: "game" } }, [
+    _c("div", { attrs: { id: "top" } }, [
+      _c("div", { attrs: { id: "game-info" } }, [
+        _c("div", { attrs: { id: "game-info__current-round" } }, [
+          _vm._v("Round " + _vm._s(_vm.round))
+        ]),
+        _vm._v(" "),
+        _vm.playerAtPlay
+          ? _c("div", { attrs: { id: "game-info__player-turn" } }, [
+              _vm.myTurn
+                ? _c("div", { attrs: { id: "my-turn" } }, [
+                    _vm._v(
+                      "\n                    It's your turn!\n                "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              !_vm.myTurn
+                ? _c("div", { attrs: { id: "not-my-turn" } }, [
+                    _vm._v("\n                    It's "),
+                    _c("span", [
+                      _vm._v(_vm._s(_vm.playerAtPlay.user.username))
+                    ]),
+                    _vm._v("'s turn\n                ")
+                  ])
+                : _vm._e()
+            ])
+          : _vm._e()
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        { attrs: { id: "player-area" } },
+        [
+          _c("game-players", {
+            attrs: {
+              game: _vm.game,
+              player: _vm.player,
+              "cart-icon-url": _vm.cartIconUrl,
+              "light-icon-url": _vm.lightIconUrl,
+              "pickaxe-icon-url": _vm.pickaxeIconUrl
+            },
+            model: {
+              value: _vm.mutablePlayers,
+              callback: function($$v) {
+                _vm.mutablePlayers = $$v
+              },
+              expression: "mutablePlayers"
+            }
+          })
+        ],
+        1
+      )
+    ]),
+    _vm._v(" "),
+    _vm.mutableGame !== null && _vm.phase === "role_selection"
+      ? _c("div", { attrs: { id: "role-selection" } }, [
+          _vm.mutablePlayerRole !== null
+            ? _c("div", { attrs: { id: "role-assigned" } }, [
+                _c("h1", [_vm._v("Role assigned")]),
+                _vm._v(" "),
+                _c("div", { staticClass: "role-card no-hover" }, [
+                  _c("div", { staticClass: "role-card__label" }, [
+                    _vm._v(_vm._s(_vm.mutablePlayerRole.label))
+                  ])
+                ]),
+                _vm._v(" "),
+                _vm.playerAtPlay
+                  ? _c("div", { attrs: { id: "role-selection__text" } }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(_vm.playerAtPlay.user.username) +
+                          " is currently picking a role.\n            "
+                      )
+                    ])
+                  : _vm._e()
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.mutablePlayerRole === null
+            ? _c("div", { attrs: { id: "role-not-assigned" } }, [
+                _c("h1", [_vm._v("Role selection")]),
+                _vm._v(" "),
+                !_vm.myTurn && _vm.playerAtPlay
+                  ? _c("div", { attrs: { id: "role-selection__text" } }, [
+                      _vm._v(
+                        "\n                " +
+                          _vm._s(_vm.playerAtPlay.user.username) +
+                          " is currently picking a role.    \n            "
+                      )
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "available-roles" } }, [
+                  _c("h3", [_vm._v("Available roles")]),
+                  _vm._v(" "),
+                  _vm.mutableGame.available_roles.length > 0
+                    ? _c(
+                        "div",
+                        { attrs: { id: "available-roles__list" } },
+                        _vm._l(_vm.mutableGame.available_roles, function(
+                          role,
+                          ri
+                        ) {
+                          return _c(
+                            "div",
+                            { key: ri, staticClass: "available-role__wrapper" },
+                            [
+                              _c("div", { staticClass: "available-role" }, [
+                                _c("div", { staticClass: "role-name" }, [
+                                  _vm._v(
+                                    _vm._s(_vm.getRoleLabelById(role.role_id))
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("div", { staticClass: "role-amount" }, [
+                                  _vm._v("x" + _vm._s(role.count))
+                                ])
+                              ])
+                            ]
+                          )
+                        }),
+                        0
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mutableGame.available_roles.length === 0
+                    ? _c("div", { attrs: { id: "no-roles-available" } }, [
+                        _vm._v(
+                          "\n                    No roles available, this shouldn't happen\n                "
+                        )
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _vm.myTurn && !_vm.selectedRoleCard
+                  ? _c("div", { attrs: { id: "role-cards" } }, [
+                      _c("h2", [_vm._v("Role cards")]),
+                      _vm._v(" "),
+                      _c("h3", [
+                        _vm._v("Please choose one of the available role cards")
+                      ]),
+                      _vm._v(" "),
+                      !_vm.selectedRoleCard
+                        ? _c(
+                            "div",
+                            { attrs: { id: "role-cards__list" } },
+                            _vm._l(
+                              _vm.mutableGame.num_available_roles,
+                              function(n, ni) {
+                                return _c(
+                                  "div",
+                                  {
+                                    key: ni,
+                                    staticClass: "role-card__wrapper"
+                                  },
+                                  [
+                                    _c(
+                                      "div",
+                                      {
+                                        staticClass: "role-card",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onClickRoleCard(ni)
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "role-card__title" },
+                                          [_vm._v("Role card")]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "div",
+                                          { staticClass: "role-card__number" },
+                                          [_vm._v("#" + _vm._s(n))]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "div",
+                                          { staticClass: "role-card__select" },
+                                          [
+                                            _vm._v(
+                                              "\n                                Select card\n                            "
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ]
+                                )
+                              }
+                            ),
+                            0
+                          )
+                        : _vm._e()
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.selectedRoleCard && _vm.selectRole.loading
+                  ? _c("div", { attrs: { id: "role-card__selected" } }, [
+                      _c("h2", [_vm._v("Role card selected")]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { attrs: { id: "role-card__selected-content" } },
+                        [
+                          _c(
+                            "div",
+                            { attrs: { id: "role-card__selected-card" } },
+                            [
+                              _c(
+                                "div",
+                                { attrs: { id: "selected-card__title" } },
+                                [_vm._v("Role card")]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "div",
+                                { attrs: { id: "selected-card__number" } },
+                                [_vm._v("# " + _vm._s(_vm.selectedRoleCard))]
+                              )
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _vm._m(0)
+                        ]
+                      )
+                    ])
+                  : _vm._e()
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.selectedRoleCard &&
+          !_vm.selectRole.loading &&
+          _vm.mutablePlayerRole !== null
+            ? _c("div", { attrs: { id: "assigned-role" } }, [
+                _c("h2", [_vm._v("Role assigned")]),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "assigned-role__card" } }, [
+                  _c("div", { attrs: { id: "assigned-role__card-title" } }, [
+                    _vm._v(_vm._s(_vm.mutablePlayerRole.label))
+                  ])
+                ])
+              ])
+            : _vm._e()
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.mutableGame !== null && _vm.phase === "main"
+      ? _c("div", { attrs: { id: "game-ui" } }, [
+          _c("div", { attrs: { id: "board-area" } }),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "action-area" } }, [
+            _c("div", { attrs: { id: "my-role" } }, [
+              _c("div", { attrs: { id: "my-role__title" } }, [
+                _vm._v("My role")
+              ]),
+              _vm._v(" "),
+              _c("div", { attrs: { id: "my-role__card" } }, [
+                _c("div", { attrs: { id: "my-role__card-text" } }, [
+                  _vm._v(
+                    "\n                        " +
+                      _vm._s(_vm.mutablePlayerRole.label) +
+                      "\n                    "
+                  )
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { attrs: { id: "my-hand" } }, [
+              _c("div", { attrs: { id: "my-hand__title" } }, [
+                _vm._v("My hand")
+              ]),
+              _vm._v(" "),
+              _vm.mutableHand.length > 0
+                ? _c(
+                    "div",
+                    { attrs: { id: "my-hand__cards" } },
+                    _vm._l(_vm.mutableHand, function(card, ci) {
+                      return _c(
+                        "div",
+                        {
+                          key: ci,
+                          staticClass: "my-hand__card",
+                          class: { selected: card.selected }
+                        },
+                        [
+                          _c("div", {
+                            staticClass: "my-hand__card-image",
+                            style: {
+                              backgroundImage:
+                                "url(" + card.data.image_url + ")"
+                            },
+                            on: {
+                              click: function($event) {
+                                return _vm.onClickHandCard(ci)
+                              }
+                            }
+                          })
+                        ]
+                      )
+                    }),
+                    0
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mutableHand.length === 0
+                ? _c("div", { attrs: { id: "my-hand__no-cards" } }, [
+                    _vm._v(
+                      "\n                    No cards in your hand at the moment\n                "
+                    )
+                  ])
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("div", { attrs: { id: "my-actions" } }, [
+              _c("div", { attrs: { id: "my-actions__title" } }, [
+                _vm._v("Actions")
+              ]),
+              _vm._v(" "),
+              _vm.myTurn && _vm.selectedHandCards.length === 1
+                ? _c("div", { attrs: { id: "my-actions__list" } }, [
+                    _c(
+                      "div",
+                      { staticClass: "action" },
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            attrs: { block: "", loading: _vm.playCard.loading },
+                            on: { click: _vm.onClickPlayCard }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            Play card\n                        "
+                            )
+                          ]
+                        )
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "action" },
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            attrs: { block: "", loading: _vm.foldCard.loading },
+                            on: { click: _vm.onClickFoldCard }
+                          },
+                          [
+                            _vm._v(
+                              "\n                            Fold card\n                        "
+                            )
+                          ]
+                        )
+                      ],
+                      1
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.myTurn && _vm.selectedHandCards.length > 1
+                ? _c("div", { attrs: { id: "my-actions__too-many-cards" } }, [
+                    _vm._v(
+                      "\n                    Too many cards selected\n                "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.myTurn && _vm.selectedHandCards.length === 0
+                ? _c("div", { attrs: { id: "my-actions__select-card" } }, [
+                    _vm._v(
+                      "\n                    Select a card in your hand to perform an action\n                "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              !_vm.myTurn
+                ? _c("div", { attrs: { id: "my-actions__wait" } }, [
+                    _vm._v(
+                      "\n                    You can't perform an action until it's your turn.\n                "
+                    )
+                  ])
+                : _vm._e()
+            ])
+          ])
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.mutableGame !== null && _vm.phase === "rewards"
+      ? _c("div", { attrs: { id: "rewards-ui" } }, [
+          _vm._v("\n        Rewards\n    ")
+        ])
+      : _vm._e()
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { attrs: { id: "role-card__selected-text" } }, [
+      _c("div", { attrs: { id: "selected-text__loading" } }, [
+        _c("i", { staticClass: "fas fa-spinner fa-spin" })
+      ]),
+      _vm._v(" "),
+      _c("div", { attrs: { id: "selected-text__title" } }, [_vm._v("Loading")])
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924&":
+/*!*******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924& ***!
+  \*******************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { attrs: { id: "game-players" } },
+    _vm._l(_vm.value, function(p, pi) {
+      return _c(
+        "div",
+        {
+          key: pi,
+          staticClass: "game-player",
+          class: { you: p.id === _vm.player.id }
+        },
+        [
+          _c("div", { staticClass: "game-player__avatar" }, [
+            _c("div", {
+              staticClass: "game-player__online-indicator",
+              class: { online: _vm.isOnline(p) }
+            })
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "game-player__text" }, [
+            _c("div", { staticClass: "game-player__number" }, [
+              _vm._v("Player " + _vm._s(p.player_number))
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "game-player__username" }, [
+              _vm._v(_vm._s(p.user.username))
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "game-player__score" }, [
+              _vm._v(_vm._s(p.score) + " goud verzameld")
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "game-player__blocked-tools" }, [
+              !p.pickaxe_available
+                ? _c("div", { staticClass: "blocked-tool" }, [
+                    _vm._v(
+                      "\n                    Pickaxe blocked\n                "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              !p.light_available
+                ? _c("div", { staticClass: "blocked-tool" }, [
+                    _vm._v(
+                      "\n                    Light blocked\n                "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              !p.cart_available
+                ? _c("div", { staticClass: "blocked-tool" }, [
+                    _vm._v(
+                      "\n                    Cart blocked\n                "
+                    )
+                  ])
+                : _vm._e()
+            ])
+          ])
+        ]
+      )
+    }),
+    0
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=template&id=09e46b58&":
 /*!****************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/leaderboards/Leaderboards.vue?vue&type=template&id=09e46b58& ***!
@@ -43543,7 +44849,12 @@ var render = function() {
                       _c(
                         "v-btn",
                         {
-                          attrs: { small: "", text: "", color: "red" },
+                          attrs: {
+                            small: "",
+                            text: "",
+                            color: "red",
+                            loading: _vm.leaveLoading
+                          },
                           on: { click: _vm.onClickLeave }
                         },
                         [
@@ -43564,7 +44875,12 @@ var render = function() {
                       _c(
                         "v-btn",
                         {
-                          attrs: { small: "", text: "", color: "red" },
+                          attrs: {
+                            small: "",
+                            text: "",
+                            color: "red",
+                            loading: _vm.deleteLoading
+                          },
                           on: { click: _vm.onClickDelete }
                         },
                         [
@@ -43621,7 +44937,8 @@ var render = function() {
                         attrs: {
                           depressed: "",
                           color: "success",
-                          disabled: _vm.startButtonDisabled
+                          disabled: _vm.startButtonDisabled,
+                          loading: _vm.startLoading
                         },
                         on: { click: _vm.onClickStart }
                       },
@@ -43671,7 +44988,12 @@ var render = function() {
                 _c(
                   "v-btn",
                   {
-                    attrs: { small: "", depressed: "", color: "primary" },
+                    attrs: {
+                      small: "",
+                      depressed: "",
+                      color: "primary",
+                      loading: _vm.createLoading
+                    },
                     on: { click: _vm.onClickCreate }
                   },
                   [
@@ -43739,7 +45061,8 @@ var render = function() {
                             depressed: "",
                             color: "success",
                             disabled:
-                              _vm.hasJoinedGame || game.status !== "open"
+                              _vm.hasJoinedGame || game.status !== "open",
+                            loading: _vm.joinLoading
                           },
                           on: {
                             click: function($event) {
@@ -97796,6 +99119,8 @@ var map = {
 	"./components/auth/ResetPasswordForm.vue": "./resources/js/components/auth/ResetPasswordForm.vue",
 	"./components/chat/ChatMessages.vue": "./resources/js/components/chat/ChatMessages.vue",
 	"./components/chat/ChatOnlineUsers.vue": "./resources/js/components/chat/ChatOnlineUsers.vue",
+	"./components/game/Game.vue": "./resources/js/components/game/Game.vue",
+	"./components/game/GamePlayers.vue": "./resources/js/components/game/GamePlayers.vue",
 	"./components/leaderboards/Leaderboards.vue": "./resources/js/components/leaderboards/Leaderboards.vue",
 	"./components/lobby/GameOverview.vue": "./resources/js/components/lobby/GameOverview.vue",
 	"./components/settings/ChangePasswordForm.vue": "./resources/js/components/settings/ChangePasswordForm.vue",
@@ -98483,6 +99808,180 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ChatOnlineUsers_vue_vue_type_template_id_9a83dc1e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ChatOnlineUsers_vue_vue_type_template_id_9a83dc1e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/game/Game.vue":
+/*!***********************************************!*\
+  !*** ./resources/js/components/game/Game.vue ***!
+  \***********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Game.vue?vue&type=template&id=787446d4& */ "./resources/js/components/game/Game.vue?vue&type=template&id=787446d4&");
+/* harmony import */ var _Game_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Game.vue?vue&type=script&lang=js& */ "./resources/js/components/game/Game.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Game.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Game_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/game/Game.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/game/Game.vue?vue&type=script&lang=js&":
+/*!************************************************************************!*\
+  !*** ./resources/js/components/game/Game.vue?vue&type=script&lang=js& ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./Game.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader!../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./Game.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/Game.vue?vue&type=template&id=787446d4&":
+/*!******************************************************************************!*\
+  !*** ./resources/js/components/game/Game.vue?vue&type=template&id=787446d4& ***!
+  \******************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./Game.vue?vue&type=template&id=787446d4& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/Game.vue?vue&type=template&id=787446d4&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Game_vue_vue_type_template_id_787446d4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GamePlayers.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/game/GamePlayers.vue ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./GamePlayers.vue?vue&type=template&id=3d593924& */ "./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924&");
+/* harmony import */ var _GamePlayers_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GamePlayers.vue?vue&type=script&lang=js& */ "./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./GamePlayers.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _GamePlayers_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/game/GamePlayers.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./GamePlayers.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&":
+/*!****************************************************************************************!*\
+  !*** ./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss& ***!
+  \****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader!../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./GamePlayers.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924& ***!
+  \*************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./GamePlayers.vue?vue&type=template&id=3d593924& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GamePlayers.vue?vue&type=template&id=3d593924&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GamePlayers_vue_vue_type_template_id_3d593924___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

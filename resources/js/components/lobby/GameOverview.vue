@@ -15,13 +15,13 @@
                 <div id="my-game__header-right">
                     <!-- Leave -->
                     <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
-                        <v-btn small text color="red" @click="onClickLeave">
+                        <v-btn small text color="red" @click="onClickLeave" :loading="leaveLoading">
                             Leave
                         </v-btn>
                     </div>
                     <!-- Delete -->
                     <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
-                        <v-btn small text color="red" @click="onClickDelete">
+                        <v-btn small text color="red" @click="onClickDelete" :loading="deleteLoading">
                             Delete
                         </v-btn>
                     </div>
@@ -47,7 +47,7 @@
             <div id="my-game__actions">
                 <!-- Start -->
                 <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
-                    <v-btn depressed color="success" :disabled="startButtonDisabled" @click="onClickStart">
+                    <v-btn depressed color="success" :disabled="startButtonDisabled" @click="onClickStart" :loading="startLoading">
                         Start game!
                     </v-btn>
                 </div>
@@ -77,7 +77,7 @@
                 </div>
                 <div id="game-overview__header-right" v-if="!hasJoinedGame">
                     <!-- Create -->
-                    <v-btn small depressed color="primary" @click="onClickCreate">
+                    <v-btn small depressed color="primary" @click="onClickCreate" :loading="createLoading">
                         Start a new game
                     </v-btn>
                 </div>
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div class="game-actions">
-                        <v-btn small depressed color="success" @click="onClickJoin(gi)" :disabled="hasJoinedGame || game.status !== 'open'">
+                        <v-btn small depressed color="success" @click="onClickJoin(gi)" :disabled="hasJoinedGame || game.status !== 'open'" :loading="joinLoading">
                             Join
                         </v-btn>
                     </div>
@@ -137,6 +137,11 @@
             tag: "[game-overview]",
             mutableGames: [],
             activeGameIndex: null,
+            createLoading: false,
+            deleteLoading: false,
+            startLoading: false,
+            leaveLoading: false,
+            joinLoading: false,
         }),
         computed: {
             hasJoinedGame() {
@@ -225,8 +230,8 @@
 
                 // Grab the game's index & make sure we get it
                 let gameIndex = this.findGameIndexById(e.game.id);
+                console.log("game index: ", gameIndex);
                 if (gameIndex !== false) {
-                    console.log("game index: ", gameIndex);
 
                     // Update the game's status
                     this.mutableGames[gameIndex].status = "ongoing";
@@ -239,9 +244,9 @@
                         console.log("redirecting");
 
                         // Wait 1 second and then redirect the user to the game
-                        setTimeout(function() {
-                            window.location.href = this.gameHref;
-                        }.bind(this), 1000);
+                        // setTimeout(function() {
+                        window.location.href = this.gameHref;
+                        // }.bind(this), 1000);
 
                     }
 
@@ -293,6 +298,8 @@
             onClickCreate() {
                 console.log(this.tag+" clicked create button");
 
+                this.createLoading = true;
+
                 // Make API request
                 this.axios.post(this.createApiEndpoint)
                     .then(function(response) {
@@ -301,17 +308,22 @@
                             console.log(this.tag+" create operation succeeded");
                             this.mutableGames.push(response.data.game);
                             this.activeGameIndex = this.mutableGames.length - 1;
+                            this.createLoading = false;
                         } else {
                             console.warn(this.tag+" create operation failed: ", response.data.error);
+                            this.createLoading = false;
                         }
                     }.bind(this))
                     .catch(function(error) {
                         console.warn(this.tag+" create request failed", error);
+                        this.createLoading = false;
                     }.bind(this));
 
             },
             onClickDelete() {
                 console.log(this.tag+" clicked delete button");
+
+                this.deleteLoading = true;
 
                 // Compose payload
                 let payload = new FormData();
@@ -325,17 +337,22 @@
                             console.log(this.tag+" delete operation succeeded");
                             this.mutableGames.splice(this.activeGameIndex, 1);
                             this.activeGameIndex = null;
+                            this.deleteLoading = false;
                         } else {
                             console.warn(this.tag+" delete operation failed: ", response.data.error);
+                            this.deleteLoading = false;
                         }
                     }.bind(this))
                     .catch(function(error) {
                         console.warn(this.tag+" delete request failed", error);
+                        this.deleteLoading = false;
                     }.bind(this));
 
             },
             onClickJoin(index) {
                 console.log(this.tag+" clicked join button", index);
+
+                this.joinLoading = true;
 
                 // Compose payload
                 let payload = new FormData();
@@ -351,17 +368,22 @@
                             this.mutableGames[index].players.push(response.data.player);
                             // Save the game as the currently active game
                             this.activeGameIndex = index;
+                            this.joinLoading = false;
                         } else {
                             console.warn(this.tag+" join operation failed: ", response.data.error);
+                            this.joinLoading = false;
                         }
                     }.bind(this))
                     .catch(function(error) {
                         console.warn(this.tag+" join request failed", error);
+                        this.joinLoading = false;
                     }.bind(this));
 
             },
             onClickLeave() {
                 console.log(this.tag+" clicked leave button");
+
+                this.leaveLoading = true;
                 
                 // Compose payload
                 let payload = new FormData();
@@ -382,17 +404,22 @@
                             }
                             // Set active game's index to null
                             this.activeGameIndex = null;
+                            this.leaveLoading = false;
                         } else {
                             console.warn(this.tag+" leave operation failed: ", response.data.error);
+                            this.leaveLoading = false;
                         }
                     }.bind(this))
                     .catch(function(error) {
                         console.warn(this.tag+" leave request failed", error);
+                        this.leaveLoading = false;
                     }.bind(this));
                 
             },
             onClickStart() {
                 console.log(this.tag+" clicked start button");
+
+                this.startLoading = true;
 
                 // Compose payload to send to API
                 let payload = new FormData();
@@ -406,19 +433,20 @@
                         // Operation succeeded
                         if (response.data.status === "success") {
                             console.log(this.tag+" operation succeeded", response.data);
-                            
+                            this.startLoading = false;
                             // Redirect the user to the game
                             window.location.href = this.gameHref;
-
                         // Operation failed
                         } else {
                             console.warn(this.tag+" operation failed", response.data.error);
+                            this.startLoading = false;
                         }
                     }.bind(this))
 
                     // Request failed
                     .catch(function(error) {
                         console.warn(this.tag+" request failed", error);
+                        this.startLoading = false;
                     }.bind(this));
 
             },

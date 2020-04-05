@@ -64,6 +64,17 @@ Route::group(["prefix" => "api"], function() {
         Route::post("join", "Api\GameController@postJoinGame")->name("api.games.join.post");
         Route::post("leave", "Api\GameController@postLeaveGame")->name("api.games.leave.post");
         Route::post("start", "Api\GameController@postStartGame")->name("api.games.start.post");
+        Route::post("perform-action", "Api\GameController@postPerformAction")->name("api.games.perform-action.post");
     });
+
+    Route::group(["prefix" => "cards"], function() {
+        Route::get("generate-image/{id}", "Api\CardController@getGenerateImage")->name("api.cards.generate-image");
+    });
+
+});
+
+Route::group(["prefix" => "test"], function() {
+
+    Route::get("card-generation", "TestController@getTestCardGeneration")->name("test.card-generation");
 
 });

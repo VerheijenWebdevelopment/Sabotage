@@ -18,10 +18,16 @@ class CreateGamesTable extends Migration
             $table->unsignedInteger('game_master_id');
             $table->string('status')->default('open');
             $table->unsignedInteger('round')->default(1);
-            $table->unsignedInteger('player_turn_index')->default(0);
-            $table->unsignedInteger('gold_location_index')->default(0);
-            $table->text('board')->nullable();
+            $table->unsignedInteger('turn')->default(1);
+            $table->string('phase')->default('role_selection');
+            $table->unsignedInteger('player_turn')->default(1);
+            $table->unsignedInteger('gold_location')->default(0);
             $table->text('deck')->nullable();
+            $table->unsignedInteger('num_cards_in_deck')->default(0);
+            $table->text('roles')->nullable();
+            $table->text('available_roles')->nullable();
+            $table->text('players_with_selected_roles')->nullable();
+            $table->text('board')->nullable();
             $table->timestamps();
         });
     }

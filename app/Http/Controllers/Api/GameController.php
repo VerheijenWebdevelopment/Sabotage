@@ -12,6 +12,7 @@ use App\Http\Requests\Api\Game\StartGameRequest;
 use App\Http\Requests\Api\Game\LeaveGameRequest;
 use App\Http\Requests\Api\Game\CreateGameRequest;
 use App\Http\Requests\Api\Game\DeleteGameRequest;
+use App\Http\Requests\Api\Game\PerformActionRequest;
 
 class GameController extends Controller
 {
@@ -57,5 +58,36 @@ class GameController extends Controller
             "status" => "success",
             "game_id" => $game->id,
         ]);
+    }
+
+    public function postPerformAction(PerformActionRequest $request)
+    {
+        // Grab the game we're supposed to perform an action on
+        $game = Games::find($request->game_id);
+
+        // Grab the currently logged in user's active player
+        $player = Players::getActivePlayer();
+
+        // try
+        // {
+            // Ensure the player is a player in the active game
+            if (!Games::playerIsInGame($player, $game)) throw new Exception("Can't perform an action in a game you are not a part of.");
+
+            // Perform the action through the Games service
+            $data = Games::performAction($game, $player, $request->action, $request->data);
+
+            // Return success response
+            return response()->json([
+                "status" => "success",
+                "data" => $data,
+            ]);
+        // }
+        // catch (Exception $e)
+        // {
+        //     return response()->json([
+        //         "status" => "error",
+        //         "error" => $e->getMessage(),
+        //     ]);
+        // }
     }
 }

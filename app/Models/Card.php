@@ -10,6 +10,7 @@ class Card extends Model
     protected $guarded = ["id", "created_at", "updated_at"];
     protected $fillable = [
         "type",
+        "text",
         "action",
         "open_positions",
     ];

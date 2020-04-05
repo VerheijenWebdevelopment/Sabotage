@@ -1534,8 +1534,9 @@ i {
 #app {
   width: 100%;
   min-height: 100%;
+  color: #ffffff;
   font-family: "Roboto", sans-serif;
-  background-color: #f2f2f2;
+  background-color: black;
 }
 
 #app .v-application--wrap {
@@ -1549,33 +1550,45 @@ i {
 
 #app .v-application--wrap #topnav-wrapper {
   width: 100%;
-  flex: 0 0 80px;
-  background-color: #e6e6e6;
+  flex: 0 0 50px;
+  background-color: #0d0d0d;
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav {
   height: 100%;
   color: #000;
   display: flex;
-  width: 1000px;
   margin: 0 auto;
+  padding: 0 30px;
   align-items: center;
   flex-direction: row;
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo {
+  padding-top: 3px;
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link {
-  color: #000;
+  transition: all 0.3s;
   text-decoration: none;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited:hover,
+#app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link:hover {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a #topnav-logo__text,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active #topnav-logo__text,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited #topnav-logo__text,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link #topnav-logo__text {
-  font-size: 1.5em;
+  font-size: 1.3em;
   font-family: "Special Elite", cursive;
 }
 
@@ -1600,36 +1613,58 @@ i {
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link {
-  color: #333;
   font-size: 1em;
   font-weight: 400;
   transition: all 0.3s;
   text-decoration: none;
+  color: rgba(255, 255, 255, 0.25);
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link:hover {
-  color: #000;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 #app .v-application--wrap #content-wrapper {
   flex: 1;
-  width: 1000px;
-  padding: 50px 0;
+  width: 100%;
+  display: block;
+}
+
+#app .v-application--wrap #content-wrapper .content {
+  padding: 30px;
   box-sizing: border-box;
 }
 
 #app .v-application--wrap #footer-wrapper {
-  flex: 0 0 100px;
+  flex: 0 0 50px;
 }
 
 #app .v-application--wrap #footer-wrapper #footer {
-  font-size: 0.8em;
+  font-size: 0.7em;
   text-align: center;
   box-sizing: border-box;
   padding: 50px 0 25px 0;
-  color: gray;
+  color: rgba(255, 255, 255, 0.1);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1em;
+  margin: 0 0 15px 0;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 1.5em;
 }
 

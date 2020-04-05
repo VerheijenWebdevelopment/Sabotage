@@ -21,10 +21,21 @@ class Game extends Model
         "game_master_id",
         "status",
         "round",
-        "player_turn_index",
-        "gold_location_index",
-        "board",
+        "turn",
+        "phase",
+        "player_turn",
+        "gold_location",
         "deck",
+        "num_cards_in_deck",
+        "roles",
+        "available_roles",
+        "players_with_selected_roles",
+        "board",
+    ];
+    protected $hidden = [
+        "deck",
+        "roles",
+        "gold_location",
     ];
 
     //
@@ -45,14 +56,34 @@ class Game extends Model
     // Accessors
     //
 
-    public function getBoardAttribute($value)
-    {
-        return json_decode(unserialize($value));
-    }
-
     public function getDeckAttribute($value)
     {
-        return json_decode(unserialize($value));
+        return unserialize($value);
+    }
+
+    public function getRolesAttribute($value)
+    {
+        return unserialize($value);
+    }
+
+    public function getAvailableRolesAttribute($value)
+    {
+        return unserialize($value);
+    }
+
+    public function getNumberOfAvailableRolesAttribute()
+    {
+        return !is_null($this->roles) && $this->roles ? count($this->roles) : 0;
+    }
+
+    public function getPlayersWithSelectedRolesAttribute($value)
+    {
+        return unserialize($value);
+    }
+
+    public function getBoardAttribute($value)
+    {
+        return unserialize($value);
     }
 
     //
@@ -61,11 +92,26 @@ class Game extends Model
 
     public function setDeckAttribute($value)
     {
-        $this->attributes["deck"] = serialize(json_encode($value));
+        $this->attributes["deck"] = serialize($value);
+    }
+
+    public function setRolesAttribute($value)
+    {
+        $this->attributes["roles"] = serialize($value);
+    }
+
+    public function setAvailableRolesAttribute($value)
+    {
+        $this->attributes["available_roles"] = serialize($value);
+    }
+
+    public function setPlayersWithSelectedRolesAttribute($value)
+    {
+        $this->attributes["players_with_selected_roles"] = serialize($value);
     }
 
     public function setBoardAttribute($value)
     {
-        $this->attributes["board"] = serialize(json_encode($value));
+        $this->attributes["board"] = serialize($value);
     }
 }

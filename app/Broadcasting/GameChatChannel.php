@@ -6,7 +6,7 @@ use Games;
 use App\Models\User;
 use App\Models\Game;
 
-class GameChannel
+class GameChatChannel
 {
     /**
      * Create a new channel instance.
@@ -32,7 +32,7 @@ class GameChannel
             {
                 if ($player->user_id == $user->id)
                 {
-                    return true;
+                    return $player;
                 }
             }
         }

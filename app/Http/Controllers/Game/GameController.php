@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Game;
 
+use Cards;
 use Games;
+use Roles;
+use Players;
+
 use App\Http\Controllers\Controller;
 
 class GameController extends Controller
@@ -17,6 +21,10 @@ class GameController extends Controller
 
         return view("pages.game.game", [
             "game" => Games::getActiveGame(),
+            "player" => Players::getActivePlayer(),
+            "playerRole" => Players::getActivePlayerRole(),
+            "cards" => Cards::getAllPreloaded(),
+            "roles" => Roles::getAll(),
         ]);
     }
 }

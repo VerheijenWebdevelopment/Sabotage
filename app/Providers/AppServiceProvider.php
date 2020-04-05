@@ -6,6 +6,7 @@ use App\Services\UserService;
 use App\Services\GameService;
 use App\Services\RoleService;
 use App\Services\CardService;
+use App\Services\BoardService;
 use App\Services\PlayerService;
 use App\Services\UploaderService;
 
@@ -54,6 +55,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton("roles", function() {
             return new RoleService;
+        });
+
+        $this->app->singleton("board", function() {
+            return new BoardService;
         });
 
         $this->app->singleton("uploader", function() {

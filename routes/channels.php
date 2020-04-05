@@ -2,6 +2,7 @@
 
 use App\Broadcasting\ChatChannel;
 use App\Broadcasting\GameChannel;
+use App\Broadcasting\GameChatChannel;
 use App\Broadcasting\LobbyChannel;
 use App\Broadcasting\OnlineChannel;
 use App\Broadcasting\PlayerChannel;
@@ -29,3 +30,6 @@ Broadcast::channel("lobby", LobbyChannel::class);
 
 // Game channel
 Broadcast::channel("game.{game}", GameChannel::class);
+
+// Game's chat channel
+Broadcast::channel("game-chat.{game}", GameChatChannel::class);

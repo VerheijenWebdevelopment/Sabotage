@@ -232,6 +232,7 @@ return [
         'Games' => \App\Facades\GamesFacade::class,
         'Cards' => \App\Facades\CardsFacade::class,
         'Roles' => \App\Facades\RolesFacade::class,
+        'Board' => \App\Facades\BoardFacade::class,
         'Players' => \App\Facades\PlayersFacade::class,
         'Uploader' => \App\Facades\UploaderFacade::class,
 

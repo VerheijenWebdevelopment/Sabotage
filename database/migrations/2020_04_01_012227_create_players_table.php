@@ -17,8 +17,13 @@ class CreatePlayersTable extends Migration
             $table->id();
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('game_id');
+            $table->unsignedInteger('role_id')->nullable();
             $table->unsignedInteger('player_number');
             $table->unsignedInteger('score')->default(0);
+            $table->text('hand')->nullable();
+            $table->boolean('cart_available')->default(true);
+            $table->boolean('light_available')->default(true);
+            $table->boolean('pickaxe_available')->default(true);
             $table->timestamps();
         });
     }

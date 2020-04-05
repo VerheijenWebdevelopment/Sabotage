@@ -17,7 +17,7 @@ class Role extends Model
     // Relationships
     //
 
-    public function player()
+    public function players()
     {
         return $this->hasMany(Player::class);
     }

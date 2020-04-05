@@ -15,74 +15,104 @@ class CardSeeder extends Seeder
         DB::table("cards")->delete();
 
         // ------------------------------------------------
+        // General cards
+        // ------------------------------------------------
+
+        $start_card = Card::create([
+            "type" => "start",
+            "text" => "Start",
+            "name" => "start",
+        ]);
+
+        $gold_location_card = Card::create([
+            "type" => "gold_location",
+            "text" => "Gold Location",
+            "name" => "gold_location"
+        ]);
+
+        // ------------------------------------------------
         // Action cards
         // ------------------------------------------------
 
         // Sabotage cards
         $action_sabotage_pickaxe = Card::create([
             "type" => "action",
+            "text" => "Sabotage Pickaxe",
             "name" => "sabotage_pickaxe",
         ]);
         $action_sabotage_light = Card::create([
             "type" => "action",
+            "text" => "Sabotage Light",
             "name" => "sabotage_light",
         ]);
         $action_sabotage_cart = Card::create([
             "type" => "action",
+            "text" => "Sabotage Cart",
             "name" => "sabotage_cart"
         ]);
 
         // Sabotage combo cards
         $action_sabotage_pickaxe_light = Card::create([
             "type" => "action",
+            "text" => "Sabotage Pickaxe & Light",
             "name" => "sabotage_pickaxe_light",
         ]);
         $action_sabotage_pickaxe_cart = Card::create([
             "type" => "action",
+            "text" => "Sabotage Pickaxe & Cart",
             "name" => "sabotage_pickaxe_cart",
         ]);
         $action_sabotage_light_cart = Card::create([
             "type" => "action",
+            "text" => "Sabotage Light & Cart",
             "name" => "sabotage_light_cart"
         ]);
 
         // Recover cards
         $action_recover_pickaxe = Card::create([
             "type" => "action",
+            "text" => "Recover Pickaxe",
             "name" => "recover_pickaxe",
         ]);
         $action_recover_light = Card::create([
             "type" => "action",
+            "text" => "Recover Light",
             "name" => "recover_light",
         ]);
         $action_recover_cart = Card::create([
             "type" => "action",
+            "text" => "Recover Cart",
             "name" => "recover_cart",
         ]);
 
         // Recover combo cards
         $action_recover_pickaxe_light = Card::create([
             "type" => "action",
+            "text" => "Recover Pickaxe & Light",
             "name" => "recover_pickaxe_light",
         ]);
         $action_recover_pickaxe_cart = Card::create([
             "type" => "action",
+            "text" => "Recover Pickaxe & Cart",
             "name" => "recover_pickaxe_cart",
         ]);
         $action_recover_light_cart = Card::create([
             "type" => "action",
+            "text" => "Recover Light & Cart",
             "name" => "recover_light_cart",
         ]);
 
         // Demolish cards
         $action_demolish = Card::create([
             "type" => "action",
+            "text" => "Collapse Tunnel",
             "name" => "demolish",
         ]);
 
         // Enlighten cards
         $action_enlighten = Card::create([
             "type" => "action",
+            "text" => "Enlighten",
             "name" => "enlighten",
         ]);
 
@@ -137,6 +167,11 @@ class CardSeeder extends Seeder
             "type" => "tunnel",
             "name" => "double_top_bottom",
             "open_positions" => ["top", "bottom"],
+        ]);
+        $tunnel_double_six = Card::create([
+            "type" => "tunnel",
+            "name" => "double_left_right",
+            "open_positions" => ["left", "right"],
         ]);
 
         // 3 opening cards

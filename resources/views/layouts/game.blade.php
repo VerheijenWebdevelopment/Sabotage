@@ -20,7 +20,7 @@
         <v-app id="app" class="dark">
             
             <!-- Topnav -->
-            <div id="topnav-wrapper">
+            <!-- <div id="topnav-wrapper">
                 <div id="topnav">
                     <div id="topnav-logo">
                         <a href="{{ route('lobby') }}">
@@ -33,20 +33,13 @@
                         <li><a href="{{ route('logout') }}">Logout</a></li>
                     </ul>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Content -->
             <div id="content-wrapper">
                 @yield("content")
             </div>
             
-            <!-- Footer -->
-            <div id="footer-wrapper">
-                <footer id="footer">
-                    &copy; Copyrighted by Nick Verheijen, and probably some other people as well. 2020 - &infin;
-                </footer>
-            </div>
-
         </v-app>
 
         {{-- Laravel Mix - JS File --}}

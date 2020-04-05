@@ -11,8 +11,21 @@ class Player extends Model
     protected $fillable = [
         "user_id",
         "game_id",
+        "role_id",
         "player_number",
         "score",
+        "hand",
+        "cart_available",
+        "light_available",
+        "pickaxe_available",
+    ];
+    protected $hidden = [
+        "role",
+    ];
+    protected $casts = [
+        "cart_available",
+        "light_available",
+        "pickaxe_available",
     ];
 
     //
@@ -27,5 +40,33 @@ class Player extends Model
     public function game()
     {
         return $this->belongsTo(Game::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    //
+    // Accessors 
+    //
+
+    public function getHasSelectedRoleAttribute()
+    {
+        return !is_null($this->role_id);
+    }
+
+    public function getHandAttribute($value)
+    {
+        return unserialize($value);
+    }
+
+    //
+    // Mutators
+    //
+
+    public function setHandAttribute($value)
+    {
+        $this->attributes["hand"] = serialize($value);
     }
 }
