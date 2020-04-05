@@ -1,33 +1,40 @@
 <template>
     <div id="game-players">
         <!-- Player -->
-        <div class="game-player" v-for="(p, pi) in value" :key="pi" :class="{ you: p.id === player.id }">
+        <div class="game-player" v-for="(p, pi) in value" :key="pi" :class="{ you: p.id === player.id, active: p.id === playerAtPlay.id }">
+            <!-- Online indicator -->
+            <div class="game-player__online-indicator" :class="{ online: isOnline(p) }"></div>
             <!-- Avatar -->
             <div class="game-player__avatar">
-                <!-- Online indicator -->
-                <div class="game-player__online-indicator" :class="{ online: isOnline(p) }"></div>
             </div>
             <!-- Text -->
             <div class="game-player__text">
                 <!-- Player # -->
-                <div class="game-player__number">Player {{ p.player_number }}</div>
+                <!-- <div class="game-player__number">Player {{ p.player_number }}</div> -->
                 <!-- Username -->
                 <div class="game-player__username">{{ p.user.username }}</div>
-                <!-- Score -->
-                <div class="game-player__score">{{ p.score }} goud verzameld</div>
                 <!-- Tools -->
-                <div class="game-player__blocked-tools">
+                <div class="game-player__tools">
                     <!-- Pickaxe -->
-                    <div class="blocked-tool" v-if="!p.pickaxe_available">
-                        Pickaxe blocked
+                    <div class="tool pickaxe" :class="{ available: p.pickaxe_available, unavailable: !p.pickaxe_available }">
+                        <img class="tool-icon" :src="pickaxeIconUrl">
                     </div>
                     <!-- Light -->
-                    <div class="blocked-tool" v-if="!p.light_available">
-                        Light blocked
+                    <div class="tool light" :class="{ available: p.light_available, unavailable: !p.light_available }">
+                        <img class="tool-icon" :src="lightIconUrl">
                     </div>
                     <!-- Cart -->
-                    <div class="blocked-tool" v-if="!p.cart_available">
-                        Cart blocked
+                    <div class="tool cart" :class="{ available: p.cart_available, unavailable: !p.cart_available }">
+                        <img class="tool-icon" :src="cartIconUrl">
+                    </div>
+                </div>
+            </div>
+            <!-- Score -->
+            <div class="game-player__score">
+                <div class="score">
+                    <div class="score-icon" :style="{ backgroundImage: 'url('+goldIconUrl+')' }"></div>
+                    <div class="score-text">
+                        {{ p.score }}
                     </div>
                 </div>
             </div>
@@ -41,10 +48,12 @@
         props: [
             "game",
             "player",
+            "playerAtPlay",
             "value",
             "cartIconUrl",
             "lightIconUrl",
             "pickaxeIconUrl",
+            "goldIconUrl",
         ],
         data: () => ({
             tag: "[game-players]",
@@ -54,10 +63,13 @@
             initialize() {
                 console.log(this.tag+" initializing");
                 console.log(this.tag+" game: ", this.game);
+                console.log(this.tag+" player: ", this.player);
+                console.log(this.tag+" player at play: ", this.playerAtPlay);
                 console.log(this.tag+" value: ", this.value);
                 console.log(this.tag+" cart icon url: ", this.cartIconUrl);
                 console.log(this.tag+" light icon url: ", this.lightIconUrl);
                 console.log(this.tag+" pickaxe icon url: ", this.pickaxeIconUrl);
+                console.log(this.tag+" gold icon url: ", this.goldIconUrl);
                 this.startListening();
             },
             startListening() {
@@ -96,7 +108,7 @@
                     }
                 }
                 return false;
-            }
+            },
         },
         mounted() {
             this.initialize();
@@ -107,16 +119,41 @@
 <style lang="scss">
     #game-players {
         display: flex;
-        flex-direction: row;
+        padding: 30px;
+        box-sizing: border-box;
+        flex-direction: column;
         justify-content: center;
         .game-player {
             display: flex;
-            flex: 0 0 250px;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 0 0 15px 0;
+            position: relative;
             align-items: center;
             flex-direction: row;
+            box-sizing: border-box;
+            background-color: hsl(0, 0%, 2%);
+            &:last-child {
+                margin: 0;
+            }
             &.you {
                 .game-player__avatar {
-                    border: 2px solid #ffd900;
+                    // border: 2px solid #ffd900;
+                }
+            }
+            &.active {
+                border-bottom: 2px solid #ffd900;
+            }
+            .game-player__online-indicator {
+                left: 6px;
+                width: 6px;
+                bottom: 6px;
+                height: 6px;
+                position: absolute;
+                border-radius: 3px;
+                background-color: #a80000;
+                &.online {
+                    background-color: #1ac000;
                 }
             }
             .game-player__avatar {
@@ -124,22 +161,10 @@
                 flex: 0 0 40px;
                 position: relative;
                 border-radius: 20px;
-                border: 2px solid #000;
+                // border: 2px solid #000;
                 background-color: #333;
                 background-repeat: no-repeat;
                 background-position: center center;
-                .game-player__online-indicator {
-                    width: 10px;
-                    height: 10px;
-                    right: -10px;
-                    bottom: -10px;
-                    position: absolute;
-                    border-radius: 5px;
-                    background-color: #a80000;
-                    &.online {
-                        background-color: #1ac000;
-                    }
-                }
             }
             .game-player__text {
                 flex: 1;
@@ -158,25 +183,72 @@
                 }
                 .game-player__tools {
                     display: flex;
+                    margin: 5px 0 0 0;
                     flex-direction: row;
                     .tool {
+                        height: 20px;
+                        display: flex;
+                        flex: 0 0 20px;
+                        border-radius: 2px;
+                        align-items: center;
+                        box-sizing: border-box;
+                        justify-content: center;
+                        margin: 0 10px 0 0;
+                        background-color: hsl(0, 0%, 5%);
+                        &:last-child {
+                            margin: 0;
+                        }
+                        &.pickaxe {
+
+                        }
+                        &.light {
+                            .tool-icon {
+                                width: 16px;
+                                height: 16px;
+                                margin: 4px 2px 0 0;
+                            }
+                        }
+                        &.cart {
+
+                        }
                         &.available {
-                            .tool-image {
-                                background-color: #1ac000;
-                            }
+                            background-color: #0e6600;
                         }
-                        &.blocked {
-                            .tool-image {
-                                background-color: #a80000;
-                            }
+                        &.unavailable {
+                            background-color: #a80000;
                         }
-                        .tool-image {
-                            width: 50px;
-                            height: 50px;
+                        .tool-icon {
+                            width: 20px;
+                            height: 20px;
+                            margin: 5px 0px 0 0;
                             background-size: contain;
                             background-repeat: no-repeat;
                             background-position: center center;
                         }
+                    }
+                }
+            }
+            .game-player__score {
+                display: flex;
+                margin: 0 0 0 15px;
+                align-items: center;
+                justify-content: center;
+                .score {
+                    display: flex;
+                        align-items: center;
+                    // align-items: center;
+                    flex-direction: row;
+                    .score-icon {
+                        width: 40px;
+                        height: 40px;
+                        margin: 7px 0 0 0;
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center center;
+                    }
+                    .score-text {
+                        display: flex;
+                        flex-direction: row;
                     }
                 }
             }

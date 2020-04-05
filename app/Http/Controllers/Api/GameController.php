@@ -13,6 +13,7 @@ use App\Http\Requests\Api\Game\LeaveGameRequest;
 use App\Http\Requests\Api\Game\CreateGameRequest;
 use App\Http\Requests\Api\Game\DeleteGameRequest;
 use App\Http\Requests\Api\Game\PerformActionRequest;
+use App\Http\Requests\Api\Game\SendGameMessageRequest;
 
 class GameController extends Controller
 {
@@ -89,5 +90,12 @@ class GameController extends Controller
         //         "error" => $e->getMessage(),
         //     ]);
         // }
+    }
+
+    public function postSendMessage(SendGameMessageRequest $request)
+    {
+        Games::sendMessageFromRequest($request);
+        
+        return response()->json(["status" => "success"]);
     }
 }

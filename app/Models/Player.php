@@ -21,6 +21,7 @@ class Player extends Model
     ];
     protected $hidden = [
         "role",
+        "hand",
     ];
     protected $casts = [
         "cart_available",
@@ -45,6 +46,11 @@ class Player extends Model
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(GameChatMessage::class);
     }
 
     //

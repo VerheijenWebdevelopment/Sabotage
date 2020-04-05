@@ -52,6 +52,11 @@ class Game extends Model
         return $this->hasMany(Player::class);
     }
 
+    public function messages()
+    {
+        return $this->hasMany(GameChatMessage::class);
+    }
+
     //
     // Accessors
     //

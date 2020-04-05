@@ -63,6 +63,17 @@
                 console.log(this.tag+" send message api endpoint: ", this.sendMessageApiEndpoint);
                 this.startListening();
             },
+            startListening() {
+                // Listen on the chat channel
+                Echo.private('chat')
+                    // Message received
+                    .listen('Chat\\MessageSent', this.onMessageReceived);
+            },
+            onMessageReceived(e) {
+                console.log(this.tag+" received 'Chat\\MessageSent' event", e);
+                // Add message to the list of messages
+                this.messages.push({ user: e.user.username, text: e.message });
+            },
             onClickSend() {
                 console.log(this.tag+" clicked send message button");
                 
@@ -91,21 +102,6 @@
                         console.warn(this.tag+" request failed: ", error);
                     }.bind(this));
                 
-            },
-            startListening() {
-
-                // Listen on the chat channel
-                Echo.private('chat')
-
-                    // Message received
-                    .listen('Chat\\MessageSent', function(e) {
-                        console.log(this.tag+" received 'Chat\\MessageSent' event", e);
-
-                        // Add message to the list of messages
-                        this.messages.push({ user: e.user.username, text: e.message });
-
-                    }.bind(this));
-
             },
         },
         mounted() {

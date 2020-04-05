@@ -1,235 +1,237 @@
 <template>
     <div id="game">
 
-        <!-- Top bar -->
-        <div id="top">
+        <!-- Content -->
+        <div id="game-content">
 
-            <!-- Game info -->
-            <div id="game-info">
-                <!-- Current round -->
-                <div id="game-info__current-round">Round {{ round }}</div>
-                <!-- Current player at play -->
-                <div id="game-info__player-turn" v-if="playerAtPlay">
-                    <div id="my-turn" v-if="myTurn">
-                        It's your turn!
-                    </div>
-                    <div id="not-my-turn" v-if="!myTurn">
-                        It's <span>{{ playerAtPlay.user.username }}</span>'s turn
-                    </div>
-                </div>
-            </div>
+            <!-- Role selection UI -->
+            <div id="role-selection" v-if="mutableGame !== null && phase === 'role_selection'">
 
-            <!-- Player area -->
-            <div id="player-area">
-                <game-players
-                    :game="game"
-                    :player="player"
-                    v-model="mutablePlayers"
-                    :cart-icon-url="cartIconUrl"
-                    :light-icon-url="lightIconUrl"
-                    :pickaxe-icon-url="pickaxeIconUrl">
-                </game-players>
-            </div>
+                <!-- Role assigned -->
+                <div id="role-assigned" v-if="mutablePlayerRole !== null">
 
-        </div>
-
-        <!-- Role selection UI -->
-        <div id="role-selection" v-if="mutableGame !== null && phase === 'role_selection'">
-
-            <!-- Role assigned -->
-            <div id="role-assigned" v-if="mutablePlayerRole !== null">
-
-                <!-- Title -->
-                <h1>Role assigned</h1>
-
-                <!-- Role card -->
-                <div class="role-card no-hover">
-                    <div class="role-card__label">{{ mutablePlayerRole.label }}</div>
-                </div>
-
-                <!-- Please wait text -->
-                <div id="role-selection__text" v-if="playerAtPlay">
-                    {{ playerAtPlay.user.username }} is currently picking a role.
-                </div>
-
-            </div>
-
-            <!-- Role not assigned yet -->
-            <div id="role-not-assigned" v-if="mutablePlayerRole === null">
-
-                <!-- Title -->
-                <h1>Role selection</h1>
-
-                <!-- Please wait on your turn text -->
-                <div id="role-selection__text" v-if="!myTurn && playerAtPlay">
-                    {{ playerAtPlay.user.username }} is currently picking a role.    
-                </div>
-
-                <!-- Available roles -->
-                <div id="available-roles">
                     <!-- Title -->
-                    <h3>Available roles</h3>
-                    <!-- Roles -->
-                    <div id="available-roles__list" v-if="mutableGame.available_roles.length > 0">
-                        <div class="available-role__wrapper" v-for="(role, ri) in mutableGame.available_roles" :key="ri">
-                            <div class="available-role">
-                                <div class="role-name">{{ getRoleLabelById(role.role_id) }}</div>
-                                <div class="role-amount">x{{ role.count }}</div>
+                    <h1>Role assigned</h1>
+
+                    <!-- Role card -->
+                    <div class="role-card no-hover">
+                        <div class="role-card__label">{{ mutablePlayerRole.label }}</div>
+                    </div>
+
+                    <!-- Please wait text -->
+                    <div id="role-selection__text" v-if="playerAtPlay">
+                        {{ playerAtPlay.user.username }} is currently picking a role.
+                    </div>
+
+                </div>
+
+                <!-- Role not assigned yet -->
+                <div id="role-not-assigned" v-if="mutablePlayerRole === null">
+
+                    <!-- Title -->
+                    <h1>Role selection</h1>
+
+                    <!-- Please wait on your turn text -->
+                    <div id="role-selection__text" v-if="!myTurn && playerAtPlay">
+                        {{ playerAtPlay.user.username }} is currently picking a role.    
+                    </div>
+
+                    <!-- Available roles -->
+                    <div id="available-roles">
+                        <!-- Title -->
+                        <h3>Available roles</h3>
+                        <!-- Roles -->
+                        <div id="available-roles__list" v-if="mutableGame.available_roles.length > 0">
+                            <div class="available-role__wrapper" v-for="(role, ri) in mutableGame.available_roles" :key="ri">
+                                <div class="available-role">
+                                    <div class="role-name">{{ getRoleLabelById(role.role_id) }}</div>
+                                    <div class="role-amount">x{{ role.count }}</div>
+                                </div>
                             </div>
                         </div>
+                        <!-- No roles -->
+                        <div id="no-roles-available" v-if="mutableGame.available_roles.length === 0">
+                            No roles available, this shouldn't happen
+                        </div>
                     </div>
-                    <!-- No roles -->
-                    <div id="no-roles-available" v-if="mutableGame.available_roles.length === 0">
-                        No roles available, this shouldn't happen
-                    </div>
-                </div>
 
-                <!-- Select card -->
-                <div id="role-cards" v-if="myTurn && !selectedRoleCard">
-                    <!-- Title -->
-                    <h2>Role cards</h2>
-                    <h3>Please choose one of the available role cards</h3>
-                    <!-- Cards -->
-                    <div id="role-cards__list" v-if="!selectedRoleCard">
-                        <div class="role-card__wrapper" v-for="(n, ni) in mutableGame.num_available_roles" :key="ni">
-                            <div class="role-card" @click="onClickRoleCard(ni)">
-                                <div class="role-card__title">Role card</div>
-                                <div class="role-card__number">#{{ n }}</div>
-                                <div class="role-card__select">
-                                    Select card
+                    <!-- Select card -->
+                    <div id="role-cards" v-if="myTurn && !selectedRoleCard">
+                        <!-- Title -->
+                        <h2>Role cards</h2>
+                        <h3>Please choose one of the available role cards</h3>
+                        <!-- Cards -->
+                        <div id="role-cards__list" v-if="!selectedRoleCard">
+                            <div class="role-card__wrapper" v-for="(n, ni) in mutableGame.num_available_roles" :key="ni">
+                                <div class="role-card" @click="onClickRoleCard(ni)">
+                                    <div class="role-card__title">Role card</div>
+                                    <div class="role-card__number">#{{ n }}</div>
+                                    <div class="role-card__select">
+                                        Select card
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Card selected & loading -->
-                <div id="role-card__selected" v-if="selectedRoleCard && selectRole.loading">
-                    <!-- Title -->
-                    <h2>Role card selected</h2>
-                    <!-- Content -->
-                    <div id="role-card__selected-content">
-                        <!-- Selected card -->
-                        <div id="role-card__selected-card">
-                            <div id="selected-card__title">Role card</div>
-                            <div id="selected-card__number"># {{ selectedRoleCard }}</div>
-                        </div>
-                        <!-- Text -->
-                        <div id="role-card__selected-text">
-                            <div id="selected-text__loading">
-                                <i class="fas fa-spinner fa-spin"></i>
+                    
+                    <!-- Card selected & loading -->
+                    <div id="role-card__selected" v-if="selectedRoleCard && selectRole.loading">
+                        <!-- Title -->
+                        <h2>Role card selected</h2>
+                        <!-- Content -->
+                        <div id="role-card__selected-content">
+                            <!-- Selected card -->
+                            <!-- <div id="role-card__selected-card">
+                                <div id="selected-card__title">Role card</div>
+                                <div id="selected-card__number"># {{ selectedRoleCard }}</div>
+                            </div> -->
+                            <!-- Text -->
+                            <div id="role-card__selected-text">
+                                <div id="selected-text__loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <div id="selected-text__title">Loading</div>
                             </div>
-                            <div id="selected-text__title">Loading</div>
                         </div>
                     </div>
-                </div>
-                
 
+                </div>
 
             </div>
 
+            <!-- Game UI -->
+            <div id="game-ui" v-if="mutableGame !== null && phase === 'main'">
 
-            
-            <!-- Please select a role text -->
-            <!-- <div id="role-selection__text" v-if="myTurn">
-                Please select a card to be assigned your role.
-            </div> -->
+                <!-- Game board -->
+                <div id="board-area">
 
-            
+                    <!-- Game info -->
+                    <div id="game-info">
+                        <!-- Current round -->
+                        <div id="game-info__current-round">Round {{ round }}</div>
+                        <!-- Current player at play -->
+                        <div id="game-info__player-turn" v-if="playerAtPlay">
+                            <div id="my-turn" v-if="myTurn">
+                                It's your turn!
+                            </div>
+                            <div id="not-my-turn" v-if="!myTurn">
+                                It's <span>{{ playerAtPlay.user.username }}</span>'s turn
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Game board -->
+                    <div id="game-board__wrapper">
+                        <game-board
+                            v-model="mutableBoard"
+                            :cards="cards"
+                            @clicked-tile="onClickedBoardTile">
+                        </game-board>
+                    </div>
 
-            <!-- Role assigned -->
-            <div id="assigned-role" v-if="selectedRoleCard && !selectRole.loading && mutablePlayerRole !== null">
-                <!-- Title -->
-                <h2>Role assigned</h2>
-                <!-- Card -->
-                <div id="assigned-role__card">
-                    <div id="assigned-role__card-title">{{ mutablePlayerRole.label }}</div>
                 </div>
+
+                <!-- Action area -->
+                <div id="action-area">
+
+                    <!-- My role -->
+                    <div id="my-role">
+                        <!-- Title -->
+                        <div id="my-role__title">My role</div>
+                        <!-- Role card -->
+                        <div id="my-role__card">
+                            <div id="my-role__card-text">
+                                {{ mutablePlayerRole.label }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My cards -->
+                    <div id="my-hand">
+                        <!-- Title -->
+                        <div id="my-hand__title">My hand</div>
+                        <!-- Cards -->
+                        <div id="my-hand__cards" v-if="mutableHand.length > 0">
+                            <div class="my-hand__card" v-for="(card, ci) in mutableHand" :key="ci" :class="{ selected: card.selected }">
+                                <div class="my-hand__card-image" :style="{ backgroundImage: 'url('+card.data.image_url+')' }" @click="onClickHandCard(ci)"></div>
+                            </div>
+                        </div>
+                        <!-- No cards in your hand -->
+                        <div id="my-hand__no-cards" v-if="mutableHand.length === 0">
+                            No cards in your hand at the moment
+                        </div>
+                    </div>
+
+                    <!-- My actions -->
+                    <div id="my-actions">
+                        <!-- Title -->
+                        <div id="my-actions__title">Actions</div>
+                        <!-- Actions -->
+                        <div id="my-actions__list" v-if="myTurn && selectedHandCards.length === 1">
+                            <!-- Play card -->
+                            <div class="action">
+                                <v-btn block @click="onClickPlayCard" :loading="playCard.loading">
+                                    Play card
+                                </v-btn>
+                            </div>
+                            <!-- Fold card -->
+                            <div class="action">
+                                <v-btn block @click="onClickFoldCard" :loading="foldCard.loading">
+                                    Fold card
+                                </v-btn>
+                            </div>
+                        </div>
+                        <!-- Too many cards selected -->
+                        <div id="my-actions__too-many-cards" v-if="myTurn && selectedHandCards.length > 1">
+                            Too many cards selected
+                        </div>
+                        <!-- No card selected -->
+                        <div id="my-actions__select-card" v-if="myTurn && selectedHandCards.length === 0">
+                            Select a card in your hand to perform an action
+                        </div>
+                        <!-- Wait on your turn -->
+                        <div id="my-actions__wait" v-if="!myTurn">
+                            You can't perform an action until it's your turn.
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Rewards UI -->
+            <div id="rewards-ui" v-if="mutableGame !== null && phase === 'rewards'">
+                Rewards
             </div>
 
         </div>
 
-        <!-- Game UI -->
-        <div id="game-ui" v-if="mutableGame !== null && phase === 'main'">
+        <!-- Sidebar -->
+        <div id="game-sidebar">
 
-            <!-- Game board -->
-            <div id="board-area">
-
-
+            <!-- Players -->
+            <div id="game-players__wrapper">
+                <game-players
+                    :game="game"
+                    :player="player"
+                    :player-at-play="playerAtPlay"
+                    v-model="mutablePlayers"
+                    :cart-icon-url="cartIconUrl"
+                    :light-icon-url="lightIconUrl"
+                    :pickaxe-icon-url="pickaxeIconUrl"
+                    :gold-icon-url="goldIconUrl">
+                </game-players>
             </div>
 
-            <!-- Action area -->
-            <div id="action-area">
-
-                <!-- My role -->
-                <div id="my-role">
-                    <!-- Title -->
-                    <div id="my-role__title">My role</div>
-                    <!-- Role card -->
-                    <div id="my-role__card">
-                        <div id="my-role__card-text">
-                            {{ mutablePlayerRole.label }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- My cards -->
-                <div id="my-hand">
-                    <!-- Title -->
-                    <div id="my-hand__title">My hand</div>
-                    <!-- Cards -->
-                    <div id="my-hand__cards" v-if="mutableHand.length > 0">
-                        <div class="my-hand__card" v-for="(card, ci) in mutableHand" :key="ci" :class="{ selected: card.selected }">
-                            <div class="my-hand__card-image" :style="{ backgroundImage: 'url('+card.data.image_url+')' }" @click="onClickHandCard(ci)"></div>
-                        </div>
-                    </div>
-                    <!-- No cards in your hand -->
-                    <div id="my-hand__no-cards" v-if="mutableHand.length === 0">
-                        No cards in your hand at the moment
-                    </div>
-                </div>
-
-                <!-- My actions -->
-                <div id="my-actions">
-                    <!-- Title -->
-                    <div id="my-actions__title">Actions</div>
-                    <!-- Actions -->
-                    <div id="my-actions__list" v-if="myTurn && selectedHandCards.length === 1">
-                        <!-- Play card -->
-                        <div class="action">
-                            <v-btn block @click="onClickPlayCard" :loading="playCard.loading">
-                                Play card
-                            </v-btn>
-                        </div>
-                        <!-- Fold card -->
-                        <div class="action">
-                            <v-btn block @click="onClickFoldCard" :loading="foldCard.loading">
-                                Fold card
-                            </v-btn>
-                        </div>
-                    </div>
-                    <!-- Too many cards selected -->
-                    <div id="my-actions__too-many-cards" v-if="myTurn && selectedHandCards.length > 1">
-                        Too many cards selected
-                    </div>
-                    <!-- No card selected -->
-                    <div id="my-actions__select-card" v-if="myTurn && selectedHandCards.length === 0">
-                        Select a card in your hand to perform an action
-                    </div>
-                    <!-- Wait on your turn -->
-                    <div id="my-actions__wait" v-if="!myTurn">
-                        You can't perform an action until it's your turn.
-                    </div>
-                </div>
-
+            <!-- Chat -->
+            <div id="game-chat__wrapper">
+                <game-chat
+                    :game="game"
+                    :player="player"
+                    :send-message-api-endpoint="sendMessageApiEndpoint">
+                </game-chat>
             </div>
 
-        </div>
-
-        <!-- Rewards UI -->
-        <div id="rewards-ui" v-if="mutableGame !== null && phase === 'rewards'">
-            Rewards
         </div>
 
     </div>
@@ -244,10 +246,12 @@
             "hand",
             "roles",
             "cards",
+            "sendMessageApiEndpoint",
             "performActionApiEndpoint",
             "cartIconUrl",
             "lightIconUrl",
             "pickaxeIconUrl",
+            "goldIconUrl",
         ],
         data: () => ({
             tag: "[game]",
@@ -260,6 +264,7 @@
             mutablePlayer: null,
             mutablePlayerRole: null,
             mutableHand: [],
+            mutableBoard: null,
             selectRole: {
                 loading: false,
                 selectedCardIndex: null,
@@ -340,7 +345,12 @@
                 console.log(this.tag+" hand: ", this.hand);
                 console.log(this.tag+" roles: ", this.roles);
                 console.log(this.tag+" cards: ", this.cards);
+                console.log(this.tag+" send message api endpoint: ", this.sendMessageApiEndpoint);
                 console.log(this.tag+" perform action api endpoint: ", this.performActionApiEndpoint);
+                console.log(this.tag+" cart icon url: ", this.cartIconUrl);
+                console.log(this.tag+" light icon url: ", this.lightIconUrl);
+                console.log(this.tag+" pickaxe icon url: ", this.pickaxeIconUrl);
+                console.log(this.tag+" gold icon url: ", this.goldIconUrl);
                 // console.log(this.tag+" ");
                 this.initializeData();
                 this.startListening();
@@ -367,6 +377,9 @@
                 if (this.hand !== undefined && this.hand !== null && this.hand && this.hand.length > 0) {
                     this.initializeHand(this.hand);
                 }
+
+                // Make the board mutable
+                this.mutableBoard = this.game.board;
 
                 // Initialize the game's state
                 this.turn = this.game.turn;
@@ -523,6 +536,10 @@
 
 
             },
+            onClickedBoardTile(data) {
+                console.log(this.tag+" clicked board tile: ", data);
+                
+            },
             sendPerformActionRequest(action, data) {
                 return new Promise(function(resolve, reject) {
                     // Compose the payload to send to the API
@@ -587,294 +604,306 @@
         width: 100%;
         height: 100%;
         display: flex;
-        flex-direction: column;
-        #top {
-            width: 100%;
-            padding: 25px;
-            display: flex;
-            position: relative;
-            flex-direction: row;
-            box-sizing: border-box;
-            #game-info {
-                top: 20px;
-                left: 25px;
-                position: absolute;
-                #game-info__current-round {
-                    font-size: 2em;
-                }
-                #game-info__player-turn {
-                    #my-turn {
-                        font-weight: 500;
-                        color: #ffd900;
-                    }
-                    #not-my-turn {
-                        span {
-                            color: #ffd900;
-                            // text-decoration: underline;
-                        }
-                    }
-                }
-            }
-            #player-area {
-                flex: 1;
-            }
-        }
-        #role-selection {
+        flex-direction: row;
+        #game-content {
             flex: 1;
-            padding: 30px;
-            box-sizing: border-box;
-            #role-assigned {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                flex-direction: column;
-                justify-content: center;
-                .role-card {
-                    margin: 15px 0 25px 0;
-                }
-            }
-            #role-not-assigned {
-                width: 100%;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                flex-direction: column;
-                justify-content: center;
-            }
-            h1 {
-                text-align: center;
-            }
-            #role-selection__text {
-                margin: 0 0 30px 0;
-                text-align: center;
-            }
-            #available-roles {
-                margin: 0 0 30px 0;
-                h3 {
-                    font-size: .9em;
-                    text-align: center;
-                    text-transform: uppercase;
-                    color: rgba(255, 255, 255, 0.5);
-                }
-                #available-roles__list {
-                    display: flex;
-                    margin: 0 0 30px 0;
-                    flex-direction: row;
-                    justify-content: center;
-                    .available-role__wrapper {
-                        margin: 0 15px 0 0;
-                        display: inline-block;
-                        &:last-child {
-                            margin: 0;
-                        }
-                        .available-role {
-                            flex: 0;
-                            display: flex;
-                            font-size: .9em;
-                            padding: 3px 8px;
-                            border-radius: 3px;
-                            flex-direction: row;
-                            box-sizing: border-box;
-                            background-color: hsl(0, 0%, 5%);
-                            .role-name {}
-                            .role-amount {
-                                margin: 0 0 0 5px;
-                            }
-                        }
-                    }
-                }
-            }
-            #role-cards {
-                width: 100%;
-                h2 {
-                    margin: 0 0 10px 0;
-                    text-align: center;
-                }
-                h3 {
-                    font-size: 1em;
-                    text-align: center;
-                    color: rgba(255, 255, 255, 0.75);
-                }
-                #role-cards__list {
-                    display: flex;
-                    flex-wrap: wrap;
-                    flex-direction: row;
-                    justify-content: center;
-                    margin: 0 -15px -30px -15px;
-                    .role-card__wrapper {
-                        flex: 0 0 160px;
-                        box-sizing: border-box;
-                        padding: 0 15px 30px 15px;
-                        
-                    }
-                }
-            }
-            #role-card__selected {
-                #role-card__selected-content {
-                    display: flex;
-                    flex-direction: row;
-                    #role-card__selected-card {
-                        display: flex;
-                        padding: 15px;
-                        height: 200px;
-                        color: #000;
-                        flex: 0 0 130px;
-                        margin: 0 30px 0 0;
-                        border-radius: 3px;
-                        position: relative;
-                        align-items: center;
-                        transition: all .3s;
-                        box-sizing: border-box;
-                        flex-direction: column;
-                        justify-content: center;
-                        background-color: rgba(255, 255, 255, 0.75);
-                        #selected-card__title {
-                            left: 0;
-                            top: 15px;
-                            width: 100%;
-                            position: absolute;
-                            text-align: center;
-                        }
-                        #selected-card__number {
-                            font-size: 1.7em;
-                            font-weight: 500;
-                        }
-                    }
-                }
-                #role-card__selected-text {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    #selected-text__loading {
-                        font-size: 2em;
-                    }
-                    #selected-text__title {
-                        margin: 0 0 0 15px;
-                    }
-                }
-            }
-        }
-        #game-ui {
             height: 100%;
             display: flex;
             flex-direction: column;
-            #board-area {
+            #role-selection {
                 flex: 1;
                 padding: 30px;
-                position: relative;
                 box-sizing: border-box;
-            }
-            #action-area {
-                display: flex;
-                padding: 30px;
-                flex: 0 0 250px;
-                flex-direction: row;
-                box-sizing: border-box;
-                background-color: hsl(0, 0%, 2%);
-                #my-role {
-                    flex: 0 0 130px;
-                    margin: 0 30px 0 0;
-                    #my-role__title {
-                        font-weight: 500;
-                        font-size: 1.2em;
-                        margin: 0 0 15px 0;
-                        text-align: center;
-                        text-transform: uppercase;
-                    }
-                    #my-role__card {
-                        width: 130px;
-                        height: 200px;
-                        color: #000000;
-                        border-radius: 3px;
-                        position: relative;
-                        background-color: hsl(0, 0%, 95%);
-                        #my-role__card-text {
-                            left: 0;
-                            bottom: 0;
-                            width: 100%;
-                            padding: 15px 0;
-                            text-align: center;
-                            position: absolute;
-                            box-sizing: border-box;
-                        }
-                    }
-                }
-                #my-hand {
-                    flex: 1;
+                #role-assigned {
+                    width: 100%;
+                    height: 100%;
                     display: flex;
-                    margin: 0 30px 0 0;
+                    align-items: center;
                     flex-direction: column;
                     justify-content: center;
-                    #my-hand__title {
-                        font-weight: 500;
-                        font-size: 1.2em;
-                        margin: 0 0 15px 0;
+                    .role-card {
+                        margin: 15px 0 25px 0;
+                    }
+                }
+                #role-not-assigned {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+                h1 {
+                    text-align: center;
+                }
+                #role-selection__text {
+                    margin: 0 0 30px 0;
+                    text-align: center;
+                }
+                #available-roles {
+                    margin: 0 0 30px 0;
+                    h3 {
+                        font-size: .9em;
                         text-align: center;
                         text-transform: uppercase;
+                        color: rgba(255, 255, 255, 0.5);
                     }
-                    #my-hand__no-cards {
+                    #available-roles__list {
                         display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    #my-hand__cards {
-                        display: flex;
+                        margin: 0 0 30px 0;
                         flex-direction: row;
                         justify-content: center;
-                        .my-hand__card {
+                        .available-role__wrapper {
                             margin: 0 15px 0 0;
-                            &:hover {
-                                cursor: pointer;
-                            }
+                            display: inline-block;
                             &:last-child {
                                 margin: 0;
                             }
-                            &.selected {
-                                .my-hand__card-image {
-                                    border: 2px solid #ffd900;
+                            .available-role {
+                                flex: 0;
+                                display: flex;
+                                font-size: .9em;
+                                padding: 3px 8px;
+                                border-radius: 3px;
+                                flex-direction: row;
+                                box-sizing: border-box;
+                                background-color: hsl(0, 0%, 5%);
+                                .role-name {}
+                                .role-amount {
+                                    margin: 0 0 0 5px;
                                 }
                             }
-                            .my-hand__card-image {
-                                width: 130px;
-                                height: 200px;
-                                border-radius: 3px;
-                                background-size: contain;
-                                background-repeat: no-repeat;
-                                background-position: center center;
-                            }
                         }
                     }
                 }
-                #my-actions {
-                    flex: 0 0 300px;
-                    #my-actions__title {
-                        font-weight: 500;
-                        font-size: 1.2em;
-                        text-align: right;
-                        margin: 0 0 15px 0;
-                        text-transform: uppercase;
+                #role-cards {
+                    width: 100%;
+                    h2 {
+                        margin: 0 0 10px 0;
+                        text-align: center;
                     }
-                    #my-actions__list {
+                    h3 {
+                        font-size: 1em;
+                        text-align: center;
+                        color: rgba(255, 255, 255, 0.75);
+                    }
+                    #role-cards__list {
+                        display: flex;
+                        flex-wrap: wrap;
+                        flex-direction: row;
+                        justify-content: center;
+                        margin: 0 -15px -30px -15px;
+                        .role-card__wrapper {
+                            flex: 0 0 160px;
+                            box-sizing: border-box;
+                            padding: 0 15px 30px 15px;
+                            
+                        }
+                    }
+                }
+                #role-card__selected {
+                    #role-card__selected-content {
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: center;
+                        #role-card__selected-card {
+                            display: flex;
+                            padding: 15px;
+                            height: 200px;
+                            color: #000;
+                            flex: 0 0 130px;
+                            margin: 0 30px 0 0;
+                            border-radius: 3px;
+                            position: relative;
+                            align-items: center;
+                            transition: all .3s;
+                            box-sizing: border-box;
+                            flex-direction: column;
+                            justify-content: center;
+                            background-color: rgba(255, 255, 255, 0.75);
+                            #selected-card__title {
+                                left: 0;
+                                top: 15px;
+                                width: 100%;
+                                position: absolute;
+                                text-align: center;
+                            }
+                            #selected-card__number {
+                                font-size: 1.7em;
+                                font-weight: 500;
+                            }
+                        }
+                    }
+                    #role-card__selected-text {
+                        display: flex;
+                        align-items: center;
+                        flex-direction: column;
+                        justify-content: center;
+                        #selected-text__loading {
+                            font-size: 2em;
+                        }
+                        #selected-text__title {
+                            margin: 10px 0 0 0;
+                        }
+                    }
+                }
+            }
+            #game-ui {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                #board-area {
+                    flex: 1;
+                    position: relative;
+                    #game-info {
+                        top: 20px;
+                        left: 25px;
+                        position: absolute;
+                        #game-info__current-round {
+                            font-size: 2em;
+                        }
+                        #game-info__player-turn {
+                            #my-turn {
+                                font-weight: 500;
+                                color: #ffd900;
+                            }
+                            #not-my-turn {
+                                span {
+                                    color: #ffd900;
+                                    // text-decoration: underline;
+                                }
+                            }
+                        }
+                    }
+                    #game-board__wrapper {
                         width: 100%;
-                        .action {
+                        height: 100%;
+                        position: relative;
+                    }
+                }
+                #action-area {
+                    display: flex;
+                    padding: 30px;
+                    flex: 0 0 250px;
+                    flex-direction: row;
+                    box-sizing: border-box;
+                    background-color: hsl(0, 0%, 2%);
+                    #my-role {
+                        flex: 0 0 130px;
+                        margin: 0 30px 0 0;
+                        #my-role__title {
+                            font-weight: 500;
+                            font-size: 1.2em;
                             margin: 0 0 15px 0;
-                            &:last-child {
-                                margin: 0;
+                            text-align: center;
+                            text-transform: uppercase;
+                        }
+                        #my-role__card {
+                            width: 130px;
+                            height: 200px;
+                            color: #000000;
+                            border-radius: 3px;
+                            position: relative;
+                            background-color: hsl(0, 0%, 95%);
+                            #my-role__card-text {
+                                left: 0;
+                                bottom: 0;
+                                width: 100%;
+                                padding: 15px 0;
+                                text-align: center;
+                                position: absolute;
+                                box-sizing: border-box;
                             }
                         }
                     }
-                    #my-actions__too-many-cards {
-                        text-align: right;
+                    #my-hand {
+                        flex: 1;
+                        display: flex;
+                        margin: 0 30px 0 0;
+                        flex-direction: column;
+                        justify-content: center;
+                        #my-hand__title {
+                            font-weight: 500;
+                            font-size: 1.2em;
+                            margin: 0 0 15px 0;
+                            text-align: center;
+                            text-transform: uppercase;
+                        }
+                        #my-hand__no-cards {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        #my-hand__cards {
+                            display: flex;
+                            flex-direction: row;
+                            justify-content: center;
+                            .my-hand__card {
+                                margin: 0 15px 0 0;
+                                &:hover {
+                                    cursor: pointer;
+                                }
+                                &:last-child {
+                                    margin: 0;
+                                }
+                                &.selected {
+                                    .my-hand__card-image {
+                                        border: 2px solid #ffd900;
+                                    }
+                                }
+                                .my-hand__card-image {
+                                    width: 130px;
+                                    height: 200px;
+                                    border-radius: 3px;
+                                    background-size: contain;
+                                    background-repeat: no-repeat;
+                                    background-position: center center;
+                                }
+                            }
+                        }
                     }
-                    #my-actions__select-card {
-                        text-align: right;
-                    }
-                    #my-actions__wait {
-                        text-align: right;
+                    #my-actions {
+                        flex: 0 0 300px;
+                        #my-actions__title {
+                            font-weight: 500;
+                            font-size: 1.2em;
+                            text-align: right;
+                            margin: 0 0 15px 0;
+                            text-transform: uppercase;
+                        }
+                        #my-actions__list {
+                            width: 100%;
+                            .action {
+                                margin: 0 0 15px 0;
+                                &:last-child {
+                                    margin: 0;
+                                }
+                            }
+                        }
+                        #my-actions__too-many-cards {
+                            text-align: right;
+                        }
+                        #my-actions__select-card {
+                            text-align: right;
+                        }
+                        #my-actions__wait {
+                            text-align: right;
+                        }
                     }
                 }
+            }
+        }
+        #game-sidebar {
+            display: flex;
+            flex: 0 0 350px;
+            flex-direction: column;
+            background-color: hsl(0, 0%, 5%);
+            #game-players__wrapper {
+                flex: 1;
+            }
+            #game-chat__wrapper {
+                flex: 0 0 300px;
             }
         }
     }

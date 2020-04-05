@@ -4,11 +4,13 @@ namespace App\Services;
 
 use Cards;
 use Roles;
+use Board;
 use Players;
 use Exception;
 
 use App\Models\User;
 use App\Models\Game;
+use App\Models\GameChatMessage;
 use App\Models\Player;
 
 use App\Traits\ModelServiceGetters;
@@ -23,12 +25,14 @@ use App\Events\Game\PlayerSelectedRole;
 use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
+use App\Events\Game\GameMessageSent;
 
 use App\Http\Requests\Api\Game\JoinGameRequest;
 use App\Http\Requests\Api\Game\LeaveGameRequest;
 use App\Http\Requests\Api\Game\CreateGameRequest;
 use App\Http\Requests\Api\Game\DeleteGameRequest;
 use App\Http\Requests\Api\Game\StartGameRequest;
+use App\Http\Requests\Api\Game\SendGameMessageRequest;
 
 class GameService implements ModelServiceContract
 {
@@ -287,6 +291,23 @@ class GameService implements ModelServiceContract
     //
     // Game operations
     //
+
+    public function sendMessageFromRequest(SendGameMessageRequest $request)
+    {   
+        $game = $this->find($request->game_id);
+
+        $player = Players::getActivePlayer();
+
+        $message = GameChatMessage::create([
+            "game_id" => $request->game_id,
+            "player_id" => $player->id,
+            "message" => $request->message
+        ]);
+
+        broadcast(new GameMessageSent($message))->toOthers();
+
+        return $message;
+    }
 
     public function performAction(Game $game, Player $player, string $action, string $data = null)
     {

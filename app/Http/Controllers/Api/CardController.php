@@ -36,8 +36,30 @@ class CardController extends Controller
         // If we managed to find the card
         else
         {
+            // If we're dealing with a start card
+            if ($card->type == "start")
+            {
+                $image->text("Start", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffffff");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
+            // If we're dealing with a gold location card
+            elseif ($card->type == "gold_location")
+            {
+                $image->text("Gold Location", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffffff");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
             // If we're dealing with an action card
-            if ($card->type == "action")
+            elseif ($card->type == "action")
             {
                 $image = $this->addHeaderText($image, "Action Card");
                 $image = $this->addCardLabelText($image, $card->text);
