@@ -13,26 +13,24 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class PlayerToolBlocked implements ShouldBroadcast
+class PlayerCollapsedTunnel implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $game;
     public $player;
-    public $target_player;
-    public $tool;
+    public $coordinates;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Game $game, Player $player, Player $targetPlayer, string $tool)
+    public function __construct(Game $game, Player $player, array $coordinates)
     {
         $this->game = $game;
         $this->player = $player;
-        $this->target_player = $targetPlayer;
-        $this->tool = $tool;
+        $this->coordinates = $coordinates;
     }
 
     /**

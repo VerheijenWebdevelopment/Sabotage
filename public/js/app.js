@@ -2926,8 +2926,324 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["game", "player", "playerRole", "hand", "roles", "cards", "sendMessageApiEndpoint", "performActionApiEndpoint", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl", "goldIconUrl"],
+  props: ["game", "player", "playerRole", "hand", "roles", "cards", "sendMessageApiEndpoint", "performActionApiEndpoint", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl", "goldIconUrl", "goldBarsIconUrl", "coalIconUrl"],
   data: function data() {
     return {
       tag: "[game]",
@@ -2945,24 +3261,63 @@ __webpack_require__.r(__webpack_exports__);
         loading: false,
         selectedCardIndex: null
       },
-      foldCard: {
-        loading: false
+      dialogs: {
+        view_card: {
+          show: false,
+          index: null,
+          inverted: false
+        },
+        fold_card: {
+          show: false,
+          index: null,
+          loading: false
+        },
+        confirm_sabotage_player: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          tool: null
+        },
+        confirm_recover_player: {
+          show: false,
+          player_id: null,
+          tool: null
+        },
+        confirm_gold_location: {
+          show: false,
+          loading: false,
+          card_index: null,
+          gold_location: null
+        },
+        confirm_collapse_tunnel: {
+          show: false,
+          loading: false,
+          card_index: null,
+          tunnel_coordinates: null
+        },
+        confirm_place_tunnel: {
+          show: false,
+          loading: false,
+          card_index: null,
+          tunnel_coordinates: null,
+          inverted: false,
+          preview: []
+        },
+        reveal_gold_location: {
+          show: false,
+          gold_location: null,
+          contains_gold: false
+        }
       },
-      playCard: {
-        loading: false,
-        dialogs: {
-          selectPlayer: {
-            show: false,
-            selectedPlayer: null
-          },
-          selectGoldLocation: {
-            show: false,
-            selectedLocation: null
-          },
-          placeTunnel: {
-            show: false,
-            selectedPosition: null
-          }
+      modes: {
+        select_gold_location: {
+          enabled: false
+        },
+        select_tunnel: {
+          enable: false
+        },
+        select_tile: {
+          enable: false
         }
       }
     };
@@ -3017,9 +3372,48 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
+    },
+    viewCardDialogCard: function viewCardDialogCard() {
+      return this.mutableHand[this.dialogs.view_card.index];
+    },
+    foldCardDialogCard: function foldCardDialogCard() {
+      return this.mutableHand[this.dialogs.fold_card.index];
+    },
+    revealGoldLocationText: function revealGoldLocationText() {
+      var out = "You have selected ";
+
+      if (this.dialogs.confirm_gold_location.gold_location === 1) {
+        out += "the first";
+      } else if (this.dialogs.confirm_gold_location.gold_location === 2) {
+        out += "the second";
+      } else {
+        out += "the third";
+      }
+
+      out += " gold location.";
+      return out;
+    },
+    showRecoverToolSelection: function showRecoverToolSelection() {
+      var recoverCard = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+
+      if (recoverCard) {
+        return recoverCard.name === "recover_pickaxe_light" || recoverCard.name === "recover_pickaxe_axe" || recoverCard.name === "recover_light_cart";
+      }
+
+      return false;
+    },
+    showSabotageToolSelection: function showSabotageToolSelection() {
+      var recoverCard = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+
+      if (recoverCard) {
+        return recoverCard.name === "sabotage_pickaxe_light" || recoverCard.name === "sabotage_pickaxe_axe" || recoverCard.name === "sabotage_light_cart";
+      }
+
+      return false;
     }
   },
   methods: {
+    // Init
     initialize: function initialize() {
       console.log(this.tag + " initializing");
       console.log(this.tag + " game: ", this.game);
@@ -3033,7 +3427,9 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " cart icon url: ", this.cartIconUrl);
       console.log(this.tag + " light icon url: ", this.lightIconUrl);
       console.log(this.tag + " pickaxe icon url: ", this.pickaxeIconUrl);
-      console.log(this.tag + " gold icon url: ", this.goldIconUrl); // console.log(this.tag+" ");
+      console.log(this.tag + " gold icon url: ", this.goldIconUrl);
+      console.log(this.tag + " gold bars icon url: ", this.goldBarsIconUrl);
+      console.log(this.tag + " coal icon url: ", this.coalIconUrl); // console.log(this.tag+" ");
 
       this.initializeData();
       this.startListening();
@@ -3072,17 +3468,14 @@ __webpack_require__.r(__webpack_exports__);
         var card = this.getCardById(hand[i]);
 
         if (card) {
-          var cardEntry = {
-            data: card,
-            selected: false
-          };
-          this.mutableHand.push(cardEntry);
+          this.mutableHand.push(card);
         }
       }
     },
+    // Events
     startListening: function startListening() {
       // Connect to the game's channel
-      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
     },
     onPlayerSelectedRole: function onPlayerSelectedRole(e) {
       console.log(this.tag + "[event] player selected role", e); // Add player's ID to the list of players who have selected a role
@@ -3096,10 +3489,91 @@ __webpack_require__.r(__webpack_exports__);
         }.bind(this), 2000);
       }
     },
+    onPlayerToolBlocked: function onPlayerToolBlocked(e) {
+      console.log(this.tag + "[event] player tool blocked", e); // Update the target player's tool's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          if (e.tool === "pickaxe") {
+            this.mutablePlayers[i].pickaxe_available = 0;
+          } else if (e.tool === "light") {
+            this.mutablePlayers[i].light_available = 0;
+          } else if (e.tool === "cart") {
+            this.mutablePlayers[i].cart_available = 0;
+          }
+
+          break;
+        }
+      } // Notify the player what just happened
+
+
+      var player = this.getPlayerById(e.player.id);
+      var targetPlayer = this.getPlayerById(e.target_player.id);
+      this.$toasted.show(player.user.username + " blocked " + targetPlayer.user.username + "'s " + e.tool, {
+        duration: 5000
+      });
+    },
+    onPlayerToolRecovered: function onPlayerToolRecovered(e) {
+      console.log(this.tag + "[event] player tool recovered", e); // Update the target player's tool's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          if (e.tool === "pickaxe") {
+            this.mutablePlayers[i].pickaxe_available = 1;
+          } else if (e.tool === "light") {
+            this.mutablePlayers[i].light_available = 1;
+          } else if (e.tool === "cart") {
+            this.mutablePlayers[i].cart_available = 1;
+          }
+
+          break;
+        }
+      } // Notify the player what just happened
+
+
+      var player = this.getPlayerById(e.player.id);
+      var targetPlayer = this.getPlayerById(e.target_player.id);
+      this.$toasted.show(player.user.username + " recovered " + targetPlayer.user.username + "'s " + e.tool, {
+        duration: 5000
+      });
+    },
+    onPlayerCheckedGoldLocation: function onPlayerCheckedGoldLocation(e) {
+      console.log(this.tag + "[event] player checked gold location", e); // Notify the player what just happened
+
+      var player = this.getPlayerById(e.player.id);
+      this.$toasted.show(player.user.username + " has checked gold location number " + e.gold_location, {
+        duration: 5000
+      });
+    },
+    onPlayerPlacedTunnel: function onPlayerPlacedTunnel(e) {
+      console.log(this.tag + "[event] player placed tunnel", e); // Update the board
+
+      this.mutableBoard[e.coordinates.y][e.coordinates.x] = {
+        card_id: e.card.id,
+        inverted: e.inverted
+      };
+      this.$forceUpdate(); // Notify user wassup
+
+      var player = this.getPlayerById(e.player.id);
+      this.$toasted.show(player.user.username + " has placed a tunnel on coordinates " + e.coordinates.x + ":" + e.coordinates.y, {
+        duration: 3000
+      });
+    },
+    onPlayerCollapsedTunnel: function onPlayerCollapsedTunnel(e) {
+      console.log(this.tag + "[event] player collapsed tunnel", e); // Update the board
+
+      this.mutableBoard[e.coordinates.y][e.coordinates.x] = null; // Notify user wassup
+
+      var player = this.getPlayerById(e.player.id);
+      this.$toasted.show(player.user.username + " has placed a tunnel on coordinates " + e.coordinates.x + ":" + e.coordinates.y, {
+        duration: 3000
+      });
+    },
     onTurnEnded: function onTurnEnded(e) {
       console.log(this.tag + "[event] turn ended", e); // Set the number of the player who's turn it is currently
 
       this.playersTurn = e.game.player_turn;
+      this.mutableGame.num_cards_in_deck = e.game.num_cards_in_deck;
     },
     onRoundEnded: function onRoundEnded(e) {
       console.log(this.tag + "[event] round ended", e);
@@ -3107,6 +3581,7 @@ __webpack_require__.r(__webpack_exports__);
     onGameEnded: function onGameEnded(e) {
       console.log(this.tag + "[event] game ended", e);
     },
+    // Role selection
     onClickRoleCard: function onClickRoleCard(index) {
       console.log(this.tag + " clicked role card", index); // Save the index of the selected role card
 
@@ -3139,46 +3614,489 @@ __webpack_require__.r(__webpack_exports__);
         console.warn(this.tag + " failed to select role!", error);
       }.bind(this));
     },
+    // Hand cards
     onClickHandCard: function onClickHandCard(index) {
-      console.log(this.tag + " clicked card in hand", index);
-      this.mutableHand[index].selected = !this.mutableHand[index].selected;
+      console.log(this.tag + " clicked card in hand", index); // this.mutableHand[index].selected = !this.mutableHand[index].selected;
+
+      this.dialogs.view_card.index = index;
+      this.dialogs.view_card.show = true;
+    },
+    onClickInvertCard: function onClickInvertCard() {
+      console.log(this.tag + " clicked invert card button");
+      this.dialogs.view_card.inverted = !this.dialogs.view_card.inverted;
     },
     onClickFoldCard: function onClickFoldCard() {
-      console.log(this.tag + " clicked fold card button"); // Start loading
+      console.log(this.tag + " clicked fold card button");
+      this.dialogs.fold_card.index = this.dialogs.view_card.index;
+      this.dialogs.view_card.show = false;
+      this.dialogs.fold_card.show = true;
+    },
+    onClickCancelFold: function onClickCancelFold() {
+      console.log(this.tag + " clicked cancel fold button");
+      this.dialogs.fold_card.show = false;
+      this.dialogs.view_card.show = true;
+    },
+    onClickConfirmFold: function onClickConfirmFold() {
+      console.log(this.tag + " clicked confirm fold button"); // Start loading
 
-      this.foldCard.loading = true; // Perform the action
+      this.dialogs.fold_card.loading = true; // Perform the action
 
       this.sendPerformActionRequest("fold_card", {
         index: this.selectedHandCardIndex
       }) // Action succeeded
       .then(function (response) {
-        console.log(this.tag + " card fold succeeded", response); // Remove the card from the user's hand
+        // Remove the card from the user's hand
+        this.mutableHand.splice(this.selectedHandCardIndex, 1); // Add the drawn card to the user's hand
 
-        this.mutableHand.splice(this.selectedHandCardIndex, 1);
-        var cardEntry = {
-          data: response.data.new_card,
-          selected: false
-        };
-        console.log("card entry: ", cardEntry);
-        console.log(this.mutableHand.length); // Add the drawn card to the user's hand
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Stop loading
 
-        this.mutableHand.push(cardEntry);
-        console.log(this.mutableHand.length); // Stop loading
+        this.dialogs.fold_card.loading = false; // Hide the dialog
 
-        this.foldCard.loading = false;
+        this.dialogs.fold_card.show = false;
       }.bind(this)) // Action failed
       ["catch"](function (error) {
         console.warn(this.tag + " failed to fold card!", error); // Stop loading
 
-        this.foldCard.loading = false;
+        this.dialogs.fold_card.loading = false;
       }.bind(this));
     },
     onClickPlayCard: function onClickPlayCard() {
-      console.log(this.tag + " clicked play card button");
+      console.log(this.tag + " clicked play card button"); // Grab the card we want to play
+
+      var card = this.mutableHand[this.dialogs.view_card.index]; // If it's a tunnel card
+
+      if (card.type === "tunnel") {
+        console.log(this.tag + " playing a tunnel card");
+        this.modes.select_tile.enabled = true;
+        this.dialogs.view_card.show = false; // If it's an action card
+      } else {
+        // If it's the enlighten card
+        if (card.name === "enlighten") {
+          console.log(this.tag + " playing an enlighten card");
+          this.modes.select_gold_location.enabled = true;
+          this.dialogs.view_card.show = false;
+        } // If it's the collapse card
+        else if (card.name === "collapse") {
+            console.log(this.tag + " playing a collapse card");
+            this.modes.select_tunnel.enabled = true;
+            this.dialogs.view_card.show = false;
+          } // If it's a sabotage card
+          else if (card.name.includes("sabotage")) {
+              console.log(this.tag + " playing a sabotage card");
+              this.dialogs.confirm_sabotage_player.card_index = this.dialogs.view_card.index;
+              this.dialogs.view_card.show = false;
+              this.dialogs.confirm_sabotage_player.show = true;
+            } // If it's a recover card
+            else if (card.name.includes("recover")) {
+                console.log(this.tag + " playing a recover card");
+                this.dialogs.confirm_recover_player.card_index = this.dialogs.view_card.index;
+                this.dialogs.view_card.show = false;
+                this.dialogs.confirm_recover_player.show = true;
+              }
+      }
     },
+    // Confirm enlighten gold location dialog
+    onClickCancelEnlighten: function onClickCancelEnlighten() {
+      console.log(this.tag + " clicked cancel enlighten button");
+      this.dialogs.confirm_gold_location.show = false;
+    },
+    onClickRetryEnlighten: function onClickRetryEnlighten() {
+      console.log(this.tag + " clicked retry enlighten button");
+      this.dialogs.confirm_gold_location.show = false;
+      this.modes.select_gold_location.enabled = true;
+    },
+    onClickConfirmEnlighten: function onClickConfirmEnlighten() {
+      console.log(this.tag + " clicked confirm enlighten button"); // Set loading to true
+
+      this.dialogs.confirm_gold_location.loading = true; // Compose data for the API request
+
+      var data = {
+        index: this.dialogs.confirm_gold_location.card_index,
+        gold_location: this.dialogs.confirm_gold_location.gold_location
+      }; // Send API request to play the sabotage card
+
+      this.sendPerformActionRequest("play_card", data) // When request succeeds
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.confirm_gold_location.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Close this dialog
+
+        this.dialogs.confirm_gold_location.loading = false;
+        this.dialogs.confirm_gold_location.show = false; // Open up the gold location reveal dialog
+
+        this.dialogs.reveal_gold_location.gold_location = this.dialogs.confirm_gold_location.gold_location;
+        this.dialogs.reveal_gold_location.contains_gold = response.data.contains_gold;
+        this.dialogs.reveal_gold_location.show = true;
+      }.bind(this)) // When request fails
+      ["catch"](function (error) {
+        console.warn(this.tag + " failed to play enlighten card", error);
+        this.dialogs.confirm_gold_location.loading = false;
+      }.bind(this));
+    },
+    // Confirm sabotage & recover dialog
+    onClickSelectPlayer: function onClickSelectPlayer(dialog, playerId) {
+      console.log(this.tag + " clicked player option");
+      console.log(this.tag + " dialog: ", dialog);
+      console.log(this.tag + " player id: ", playerId);
+
+      if (dialog === "recover") {
+        if (this.dialogs.confirm_recover_player.player_id === playerId) {
+          this.dialogs.confirm_recover_player.player_id = null;
+        } else {
+          this.dialogs.confirm_recover_player.player_id = playerId;
+        }
+      } else if (dialog === "sabotage") {
+        if (this.dialogs.confirm_sabotage_player.player_id === playerId) {
+          this.dialogs.confirm_sabotage_player.player_id = null;
+        } else {
+          this.dialogs.confirm_sabotage_player.player_id = playerId;
+        }
+      }
+    },
+    onClickSelectTool: function onClickSelectTool(dialog, tool) {},
+    // Confirm sabotage player dialog
+    onClickCancelSabotagePlayer: function onClickCancelSabotagePlayer() {
+      console.log(this.tag + " clicked cancel sabotage player");
+      this.dialogs.confirm_sabotage_player.show = false;
+      this.dialogs.view_card.show = true;
+    },
+    onClickConfirmSabotagePlayer: function onClickConfirmSabotagePlayer() {
+      console.log(this.tag + " clicked confirm sabotage player"); // Set loading to true
+
+      this.dialogs.confirm_sabotage_player.loading = true; // Compose data for the API request
+
+      var data = {
+        index: this.dialogs.confirm_sabotage_player.card_index,
+        player_id: this.dialogs.confirm_sabotage_player.player_id,
+        tool: null
+      }; // Grab the card we're about to play
+
+      var card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+      console.log(this.tag + " card: ", card); // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
+
+      var tool = null;
+
+      if (card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_pickaxe_light" || card.name === "sabotage_light_cart") {
+        tool = this.dialogs.confirm_sabotage_player.tool;
+        data.tool = tool;
+      } else {
+        if (card.name === "sabotage_light") {
+          tool = "light";
+        } else if (card.name === "sabotage_cart") {
+          tool = "cart";
+        } else {
+          tool = "pickaxe";
+        }
+      }
+
+      console.log(this.tag + " tool: ", tool); // Send API request to play the sabotage card
+
+      this.sendPerformActionRequest("play_card", data) // When request succeeds
+      .then(function (response) {
+        // Update the player's hand
+        this.mutableHand.splice(this.dialogs.confirm_sabotage_player.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Update the target player
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            if (tool === "pickaxe") {
+              this.mutablePlayers[i].pickaxe_available = false;
+            } else if (tool === "light") {
+              this.mutablePlayers[i].light_available = false;
+            } else {
+              this.mutablePlayers[i].cart_available = false;
+            }
+
+            break;
+          }
+        } // Hide the dialog
+
+
+        this.dialogs.confirm_sabotage_player.loading = false;
+        this.dialogs.confirm_sabotage_player.show = false;
+      }.bind(this)) // When request fails
+      ["catch"](function (error) {
+        console.warn(this.tag + " failed to play sabotage card", error);
+        this.dialogs.confirm_sabotage_player.loading = false;
+      }.bind(this));
+    },
+    // Confirm recover player dialog
+    onClickCancelRecoverPlayer: function onClickCancelRecoverPlayer() {
+      console.log(this.tag + " clicked cancel recover player");
+      this.dialogs.confirm_recover_player.show = false;
+      this.dialogs.view_card.show = true;
+    },
+    onClickConfirmRecoverPlayer: function onClickConfirmRecoverPlayer() {
+      console.log(this.tag + " clicked confirm recover player"); // Set loading to true
+
+      this.dialogs.confirm_recover_player.loading = true; // Compose data for the API request
+
+      var data = {
+        index: this.dialogs.confirm_recover_player.card_index,
+        player_id: this.dialogs.confirm_recover_player.player_id
+      }; // Grab the card we're about to play
+
+      var card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+      console.log("card id: ", this.dialogs.confirm_recover_player.card_index);
+      console.log("card: ", card); // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
+
+      var tool = "pickaxe";
+
+      if (card.name === "recover_pickaxe_cart" || card.name === "recover_pickaxe_light" || card.name === "recover_light_cart") {
+        var _tool = this.dialogs.confirm_recover_player.tool;
+        data.tool = _tool;
+      } else {
+        if (card.name === "recover_light") {
+          tool = "light";
+        } else if (card.name === "recover_cart") {
+          tool = "cart";
+        }
+      } // Send API request to play the sabotage card
+
+
+      this.sendPerformActionRequest("play_card", data) // When request succeeds
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.confirm_recover_player.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Update target player's tool's status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            if (tool === "pickaxe") {
+              this.mutablePlayers[i].pickaxe_available = true;
+            } else if (tool === "light") {
+              this.mutablePlayers[i].light_available = true;
+            } else {
+              this.mutablePlayers[i].cart_available = true;
+            }
+
+            break;
+          }
+        } // Hide the dialog
+
+
+        this.dialogs.confirm_recover_player.loading = false;
+        this.dialogs.confirm_recover_player.show = false;
+      }.bind(this)) // When request fails
+      ["catch"](function (error) {
+        console.warn(this.tag + " failed to play sabotage card", error);
+        this.dialogs.confirm_recover_player.loading = false;
+      }.bind(this));
+    },
+    // Confirm collapse tunnel dialog
+    onClickCancelCollapseTunnel: function onClickCancelCollapseTunnel() {
+      console.log(this.tag + " clicked cancel collapse tunnel");
+      this.dialogs.confirm_collapse_tunnel.show = false;
+    },
+    onClickConfirmCollapseTunnel: function onClickConfirmCollapseTunnel() {
+      console.log(this.tag + " clicked confirm collapse tunnel");
+    },
+    // Confirm place tunnel dialog
+    onClickCancelPlaceTunnel: function onClickCancelPlaceTunnel() {
+      console.log(this.tag + " clicked cancel place tunnel");
+      this.dialogs.confirm_place_tunnel.show = false;
+      this.dialogs.view_card.show = true; // because maybe we just want to invert the tunnel card before retrying
+    },
+    onClickConfirmPlaceTunnel: function onClickConfirmPlaceTunnel() {
+      console.log(this.tag + " clicked confirm place tunnel");
+      this.dialogs.confirm_place_tunnel.loading = true; // Compose data to send along with the API request
+
+      var data = {
+        index: this.dialogs.confirm_place_tunnel.card_index,
+        target_coordinates: this.dialogs.confirm_place_tunnel.tunnel_coordinates,
+        inverted: this.dialogs.confirm_place_tunnel.inverted
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data).then(function (response) {
+        console.log(this.tag + " operation succeeded"); // Grab card from player's hand
+
+        var card = this.mutableHand[this.dialogs.confirm_place_tunnel.card_index];
+        console.log(this.tag + " card: ", card); // Update the game board
+
+        var coords = this.dialogs.confirm_place_tunnel.tunnel_coordinates;
+        console.log(this.tag + " coords: ", coords);
+        this.mutableBoard[coords.y][coords.x] = {
+          card_id: card.id,
+          inverted: this.dialogs.confirm_place_tunnel.inverted
+        };
+        console.log(this.tag + " tile: ", this.mutableBoard[coords.y][coords.x]);
+        this.$forceUpdate(); // Update the player's hand
+
+        this.mutableHand.splice(this.dialogs.confirm_place_tunnel.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Hide the dialog
+
+        this.dialogs.confirm_place_tunnel.loading = false;
+        this.dialogs.confirm_place_tunnel.show = false;
+      }.bind(this))["catch"](function (error) {
+        console.warn(this.tag + " failed to play tunnel card", error);
+        this.dialogs.confirm_place_tunnel.loading = false;
+        this.$toasted.show("Failed to play tunnel card, error: " + error, {
+          duration: 3000
+        });
+      }.bind(this));
+    },
+    // Game board
     onClickedBoardTile: function onClickedBoardTile(data) {
-      console.log(this.tag + " clicked board tile: ", data);
+      console.log(this.tag + " clicked board tile: ", data); // If we're in gold location selection mode
+
+      if (this.modes.select_gold_location.enabled) {
+        // Determine the ID of the start card
+        var startCardId = this.getCardIdByName("start");
+
+        if (startCardId) {
+          // Determine the coordinates of the start card
+          var startCoordinates = null;
+
+          for (var y = 0; y < this.mutableBoard.length; y++) {
+            if (startCoordinates !== null) break;
+
+            for (var x = 0; x < this.mutableBoard[y].length; x++) {
+              if (this.mutableBoard[y][x] !== null && this.mutableBoard[y][x].card_id === startCardId) {
+                startCoordinates = {
+                  x: x,
+                  y: y
+                };
+                break;
+              }
+            }
+          } // Use the start card coordinates to determine the gold location card's coordinates
+
+
+          var goldLocationOne = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y - 2
+          };
+          var goldLocationTwo = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y
+          };
+          var goldLocationThree = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y + 2
+          }; // If the first gold location was selected
+
+          if (data.rowIndex === goldLocationOne.y && data.columnIndex === goldLocationOne.x) {
+            this.modes.select_gold_location.enabled = false;
+            this.dialogs.confirm_gold_location.gold_location = 1;
+            this.dialogs.confirm_gold_location.card_index = this.dialogs.view_card.index;
+            this.dialogs.confirm_gold_location.show = true;
+          } // If the second gold location was selected
+          else if (data.rowIndex === goldLocationTwo.y && data.columnIndex === goldLocationTwo.x) {
+              this.modes.select_gold_location.enabled = false;
+              this.dialogs.confirm_gold_location.gold_location = 2;
+              this.dialogs.confirm_gold_location.card_index = this.dialogs.view_card.index;
+              this.dialogs.confirm_gold_location.show = true;
+            } // If the third gold location was selected
+            else if (data.rowIndex === goldLocationThree.y && data.columnIndex === goldLocationThree.x) {
+                this.modes.select_gold_location.enabled = false;
+                this.dialogs.confirm_gold_location.gold_location = 3;
+                this.dialogs.confirm_gold_location.card_index = this.dialogs.view_card.index;
+                this.dialogs.confirm_gold_location.show = true;
+              }
+        }
+      } // If we're in collapse tunnel mode
+      else if (this.modes.select_tunnel.enabled) {
+          console.log(this.tag + " in collapse tunnel mode"); // If the clicked tile contains a card
+
+          if (this.mutableBoard[data.rowIndex][data.columnIndex] !== null) {
+            // Grab the card that's on the clicked tile
+            var cardOnTile = this.getCardById(this.mutableBoard[data.rowIndex][data.columnIndex].card_id);
+
+            if (cardOnTile) {
+              // If the card is a tunnel card
+              if (cardOnTile.type === "tunnel") {
+                this.modes.select_tunnel.enabled = false;
+                this.dialogs.confirm_collapse_tunnel.tunnel_coordinates = {
+                  x: data.columnIndex,
+                  y: data.rowIndex
+                };
+                this.dialogs.confirm_collapse_tunnel.card_index = this.dialogs.view_card.index;
+                this.dialogs.confirm_collapse_tunnel.show = true;
+              } else {
+                this.$toasted.show("The card you selected is not a tunnel card", {
+                  duration: 3000
+                });
+              }
+            } else {
+              this.$toasted.show("Failed to retrieve the card on the clicked tile", {
+                duration: 3000
+              });
+            }
+          } else {
+            this.$toasted.show("No tunnel card placed on the clicked tile", {
+              duration: 3000
+            });
+          }
+        } // If we're in place tunnel mode
+        else if (this.modes.select_tile.enabled) {
+            console.log(this.tag + " in place tunnel mode"); // Determine what card is placed on the selected tile
+
+            if (this.mutableBoard[data.rowIndex][data.columnIndex] === null) {
+              console.log(this.tag + " tile is free"); // Make sure the tile is available
+
+              if (this.tileIsAvailable(data.rowIndex, data.columnIndex)) {
+                console.log(this.tag + " tile is available"); // Grab the card we want to place
+
+                var card = this.mutableHand[this.dialogs.view_card.index];
+                console.log(this.tag + " card we want to place: ", card); // Make sure the card can be placed on the selected tile
+
+                if (this.cardCanBePlacedOnTile(data.rowIndex, data.columnIndex, card)) {
+                  console.log(this.tag + " card can be placed on the given tile!");
+                  this.modes.select_tile.enabled = false;
+                  this.dialogs.confirm_place_tunnel.tunnel_coordinates = {
+                    x: data.columnIndex,
+                    y: data.rowIndex
+                  };
+                  this.dialogs.confirm_place_tunnel.card_index = this.dialogs.view_card.index;
+                  this.dialogs.confirm_place_tunnel.inverted = this.dialogs.view_card.inverted;
+                  this.dialogs.confirm_place_tunnel.preview = this.generatePlaceTunnelPreview(data, card, this.dialogs.view_card.inverted);
+                  this.dialogs.confirm_place_tunnel.show = true;
+                } else {
+                  this.$toasted.show("Card does not fit on the specified tile", {
+                    duration: 3000
+                  });
+                }
+              } else {
+                this.$toasted.show("Selected tile has no connecting tunnels around it", {
+                  duration: 3000
+                });
+              } // If the card is unavailable
+
+            } else {
+              this.$toasted.show("Selected tile already has a card", {
+                duration: 3000
+              });
+            }
+          }
     },
+    generatePlaceTunnelPreview: function generatePlaceTunnelPreview(coordinates, card, inverted) {
+      var out = []; // Determine the grid bounds
+
+      var startRowIndex = coordinates.rowIndex - 1;
+      var endRowIndex = coordinates.rowIndex + 1;
+      var startColumnIndex = coordinates.columnIndex - 1;
+      var endColumnIndex = coordinates.columnIndex + 1; // Generate the preview grid
+
+      for (var ri = startRowIndex; ri <= endRowIndex; ri++) {
+        var row = [];
+
+        for (var ci = startColumnIndex; ci <= endColumnIndex; ci++) {
+          if (ci === coordinates.columnIndex && ri === coordinates.rowIndex) {
+            row.push({
+              card_id: card.id,
+              inverted: inverted
+            });
+          } else {
+            row.push(this.mutableBoard[ri][ci]);
+          }
+        }
+
+        out.push(row);
+      }
+
+      return out;
+    },
+    // General
     sendPerformActionRequest: function sendPerformActionRequest(action, data) {
       return new Promise(function (resolve, reject) {
         // Compose the payload to send to the API
@@ -3229,6 +4147,272 @@ __webpack_require__.r(__webpack_exports__);
       for (var i = 0; i < this.cards.length; i++) {
         if (this.cards[i].id === id) {
           return this.cards[i];
+        }
+      }
+
+      return false;
+    },
+    getCardIdByName: function getCardIdByName(name) {
+      for (var i = 0; i < this.cards.length; i++) {
+        if (this.cards[i].name === name) {
+          return this.cards[i].id;
+        }
+      }
+
+      return false;
+    },
+    getCardImageById: function getCardImageById(id) {
+      var card = this.getCardById(id);
+
+      if (card) {
+        return card.image_url;
+      }
+
+      return "";
+    },
+    tileIsAvailable: function tileIsAvailable(rowIndex, columnIndex) {
+      console.log(this.tag + " checking if tile is available (row index: " + rowIndex + ", colum index: " + columnIndex + ")"); // Check tile above
+
+      var tileAbove = [rowIndex - 1, columnIndex];
+      console.log(this.tag + " tile above: ", tileAbove);
+
+      if (this.mutableBoard[tileAbove[0]][tileAbove[1]] !== null) {
+        console.log(this.tag + " card id: ", this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
+        var card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
+        console.log(this.tag + " card on tile: ", card);
+
+        if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("bottom"))) {
+          console.log(this.tag + " connecting card found on tile above, available");
+          return true;
+        }
+      } // Check tile to the right
+
+
+      var tileRight = [rowIndex, columnIndex + 1];
+      console.log(this.tag + " tile right: ", tileRight);
+
+      if (this.mutableBoard[tileRight[0]][tileRight[1]] !== null) {
+        console.log(this.tag + " card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
+
+        var _card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
+
+        console.log(this.tag + " card on tile: ", _card);
+
+        if (_card && _card.type !== "gold_location" && (cart.type === "start" || _card.open_positions.includes("left"))) {
+          console.log(this.tag + " connecting card found on tile to the right, available");
+          return true;
+        }
+      } // Check tile below
+
+
+      var tileBelow = [rowIndex + 1, columnIndex];
+      console.log(this.tag + " tile below: ", tileBelow);
+
+      if (this.mutableBoard[tileBelow[0]][tileBelow[1]] !== null) {
+        console.log(this.tag + " card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
+
+        var _card2 = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
+
+        console.log(this.tag + " card on tile: ", _card2);
+
+        if (_card2 && _card2.type !== "gold_location" && (_card2.type === "start" || _card2.open_positions.includes("top"))) {
+          console.log(this.tag + " connecting card found on tile below, available");
+          return true;
+        }
+      } // Check tile to the left
+
+
+      var tileLeft = [rowIndex, columnIndex - 1];
+      console.log(this.tag + " tile left: ", tileLeft);
+
+      if (this.mutableBoard[tileLeft[0]][tileLeft[1]] !== null) {
+        console.log(this.tag + " card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
+
+        var _card3 = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
+
+        console.log(this.tag + " card on tile: ", _card3);
+
+        if (_card3 && _card3.type !== "gold_location" && (_card3.type === "start" || _card3.open_positions.includes("right"))) {
+          console.log(this.tag + " connecting card found on tile to the left, available");
+          return true;
+        }
+      } // If we've reached this point the tile is available but has no connecting card
+
+
+      console.log(this.tag + " tile has no connected tunnels, unavailable");
+      return false;
+    },
+    cardCanBePlacedOnTile: function cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
+      console.log(this.tag + " checking if card can be placed on tile: ", rowIndex, columnIndex, card); // Gather the required open positions based on the cards surrounding the selected coordinate
+
+      var requiredOpenPositions = [];
+      var requiredClosedPositions = []; // Check card above
+
+      var coordsAbove = {
+        rowIndex: rowIndex - 1,
+        columnIndex: columnIndex
+      };
+
+      if (this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex] !== null) {
+        console.log("tile above taken");
+
+        var _card4 = this.getCardById(this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
+
+        if (_card4) {
+          console.log("card found above", _card4);
+
+          if (_card4.type === "start") {
+            requiredOpenPositions.push("top");
+          } else {
+            if (_card4.open_positions.includes("bottom")) {
+              requiredOpenPositions.push("top");
+            } else {
+              requiredClosedPositions.push("top");
+            }
+          }
+        }
+      } // Check card to the right
+
+
+      var coordsRight = {
+        rowIndex: rowIndex,
+        columnIndex: columnIndex + 1
+      };
+
+      if (this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== null) {
+        console.log("tile right taken");
+
+        var _card5 = this.getCardById(this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
+
+        if (_card5) {
+          console.log("card found right", _card5);
+
+          if (_card5.type === "start") {
+            requiredOpenPositions.push("right");
+          } else {
+            if (_card5.open_positions.includes("left")) {
+              requiredOpenPositions.push("right");
+            } else {
+              requiredClosedPositions.push("right");
+            }
+          }
+        }
+      } // Check card below
+
+
+      var coordsBelow = {
+        rowIndex: rowIndex + 1,
+        columnIndex: columnIndex
+      };
+
+      if (this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== null) {
+        console.log("tile below taken");
+
+        var _card6 = this.getCardById(this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
+
+        if (_card6) {
+          console.log("card found below", _card6);
+
+          if (_card6.type === "start") {
+            requiredOpenPositions.push("bottom");
+          } else {
+            if (_card6.open_positions.includes("top")) {
+              requiredOpenPositions.push("bottom");
+            } else {
+              requiredClosedPositions.push("bottom");
+            }
+          }
+        }
+      } // Check card to the left
+
+
+      var coordsLeft = {
+        rowIndex: rowIndex,
+        columnIndex: columnIndex - 1
+      };
+
+      if (this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== null) {
+        console.log("tile left taken", this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
+
+        var _card7 = this.getCardById(this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
+
+        if (_card7) {
+          console.log("card found left", _card7);
+
+          if (_card7.type === "start") {
+            requiredOpenPositions.push("left");
+          } else {
+            if (_card7.open_positions.includes("right")) {
+              requiredOpenPositions.push("left");
+            } else {
+              requiredClosedPositions.push("left");
+            }
+          }
+        }
+      }
+
+      console.log(this.tag + " required open positions: ", requiredOpenPositions);
+      console.log(this.tag + " required closed positions: ", requiredClosedPositions); // If the card meets the requirements (in it's current state)
+
+      var meetsRequirements = true;
+
+      if (!card.inverted) {
+        console.log(this.tag + " checking if (non-inverted) card fits on the tile"); // Validate against the required open & closed positions
+
+        for (var i = 0; i < requiredOpenPositions.length; i++) {
+          if (!card.open_positions.includes(requiredOpenPositions[i])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+
+        for (var _i = 0; _i < requiredClosedPositions.length; _i++) {
+          if (card.open_positions.includes(requiredClosedPositions[_i])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+      } else {
+        console.log(this.tag + " checking if (inverted) card fits on the tile"); // Invert the card's open positions
+
+        var invertedOpenPositions = [];
+
+        for (var _i2 = 0; _i2 < card.open_positions.length; _i2++) {
+          if (card.open_positions[_i2] === "top") {
+            invertedOpenPositions.push("bottom");
+          } else if (card.open_positions[_i2] === "right") {
+            invertedOpenPositions.push("left");
+          } else if (card.open_positions[_i2] === "bottom") {
+            invertedOpenPositions.push("top");
+          } else if (card.open_positions[_i2] === "left") {
+            invertedOpenPositions.push("right");
+          }
+        } // Validate against the required open & closed positions
+
+
+        for (var _i3 = 0; _i3 < requiredOpenPositions.length; _i3++) {
+          if (!invertedOpenPositions.includes(requiredOpenPositions[_i3])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+
+        for (var _i4 = 0; _i4 < requiredClosedPositions.length; _i4++) {
+          if (invertedOpenPositions.includes(requiredClosedPositions[_i4])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+      }
+
+      console.log(this.tag + " tile meets requirements: ", meetsRequirements); // Return result
+
+      return meetsRequirements;
+    },
+    getPlayerById: function getPlayerById(id) {
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === id) {
+          return this.mutablePlayers[i];
         }
       }
 
@@ -3329,16 +4513,14 @@ __webpack_require__.r(__webpack_exports__);
       return 0;
     },
     centerBoard: function centerBoard() {
-      console.log(this.tag + " centering board"); // Grab the ID of the start card
-
-      var startCardId = this.getCardIdByName("start");
-      console.log(this.tag + " start card id: ", startCardId); // Grab the coordinates of the start card on the board
+      // Grab the ID of the start card
+      var startCardId = this.getCardIdByName("start"); // Grab the coordinates of the start card on the board
 
       var startCoordinates = null;
 
       for (var i = 0; i < this.value.length; i++) {
         for (var j = 0; j < this.value[i].length; j++) {
-          if (this.value[i][j] === startCardId) {
+          if (this.value[i][j] !== null && this.value[i][j].card_id === startCardId) {
             startCoordinates = {
               rowIndex: i,
               columnIndex: j
@@ -3346,33 +4528,23 @@ __webpack_require__.r(__webpack_exports__);
             break;
           }
         }
-      }
+      } // Determine the coordinates of the center card (relative to start & 2nd gold location card)
 
-      console.log(this.tag + " start card coordinates", startCoordinates); // Determine the coordinates of the center card (relative to start & 2nd gold location card)
 
       var centerCoordinates = startCoordinates;
-      centerCoordinates.columnIndex += 4;
-      console.log(this.tag + " center coordinates: ", centerCoordinates); // Calculate the X & Y coordinate of the center card on the board
+      centerCoordinates.columnIndex += 4; // Calculate the X & Y coordinate of the center card on the board
 
       var centerX = 130 * centerCoordinates.columnIndex + 130 / 2;
-      var centerY = 200 * centerCoordinates.rowIndex + 200 / 2;
-      console.log(this.tag + " center x: ", centerX);
-      console.log(this.tag + " center y: ", centerY); // Grab the dimensions of the viewport
+      var centerY = 200 * centerCoordinates.rowIndex + 200 / 2; // Grab the dimensions of the viewport
 
       var viewportWidth = $("#game-board__inner").width();
-      var viewportHeight = $("#game-board__inner").height();
-      console.log(this.tag + " viewport width: ", viewportWidth);
-      console.log(this.tag + " viewport height: ", viewportHeight); // Calculate the center of the viewport
+      var viewportHeight = $("#game-board__inner").height(); // Calculate the center of the viewport
 
       var viewportCenterX = viewportWidth / 2;
-      var viewportCenterY = viewportHeight / 2;
-      console.log(this.tag + " viewport center x: ", viewportCenterX);
-      console.log(this.tag + " viewport center y: ", viewportCenterY); // Calculate the difference between them; which in turn is the desired position of the board within the viewport
+      var viewportCenterY = viewportHeight / 2; // Calculate the difference between them; which in turn is the desired position of the board within the viewport
 
       var differenceX = viewportCenterX - centerX;
-      var differenceY = viewportCenterY - centerY;
-      console.log(this.tag + " difference x: ", differenceX);
-      console.log(this.tag + " difference y: ", differenceY); // Center the board
+      var differenceY = viewportCenterY - centerY; // Center the board
 
       this.viewportX = differenceX;
       this.viewportY = differenceY;
@@ -6495,7 +7667,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}", ""]);
+exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
 
 // exports
 
@@ -44627,422 +45799,1349 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "game" } }, [
-    _c("div", { attrs: { id: "game-content" } }, [
-      _vm.mutableGame !== null && _vm.phase === "role_selection"
-        ? _c("div", { attrs: { id: "role-selection" } }, [
-            _vm.mutablePlayerRole !== null
-              ? _c("div", { attrs: { id: "role-assigned" } }, [
-                  _c("h1", [_vm._v("Role assigned")]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "role-card no-hover" }, [
-                    _c("div", { staticClass: "role-card__label" }, [
-                      _vm._v(_vm._s(_vm.mutablePlayerRole.label))
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _vm.playerAtPlay
-                    ? _c("div", { attrs: { id: "role-selection__text" } }, [
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(_vm.playerAtPlay.user.username) +
-                            " is currently picking a role.\n                "
-                        )
-                      ])
-                    : _vm._e()
-                ])
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.mutablePlayerRole === null
-              ? _c("div", { attrs: { id: "role-not-assigned" } }, [
-                  _c("h1", [_vm._v("Role selection")]),
-                  _vm._v(" "),
-                  !_vm.myTurn && _vm.playerAtPlay
-                    ? _c("div", { attrs: { id: "role-selection__text" } }, [
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(_vm.playerAtPlay.user.username) +
-                            " is currently picking a role.    \n                "
-                        )
-                      ])
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _c("div", { attrs: { id: "available-roles" } }, [
-                    _c("h3", [_vm._v("Available roles")]),
+  return _c(
+    "div",
+    { attrs: { id: "game" } },
+    [
+      _c("div", { attrs: { id: "game-content" } }, [
+        _vm.mutableGame !== null && _vm.phase === "role_selection"
+          ? _c("div", { attrs: { id: "role-selection" } }, [
+              _vm.mutablePlayerRole !== null
+                ? _c("div", { attrs: { id: "role-assigned" } }, [
+                    _c("h1", [_vm._v("Role assigned")]),
                     _vm._v(" "),
-                    _vm.mutableGame.available_roles.length > 0
-                      ? _c(
-                          "div",
-                          { attrs: { id: "available-roles__list" } },
-                          _vm._l(_vm.mutableGame.available_roles, function(
-                            role,
-                            ri
-                          ) {
-                            return _c(
-                              "div",
-                              {
-                                key: ri,
-                                staticClass: "available-role__wrapper"
-                              },
-                              [
-                                _c("div", { staticClass: "available-role" }, [
-                                  _c("div", { staticClass: "role-name" }, [
-                                    _vm._v(
-                                      _vm._s(_vm.getRoleLabelById(role.role_id))
-                                    )
-                                  ]),
-                                  _vm._v(" "),
-                                  _c("div", { staticClass: "role-amount" }, [
-                                    _vm._v("x" + _vm._s(role.count))
-                                  ])
-                                ])
-                              ]
-                            )
-                          }),
-                          0
-                        )
-                      : _vm._e(),
+                    _c("div", { staticClass: "role-card no-hover" }, [
+                      _c("div", { staticClass: "role-card__label" }, [
+                        _vm._v(_vm._s(_vm.mutablePlayerRole.label))
+                      ])
+                    ]),
                     _vm._v(" "),
-                    _vm.mutableGame.available_roles.length === 0
-                      ? _c("div", { attrs: { id: "no-roles-available" } }, [
+                    _vm.playerAtPlay
+                      ? _c("div", { attrs: { id: "role-selection__text" } }, [
                           _vm._v(
-                            "\n                        No roles available, this shouldn't happen\n                    "
+                            "\n                    " +
+                              _vm._s(_vm.playerAtPlay.user.username) +
+                              " is currently picking a role.\n                "
                           )
                         ])
                       : _vm._e()
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mutablePlayerRole === null
+                ? _c("div", { attrs: { id: "role-not-assigned" } }, [
+                    _c("h1", [_vm._v("Role selection")]),
+                    _vm._v(" "),
+                    !_vm.myTurn && _vm.playerAtPlay
+                      ? _c("div", { attrs: { id: "role-selection__text" } }, [
+                          _vm._v(
+                            "\n                    " +
+                              _vm._s(_vm.playerAtPlay.user.username) +
+                              " is currently picking a role.    \n                "
+                          )
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _c("div", { attrs: { id: "available-roles" } }, [
+                      _c("h3", [_vm._v("Available roles")]),
+                      _vm._v(" "),
+                      _vm.mutableGame.available_roles.length > 0
+                        ? _c(
+                            "div",
+                            { attrs: { id: "available-roles__list" } },
+                            _vm._l(_vm.mutableGame.available_roles, function(
+                              role,
+                              ri
+                            ) {
+                              return _c(
+                                "div",
+                                {
+                                  key: ri,
+                                  staticClass: "available-role__wrapper"
+                                },
+                                [
+                                  _c("div", { staticClass: "available-role" }, [
+                                    _c("div", { staticClass: "role-name" }, [
+                                      _vm._v(
+                                        _vm._s(
+                                          _vm.getRoleLabelById(role.role_id)
+                                        )
+                                      )
+                                    ]),
+                                    _vm._v(" "),
+                                    _c("div", { staticClass: "role-amount" }, [
+                                      _vm._v("x" + _vm._s(role.count))
+                                    ])
+                                  ])
+                                ]
+                              )
+                            }),
+                            0
+                          )
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.mutableGame.available_roles.length === 0
+                        ? _c("div", { attrs: { id: "no-roles-available" } }, [
+                            _vm._v(
+                              "\n                        No roles available, this shouldn't happen\n                    "
+                            )
+                          ])
+                        : _vm._e()
+                    ]),
+                    _vm._v(" "),
+                    _vm.myTurn && !_vm.selectedRoleCard
+                      ? _c("div", { attrs: { id: "role-cards" } }, [
+                          _c("h2", [_vm._v("Role cards")]),
+                          _vm._v(" "),
+                          _c("h3", [
+                            _vm._v(
+                              "Please choose one of the available role cards"
+                            )
+                          ]),
+                          _vm._v(" "),
+                          !_vm.selectedRoleCard
+                            ? _c(
+                                "div",
+                                { attrs: { id: "role-cards__list" } },
+                                _vm._l(
+                                  _vm.mutableGame.num_available_roles,
+                                  function(n, ni) {
+                                    return _c(
+                                      "div",
+                                      {
+                                        key: ni,
+                                        staticClass: "role-card__wrapper"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          {
+                                            staticClass: "role-card",
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.onClickRoleCard(ni)
+                                              }
+                                            }
+                                          },
+                                          [
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass: "role-card__title"
+                                              },
+                                              [_vm._v("Role card")]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass: "role-card__number"
+                                              },
+                                              [_vm._v("#" + _vm._s(n))]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass: "role-card__select"
+                                              },
+                                              [
+                                                _vm._v(
+                                                  "\n                                    Select card\n                                "
+                                                )
+                                              ]
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  }
+                                ),
+                                0
+                              )
+                            : _vm._e()
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _vm.selectedRoleCard && _vm.selectRole.loading
+                      ? _c("div", { attrs: { id: "role-card__selected" } }, [
+                          _c("h2", [_vm._v("Role card selected")]),
+                          _vm._v(" "),
+                          _vm._m(0)
+                        ])
+                      : _vm._e()
+                  ])
+                : _vm._e()
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.mutableGame !== null && _vm.phase === "main"
+          ? _c("div", { attrs: { id: "game-ui" } }, [
+              _c("div", { attrs: { id: "board-area" } }, [
+                _c("div", { attrs: { id: "game-info" } }, [
+                  _c("div", { attrs: { id: "game-info__current-round" } }, [
+                    _vm._v("Round " + _vm._s(_vm.round))
                   ]),
                   _vm._v(" "),
-                  _vm.myTurn && !_vm.selectedRoleCard
-                    ? _c("div", { attrs: { id: "role-cards" } }, [
-                        _c("h2", [_vm._v("Role cards")]),
+                  _vm.playerAtPlay
+                    ? _c("div", { attrs: { id: "game-info__player-turn" } }, [
+                        _vm.myTurn
+                          ? _c("div", { attrs: { id: "my-turn" } }, [
+                              _vm._v(
+                                "\n                            It's your turn!\n                        "
+                              )
+                            ])
+                          : _vm._e(),
                         _vm._v(" "),
-                        _c("h3", [
-                          _vm._v(
-                            "Please choose one of the available role cards"
+                        !_vm.myTurn
+                          ? _c("div", { attrs: { id: "not-my-turn" } }, [
+                              _vm._v("\n                            It's "),
+                              _c("span", [
+                                _vm._v(_vm._s(_vm.playerAtPlay.user.username))
+                              ]),
+                              _vm._v("'s turn\n                        ")
+                            ])
+                          : _vm._e()
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _vm.modes.select_gold_location.enabled
+                  ? _c("div", { attrs: { id: "action-mode__wrapper" } }, [
+                      _c("div", { attrs: { id: "action-mode" } }, [
+                        _vm._v(
+                          "\n                        Please select the gold location you wish to reveal\n                    "
+                        )
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modes.select_tunnel.enabled
+                  ? _c("div", { attrs: { id: "action-mode__wrapper" } }, [
+                      _c("div", { attrs: { id: "action-mode" } }, [
+                        _vm._v(
+                          "\n                        Please select the tunnel you want to destroy\n                    "
+                        )
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.modes.select_tile.enabled
+                  ? _c("div", { attrs: { id: "action-mode__wrapper" } }, [
+                      _c("div", { attrs: { id: "action-mode" } }, [
+                        _vm._v(
+                          "\n                        Please select the tile where you want to place your tunnel\n                    "
+                        )
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { attrs: { id: "game-board__wrapper" } },
+                  [
+                    _c("game-board", {
+                      attrs: { cards: _vm.cards },
+                      on: { "clicked-tile": _vm.onClickedBoardTile },
+                      model: {
+                        value: _vm.mutableBoard,
+                        callback: function($$v) {
+                          _vm.mutableBoard = $$v
+                        },
+                        expression: "mutableBoard"
+                      }
+                    })
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { attrs: { id: "action-area" } }, [
+                _c("div", { attrs: { id: "my-role" } }, [
+                  _c("div", { attrs: { id: "my-role__title" } }, [
+                    _vm._v("My role")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { attrs: { id: "my-role__card" } }, [
+                    _c("div", { attrs: { id: "my-role__card-text" } }, [
+                      _vm._v(
+                        "\n                            " +
+                          _vm._s(_vm.mutablePlayerRole.label) +
+                          "\n                        "
+                      )
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "my-hand" } }, [
+                  _c("div", { attrs: { id: "my-hand__title" } }, [
+                    _vm._v("My hand")
+                  ]),
+                  _vm._v(" "),
+                  _vm.mutableHand.length > 0
+                    ? _c(
+                        "div",
+                        { attrs: { id: "my-hand__cards" } },
+                        _vm._l(_vm.mutableHand, function(card, ci) {
+                          return _c(
+                            "div",
+                            { key: ci, staticClass: "my-hand__card" },
+                            [
+                              _c("div", {
+                                staticClass: "my-hand__card-image",
+                                style: {
+                                  backgroundImage: "url(" + card.image_url + ")"
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickHandCard(ci)
+                                  }
+                                }
+                              })
+                            ]
                           )
+                        }),
+                        0
+                      )
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mutableHand.length === 0
+                    ? _c("div", { attrs: { id: "my-hand__no-cards" } }, [
+                        _vm._v(
+                          "\n                        No cards in your hand at the moment\n                    "
+                        )
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "deck" } }, [
+                  _c("div", { attrs: { id: "deck__title" } }, [_vm._v("Deck")]),
+                  _vm._v(" "),
+                  _c("div", { attrs: { id: "deck__card" } }, [
+                    _c("div", { attrs: { id: "deck__card-text" } }, [
+                      _vm._v(
+                        "\n                            " +
+                          _vm._s(_vm.mutableGame.num_cards_in_deck) +
+                          "\n                        "
+                      )
+                    ])
+                  ])
+                ])
+              ])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.mutableGame !== null && _vm.phase === "rewards"
+          ? _c("div", { attrs: { id: "rewards-ui" } }, [
+              _vm._v("\n            Rewards\n        ")
+            ])
+          : _vm._e()
+      ]),
+      _vm._v(" "),
+      _c("div", { attrs: { id: "game-sidebar" } }, [
+        _c(
+          "div",
+          { attrs: { id: "game-players__wrapper" } },
+          [
+            _c("game-players", {
+              attrs: {
+                game: _vm.game,
+                player: _vm.player,
+                "player-at-play": _vm.playerAtPlay,
+                "cart-icon-url": _vm.cartIconUrl,
+                "light-icon-url": _vm.lightIconUrl,
+                "pickaxe-icon-url": _vm.pickaxeIconUrl,
+                "gold-icon-url": _vm.goldIconUrl
+              },
+              model: {
+                value: _vm.mutablePlayers,
+                callback: function($$v) {
+                  _vm.mutablePlayers = $$v
+                },
+                expression: "mutablePlayers"
+              }
+            })
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          { attrs: { id: "game-chat__wrapper" } },
+          [
+            _c("game-chat", {
+              attrs: {
+                game: _vm.game,
+                player: _vm.player,
+                "send-message-api-endpoint": _vm.sendMessageApiEndpoint
+              }
+            })
+          ],
+          1
+        )
+      ]),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.view_card.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.view_card, "show", $$v)
+            },
+            expression: "dialogs.view_card.show"
+          }
+        },
+        [
+          this.dialogs.view_card.index !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: {
+                      click: function($event) {
+                        _vm.dialogs.view_card.show = false
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("h3", { staticClass: "dialog-title" }, [
+                    _vm._v("View card")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text nm" }, [
+                    _c("div", { staticClass: "card-info" }, [
+                      _c("div", {
+                        staticClass: "card-info__card",
+                        class: { inverted: _vm.dialogs.view_card.inverted },
+                        style: {
+                          backgroundImage:
+                            "url(" + _vm.viewCardDialogCard.image_url + ")"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "card-info__content" }, [
+                        _c("div", { staticClass: "card-info__description" }, [
+                          _c(
+                            "div",
+                            { staticClass: "card-info__description-label" },
+                            [_vm._v("Description")]
+                          ),
+                          _vm._v(" "),
+                          _vm.viewCardDialogCard.type === "tunnel"
+                            ? _c(
+                                "div",
+                                { staticClass: "card-info__description-text" },
+                                [
+                                  _vm._v(
+                                    "\n                                    This is a tunnel card which can be placed on the board to expand the tunnel system in the desired direction.\n                                "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.viewCardDialogCard.type !== "tunnel" &&
+                          _vm.viewCardDialogCard.description === null
+                            ? _c(
+                                "div",
+                                { staticClass: "card-info__description-text" },
+                                [
+                                  _vm._v(
+                                    "\n                                    This card is missing a description.\n                                "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.viewCardDialogCard.type !== "tunnel" &&
+                          _vm.viewCardDialogCard.description !== null
+                            ? _c(
+                                "div",
+                                { staticClass: "card-info__description-text" },
+                                [
+                                  _vm._v(
+                                    "\n                                    " +
+                                      _vm._s(
+                                        _vm.viewCardDialogCard.description
+                                      ) +
+                                      "\n                                "
+                                  )
+                                ]
+                              )
+                            : _vm._e()
                         ]),
                         _vm._v(" "),
-                        !_vm.selectedRoleCard
-                          ? _c(
-                              "div",
-                              { attrs: { id: "role-cards__list" } },
-                              _vm._l(
-                                _vm.mutableGame.num_available_roles,
-                                function(n, ni) {
-                                  return _c(
-                                    "div",
+                        _c("div", { staticClass: "card-info__actions" }, [
+                          !_vm.myTurn
+                            ? _c(
+                                "div",
+                                { staticClass: "card-info__actions-text" },
+                                [
+                                  _vm._v(
+                                    "\n                                    You can't play this card until it's your turn\n                                "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.myTurn
+                            ? _c(
+                                "div",
+                                { staticClass: "card-info__actions-buttons" },
+                                [
+                                  _c(
+                                    "v-btn",
                                     {
-                                      key: ni,
-                                      staticClass: "role-card__wrapper"
+                                      staticClass: "icon-only",
+                                      on: { click: _vm.onClickInvertCard }
                                     },
                                     [
-                                      _c(
-                                        "div",
-                                        {
-                                          staticClass: "role-card",
-                                          on: {
-                                            click: function($event) {
-                                              return _vm.onClickRoleCard(ni)
-                                            }
-                                          }
-                                        },
-                                        [
-                                          _c(
-                                            "div",
-                                            { staticClass: "role-card__title" },
-                                            [_vm._v("Role card")]
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "div",
-                                            {
-                                              staticClass: "role-card__number"
-                                            },
-                                            [_vm._v("#" + _vm._s(n))]
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "div",
-                                            {
-                                              staticClass: "role-card__select"
-                                            },
-                                            [
-                                              _vm._v(
-                                                "\n                                    Select card\n                                "
-                                              )
-                                            ]
-                                          )
-                                        ]
+                                      _c("i", {
+                                        staticClass: "fas fa-sync-alt"
+                                      })
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    { on: { click: _vm.onClickPlayCard } },
+                                    [
+                                      _vm._v(
+                                        "\n                                        Play card\n                                    "
                                       )
+                                    ]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    { on: { click: _vm.onClickFoldCard } },
+                                    [
+                                      _vm._v(
+                                        "\n                                        Fold card\n                                    "
+                                      )
+                                    ]
+                                  )
+                                ],
+                                1
+                              )
+                            : _vm._e()
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "550" },
+          model: {
+            value: _vm.dialogs.fold_card.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.fold_card, "show", $$v)
+            },
+            expression: "dialogs.fold_card.show"
+          }
+        },
+        [
+          _vm.dialogs.fold_card.index !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelFold }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Fold card")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text centered" }, [
+                    _c("div", {
+                      staticClass: "card mb-15",
+                      style: {
+                        backgroundImage:
+                          "url(" + _vm.foldCardDialogCard.image_url + ")"
+                      }
+                    }),
+                    _vm._v(
+                      "\n                    Are you sure you want to fold this card?"
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    The card will be discarded, you will draw a new card and your turn will end.\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelFold }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            color: "red",
+                            loading: _vm.dialogs.fold_card.loading
+                          },
+                          on: { click: _vm.onClickConfirmFold }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Fold card\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_gold_location.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_gold_location, "show", $$v)
+            },
+            expression: "dialogs.confirm_gold_location.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_gold_location.card_index !== null &&
+          _vm.dialogs.confirm_gold_location.gold_location !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelEnlighten }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Reveal gold location contents")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(_vm.revealGoldLocationText)
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    Are you sure you want to reveal the contents of this gold location?\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelEnlighten }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickRetryEnlighten }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Select another location\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_gold_location.loading
+                          },
+                          on: { click: _vm.onClickConfirmEnlighten }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Reveal contents\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "500" },
+          model: {
+            value: _vm.dialogs.reveal_gold_location.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.reveal_gold_location, "show", $$v)
+            },
+            expression: "dialogs.reveal_gold_location.show"
+          }
+        },
+        [
+          _vm.dialogs.reveal_gold_location.gold_location !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: {
+                      click: function($event) {
+                        _vm.dialogs.reveal_gold_location.show = false
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v(
+                      "Gold Location " +
+                        _vm._s(_vm.dialogs.reveal_gold_location.gold_location)
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm.dialogs.reveal_gold_location.contains_gold
+                    ? _c("div", { staticClass: "dialog-text" }, [
+                        _c("div", { attrs: { id: "reveal-gold-location" } }, [
+                          _c("div", {
+                            style: {
+                              backgroundImage:
+                                "url(" + _vm.goldBarsIconUrl + ")"
+                            },
+                            attrs: { id: "reveal-gold-location__image" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            { attrs: { id: "reveal-gold-location__text" } },
+                            [
+                              _vm._v(
+                                "\n                            This location contains the gold!\n                        "
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  !_vm.dialogs.reveal_gold_location.contains_gold
+                    ? _c("div", { staticClass: "dialog-text" }, [
+                        _c("div", { attrs: { id: "reveal-gold-location" } }, [
+                          _c("div", {
+                            style: {
+                              backgroundImage: "url(" + _vm.coalIconUrl + ")"
+                            },
+                            attrs: { id: "reveal-gold-location__image" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            { attrs: { id: "reveal-gold-location__text" } },
+                            [
+                              _vm._v(
+                                "\n                            This location does not contain any gold.\n                        "
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    : _vm._e()
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_sabotage_player.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_sabotage_player, "show", $$v)
+            },
+            expression: "dialogs.confirm_sabotage_player.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_sabotage_player.card_index !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelSabotagePlayer }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Sabotage player's tool")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Select target player")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayers, function(player, pi) {
+                        return player.id !== _vm.mutablePlayer.id
+                          ? _c(
+                              "div",
+                              {
+                                key: pi,
+                                staticClass: "select-player__list-item"
+                              },
+                              [
+                                _c(
+                                  "div",
+                                  {
+                                    staticClass: "player-option",
+                                    class: {
+                                      selected:
+                                        _vm.dialogs.confirm_sabotage_player
+                                          .player_id === player.id
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.onClickSelectPlayer(
+                                          "sabotage",
+                                          player.id
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                " +
+                                        _vm._s(player.user.username) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                )
+                              ]
+                            )
+                          : _vm._e()
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelSabotagePlayer }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading:
+                              _vm.dialogs.confirm_sabotage_player.loading,
+                            disabled:
+                              _vm.dialogs.confirm_sabotage_player.player_id ===
+                              null
+                          },
+                          on: { click: _vm.onClickConfirmSabotagePlayer }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Sabotage player's tool\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_recover_player.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_recover_player, "show", $$v)
+            },
+            expression: "dialogs.confirm_recover_player.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_recover_player.card_index !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelRecoverPlayer }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Recover player's tool")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Select target player")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayers, function(player, pi) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.confirm_recover_player
+                                      .player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "recover",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm.showRecoverToolSelection
+                    ? _c("div", { staticClass: "select-tool" }, [
+                        _c("div", { staticClass: "select-tool__title" }, [
+                          _vm._v("Select tool to recover")
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "select-tool__list" })
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelRecoverPlayer }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_recover_player.loading,
+                            disabled:
+                              _vm.dialogs.confirm_recover_player.player_id ===
+                              null
+                          },
+                          on: { click: _vm.onClickConfirmRecoverPlayer }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Recover player's tool\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_collapse_tunnel.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_collapse_tunnel, "show", $$v)
+            },
+            expression: "dialogs.confirm_collapse_tunnel.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_collapse_tunnel.card_index !== null &&
+          _vm.dialogs.confirm_collapse_tunnel.tunnel_coordinates !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelCollapseTunnel }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Collapse tunnel")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(
+                      "\n                    Are you sure you want to collapse the tunnel on " +
+                        _vm._s(
+                          _vm.dialogs.confirm_collapse_tunnel.tunnel_coordinates
+                            .x +
+                            ":" +
+                            _vm.dialogs.confirm_collapse_tunnel
+                              .tunnel_coordinates.y
+                        ) +
+                        "?\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelCollapseTunnel }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading:
+                              _vm.dialogs.confirm_collapse_tunnel.loading,
+                            disabled:
+                              _vm.dialogs.confirm_collapse_tunnel.player_id ===
+                              null
+                          },
+                          on: { click: _vm.onClickConfirmCollapseTunnel }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Collapse tunnel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_place_tunnel.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_place_tunnel, "show", $$v)
+            },
+            expression: "dialogs.confirm_place_tunnel.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_place_tunnel.card_index !== null &&
+          _vm.dialogs.confirm_place_tunnel.tunnel_coordinates !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelPlaceTunnel }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Place tunnel card")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { attrs: { id: "place-tunnel" } }, [
+                    _c("div", { attrs: { id: "place-tunnel__preview" } }, [
+                      _c(
+                        "div",
+                        { attrs: { id: "preview" } },
+                        _vm._l(
+                          _vm.dialogs.confirm_place_tunnel.preview,
+                          function(row, ri) {
+                            return _c(
+                              "div",
+                              { key: ri, staticClass: "preview-row" },
+                              _vm._l(
+                                _vm.dialogs.confirm_place_tunnel.preview[ri],
+                                function(col, ci) {
+                                  return _c(
+                                    "div",
+                                    { key: ci, staticClass: "preview-col" },
+                                    [
+                                      col !== null
+                                        ? _c("div", {
+                                            staticClass: "preview-card",
+                                            style: {
+                                              backgroundImage:
+                                                "url(" +
+                                                _vm.getCardImageById(
+                                                  col.card_id
+                                                ) +
+                                                ")"
+                                            }
+                                          })
+                                        : _vm._e()
                                     ]
                                   )
                                 }
                               ),
                               0
                             )
-                          : _vm._e()
-                      ])
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _vm.selectedRoleCard && _vm.selectRole.loading
-                    ? _c("div", { attrs: { id: "role-card__selected" } }, [
-                        _c("h2", [_vm._v("Role card selected")]),
-                        _vm._v(" "),
-                        _vm._m(0)
-                      ])
-                    : _vm._e()
-                ])
-              : _vm._e()
-          ])
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.mutableGame !== null && _vm.phase === "main"
-        ? _c("div", { attrs: { id: "game-ui" } }, [
-            _c("div", { attrs: { id: "board-area" } }, [
-              _c("div", { attrs: { id: "game-info" } }, [
-                _c("div", { attrs: { id: "game-info__current-round" } }, [
-                  _vm._v("Round " + _vm._s(_vm.round))
-                ]),
-                _vm._v(" "),
-                _vm.playerAtPlay
-                  ? _c("div", { attrs: { id: "game-info__player-turn" } }, [
-                      _vm.myTurn
-                        ? _c("div", { attrs: { id: "my-turn" } }, [
-                            _vm._v(
-                              "\n                            It's your turn!\n                        "
-                            )
-                          ])
-                        : _vm._e(),
-                      _vm._v(" "),
-                      !_vm.myTurn
-                        ? _c("div", { attrs: { id: "not-my-turn" } }, [
-                            _vm._v("\n                            It's "),
-                            _c("span", [
-                              _vm._v(_vm._s(_vm.playerAtPlay.user.username))
-                            ]),
-                            _vm._v("'s turn\n                        ")
-                          ])
-                        : _vm._e()
+                          }
+                        ),
+                        0
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { attrs: { id: "place-tunnel__text" } }, [
+                      _vm._v(
+                        "\n                        Are you sure you want to place your card on the selected coordinates (" +
+                          _vm._s(
+                            _vm.dialogs.confirm_place_tunnel.tunnel_coordinates
+                              .x +
+                              "," +
+                              _vm.dialogs.confirm_place_tunnel
+                                .tunnel_coordinates.y
+                          ) +
+                          ")?\n                    "
+                      )
                     ])
-                  : _vm._e()
-              ]),
-              _vm._v(" "),
-              _c(
-                "div",
-                { attrs: { id: "game-board__wrapper" } },
-                [
-                  _c("game-board", {
-                    attrs: { cards: _vm.cards },
-                    on: { "clicked-tile": _vm.onClickedBoardTile },
-                    model: {
-                      value: _vm.mutableBoard,
-                      callback: function($$v) {
-                        _vm.mutableBoard = $$v
-                      },
-                      expression: "mutableBoard"
-                    }
-                  })
-                ],
-                1
-              )
-            ]),
-            _vm._v(" "),
-            _c("div", { attrs: { id: "action-area" } }, [
-              _c("div", { attrs: { id: "my-role" } }, [
-                _c("div", { attrs: { id: "my-role__title" } }, [
-                  _vm._v("My role")
-                ]),
-                _vm._v(" "),
-                _c("div", { attrs: { id: "my-role__card" } }, [
-                  _c("div", { attrs: { id: "my-role__card-text" } }, [
-                    _vm._v(
-                      "\n                            " +
-                        _vm._s(_vm.mutablePlayerRole.label) +
-                        "\n                        "
-                    )
                   ])
-                ])
-              ]),
-              _vm._v(" "),
-              _c("div", { attrs: { id: "my-hand" } }, [
-                _c("div", { attrs: { id: "my-hand__title" } }, [
-                  _vm._v("My hand")
                 ]),
                 _vm._v(" "),
-                _vm.mutableHand.length > 0
-                  ? _c(
-                      "div",
-                      { attrs: { id: "my-hand__cards" } },
-                      _vm._l(_vm.mutableHand, function(card, ci) {
-                        return _c(
-                          "div",
-                          {
-                            key: ci,
-                            staticClass: "my-hand__card",
-                            class: { selected: card.selected }
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelPlaceTunnel }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Cancel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_place_tunnel.loading,
+                            disabled:
+                              _vm.dialogs.confirm_place_tunnel.player_id ===
+                              null
                           },
-                          [
-                            _c("div", {
-                              staticClass: "my-hand__card-image",
-                              style: {
-                                backgroundImage:
-                                  "url(" + card.data.image_url + ")"
-                              },
-                              on: {
-                                click: function($event) {
-                                  return _vm.onClickHandCard(ci)
-                                }
-                              }
-                            })
-                          ]
-                        )
-                      }),
-                      0
-                    )
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.mutableHand.length === 0
-                  ? _c("div", { attrs: { id: "my-hand__no-cards" } }, [
-                      _vm._v(
-                        "\n                        No cards in your hand at the moment\n                    "
-                      )
-                    ])
-                  : _vm._e()
-              ]),
-              _vm._v(" "),
-              _c("div", { attrs: { id: "my-actions" } }, [
-                _c("div", { attrs: { id: "my-actions__title" } }, [
-                  _vm._v("Actions")
-                ]),
-                _vm._v(" "),
-                _vm.myTurn && _vm.selectedHandCards.length === 1
-                  ? _c("div", { attrs: { id: "my-actions__list" } }, [
-                      _c(
-                        "div",
-                        { staticClass: "action" },
+                          on: { click: _vm.onClickConfirmPlaceTunnel }
+                        },
                         [
-                          _c(
-                            "v-btn",
-                            {
-                              attrs: {
-                                block: "",
-                                loading: _vm.playCard.loading
-                              },
-                              on: { click: _vm.onClickPlayCard }
-                            },
-                            [
-                              _vm._v(
-                                "\n                                Play card\n                            "
-                              )
-                            ]
+                          _vm._v(
+                            "\n                        Place tunnel\n                    "
                           )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "action" },
-                        [
-                          _c(
-                            "v-btn",
-                            {
-                              attrs: {
-                                block: "",
-                                loading: _vm.foldCard.loading
-                              },
-                              on: { click: _vm.onClickFoldCard }
-                            },
-                            [
-                              _vm._v(
-                                "\n                                Fold card\n                            "
-                              )
-                            ]
-                          )
-                        ],
-                        1
+                        ]
                       )
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.myTurn && _vm.selectedHandCards.length > 1
-                  ? _c("div", { attrs: { id: "my-actions__too-many-cards" } }, [
-                      _vm._v(
-                        "\n                        Too many cards selected\n                    "
-                      )
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.myTurn && _vm.selectedHandCards.length === 0
-                  ? _c("div", { attrs: { id: "my-actions__select-card" } }, [
-                      _vm._v(
-                        "\n                        Select a card in your hand to perform an action\n                    "
-                      )
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                !_vm.myTurn
-                  ? _c("div", { attrs: { id: "my-actions__wait" } }, [
-                      _vm._v(
-                        "\n                        You can't perform an action until it's your turn.\n                    "
-                      )
-                    ])
-                  : _vm._e()
+                    ],
+                    1
+                  )
+                ])
               ])
-            ])
-          ])
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.mutableGame !== null && _vm.phase === "rewards"
-        ? _c("div", { attrs: { id: "rewards-ui" } }, [
-            _vm._v("\n            Rewards\n        ")
-          ])
-        : _vm._e()
-    ]),
-    _vm._v(" "),
-    _c("div", { attrs: { id: "game-sidebar" } }, [
-      _c(
-        "div",
-        { attrs: { id: "game-players__wrapper" } },
-        [
-          _c("game-players", {
-            attrs: {
-              game: _vm.game,
-              player: _vm.player,
-              "player-at-play": _vm.playerAtPlay,
-              "cart-icon-url": _vm.cartIconUrl,
-              "light-icon-url": _vm.lightIconUrl,
-              "pickaxe-icon-url": _vm.pickaxeIconUrl,
-              "gold-icon-url": _vm.goldIconUrl
-            },
-            model: {
-              value: _vm.mutablePlayers,
-              callback: function($$v) {
-                _vm.mutablePlayers = $$v
-              },
-              expression: "mutablePlayers"
-            }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        { attrs: { id: "game-chat__wrapper" } },
-        [
-          _c("game-chat", {
-            attrs: {
-              game: _vm.game,
-              player: _vm.player,
-              "send-message-api-endpoint": _vm.sendMessageApiEndpoint
-            }
-          })
-        ],
-        1
+            : _vm._e()
+        ]
       )
-    ])
-  ])
+    ],
+    1
+  )
 }
 var staticRenderFns = [
   function() {
@@ -45100,7 +47199,7 @@ var render = function() {
           return _c(
             "div",
             { key: ri, staticClass: "board-row" },
-            _vm._l(row, function(cardId, ci) {
+            _vm._l(row, function(card, ci) {
               return _c(
                 "div",
                 {
@@ -45114,16 +47213,16 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "coordinates" }, [
-                    _vm._v(_vm._s(ri + "," + ci))
+                    _vm._v(_vm._s(ci + "," + ri))
                   ]),
                   _vm._v(" "),
-                  cardId !== null
+                  card !== null
                     ? _c("div", { staticClass: "card" }, [
                         _c("div", {
                           staticClass: "card-image",
                           style: {
                             backgroundImage:
-                              "url(" + _vm.getCardImageById(cardId) + ")"
+                              "url(" + _vm.getCardImageById(card.card_id) + ")"
                           }
                         })
                       ])

@@ -22,12 +22,14 @@ class CardSeeder extends Seeder
             "type" => "start",
             "text" => "Start",
             "name" => "start",
+            "description" => "This is where the journey begins.",
         ]);
 
         $gold_location_card = Card::create([
             "type" => "gold_location",
             "text" => "Gold Location",
-            "name" => "gold_location"
+            "name" => "gold_location",
+            "description" => "Possible location of shiny gold."
         ]);
 
         // ------------------------------------------------
@@ -39,16 +41,19 @@ class CardSeeder extends Seeder
             "type" => "action",
             "text" => "Sabotage Pickaxe",
             "name" => "sabotage_pickaxe",
+            "description" => "Disable another player's pickaxe.",
         ]);
         $action_sabotage_light = Card::create([
             "type" => "action",
             "text" => "Sabotage Light",
             "name" => "sabotage_light",
+            "description" => "Disable another player's lantern."
         ]);
         $action_sabotage_cart = Card::create([
             "type" => "action",
             "text" => "Sabotage Cart",
-            "name" => "sabotage_cart"
+            "name" => "sabotage_cart",
+            "description" => "Disable another player's cart."
         ]);
 
         // Sabotage combo cards
@@ -56,16 +61,19 @@ class CardSeeder extends Seeder
             "type" => "action",
             "text" => "Sabotage Pickaxe & Light",
             "name" => "sabotage_pickaxe_light",
+            "description" => "Disable another player's pickaxe or lantern.",
         ]);
         $action_sabotage_pickaxe_cart = Card::create([
             "type" => "action",
             "text" => "Sabotage Pickaxe & Cart",
             "name" => "sabotage_pickaxe_cart",
+            "description" => "Disable another player's pickaxe or cart.",
         ]);
         $action_sabotage_light_cart = Card::create([
             "type" => "action",
             "text" => "Sabotage Light & Cart",
-            "name" => "sabotage_light_cart"
+            "name" => "sabotage_light_cart",
+            "description" => "Disable another player's lantern or cart.",
         ]);
 
         // Recover cards
@@ -73,16 +81,19 @@ class CardSeeder extends Seeder
             "type" => "action",
             "text" => "Recover Pickaxe",
             "name" => "recover_pickaxe",
+            "description" => "Recover a player's disabled pickaxe.",
         ]);
         $action_recover_light = Card::create([
             "type" => "action",
             "text" => "Recover Light",
             "name" => "recover_light",
+            "description" => "Recover a player's disabled lantern.",
         ]);
         $action_recover_cart = Card::create([
             "type" => "action",
             "text" => "Recover Cart",
             "name" => "recover_cart",
+            "description" => "Recover a player's disabled cart.",
         ]);
 
         // Recover combo cards
@@ -90,23 +101,27 @@ class CardSeeder extends Seeder
             "type" => "action",
             "text" => "Recover Pickaxe & Light",
             "name" => "recover_pickaxe_light",
+            "description" => "Recover a player's disabled pickaxe or lantern.",
         ]);
         $action_recover_pickaxe_cart = Card::create([
             "type" => "action",
             "text" => "Recover Pickaxe & Cart",
             "name" => "recover_pickaxe_cart",
+            "description" => "Recover a player's disabled pickaxe or cart.",
         ]);
         $action_recover_light_cart = Card::create([
             "type" => "action",
             "text" => "Recover Light & Cart",
             "name" => "recover_light_cart",
+            "description" => "Recover a player's disabled lantern or cart.",
         ]);
 
         // Demolish cards
         $action_demolish = Card::create([
             "type" => "action",
             "text" => "Collapse Tunnel",
-            "name" => "demolish",
+            "name" => "collapse",
+            "description" => "Destroy a placed tunnel card.",
         ]);
 
         // Enlighten cards
@@ -114,6 +129,7 @@ class CardSeeder extends Seeder
             "type" => "action",
             "text" => "Enlighten",
             "name" => "enlighten",
+            "description" => "Check one of the gold locations and be enlightened with it's contents.",
         ]);
 
         // ------------------------------------------------

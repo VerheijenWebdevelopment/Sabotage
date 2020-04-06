@@ -3,10 +3,10 @@
         <div id="game-board__inner">
             <div id="board" :style="{ top: viewportY+'px', left: viewportX+'px' }" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove">
                 <div class="board-row" v-for="(row, ri) in value" :key="ri">
-                    <div class="board-cell" v-for="(cardId, ci) in row" :key="ci" @click="onClickTile(ri, ci)">
-                        <div class="coordinates">{{ ri+","+ci }}</div>
-                        <div class="card" v-if="cardId !== null">
-                            <div class="card-image" :style="{ backgroundImage: 'url('+getCardImageById(cardId)+')' }"></div>
+                    <div class="board-cell" v-for="(card, ci) in row" :key="ci" @click="onClickTile(ri, ci)">
+                        <div class="coordinates">{{ ci+","+ri }}</div>
+                        <div class="card" v-if="card !== null">
+                            <div class="card-image" :style="{ backgroundImage: 'url('+getCardImageById(card.card_id)+')' }"></div>
                         </div>
                     </div>
                 </div>
@@ -77,52 +77,39 @@
             },
             centerBoard() {
 
-                console.log(this.tag+" centering board");
-
                 // Grab the ID of the start card
                 let startCardId = this.getCardIdByName("start");
-                console.log(this.tag+" start card id: ", startCardId);
 
                 // Grab the coordinates of the start card on the board
                 let startCoordinates = null;
                 for (let i = 0; i < this.value.length; i++) {
                     for (let j = 0; j < this.value[i].length; j++) {
-                        if (this.value[i][j] === startCardId) {
+                        if (this.value[i][j] !== null && this.value[i][j].card_id === startCardId) {
                             startCoordinates = { rowIndex: i, columnIndex: j };
                             break;
                         }
                     }
                 }
-                console.log(this.tag+" start card coordinates", startCoordinates);
 
                 // Determine the coordinates of the center card (relative to start & 2nd gold location card)
                 let centerCoordinates = startCoordinates;
                 centerCoordinates.columnIndex += 4;
-                console.log(this.tag+" center coordinates: ", centerCoordinates);
 
                 // Calculate the X & Y coordinate of the center card on the board
                 let centerX = 130 * centerCoordinates.columnIndex + (130/2);
                 let centerY = 200 * centerCoordinates.rowIndex + (200/2);
-                console.log(this.tag+" center x: ", centerX);
-                console.log(this.tag+" center y: ", centerY);
 
                 // Grab the dimensions of the viewport
                 let viewportWidth = $("#game-board__inner").width();
                 let viewportHeight = $("#game-board__inner").height();
-                console.log(this.tag+" viewport width: ", viewportWidth);
-                console.log(this.tag+" viewport height: ", viewportHeight);
 
                 // Calculate the center of the viewport
                 let viewportCenterX = viewportWidth / 2;
                 let viewportCenterY = viewportHeight / 2;
-                console.log(this.tag+" viewport center x: ", viewportCenterX);
-                console.log(this.tag+" viewport center y: ", viewportCenterY);
 
                 // Calculate the difference between them; which in turn is the desired position of the board within the viewport
                 let differenceX = viewportCenterX - centerX;
                 let differenceY = viewportCenterY - centerY;
-                console.log(this.tag+" difference x: ", differenceX);
-                console.log(this.tag+" difference y: ", differenceY);
 
                 // Center the board
                 this.viewportX = differenceX;

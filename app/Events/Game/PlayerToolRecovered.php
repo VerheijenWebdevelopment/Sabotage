@@ -2,6 +2,7 @@
 
 namespace App\Events\Game;
 
+use App\Models\Game;
 use App\Models\Player;
 
 use Illuminate\Broadcasting\Channel;
@@ -16,7 +17,9 @@ class PlayerToolRecovered implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $game;
     public $player;
+    public $target_player;
     public $tool;
 
     /**
@@ -24,9 +27,11 @@ class PlayerToolRecovered implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Player $player, string $tool)
+    public function __construct(Game $game, Player $player, Player $targetPlayer, string $tool)
     {
+        $this->game = $game;
         $this->player = $player;
+        $this->target_player = $targetPlayer;
         $this->tool = $tool;
     }
 

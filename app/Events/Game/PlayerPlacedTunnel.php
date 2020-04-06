@@ -4,6 +4,7 @@ namespace App\Events\Game;
 
 use App\Models\Game;
 use App\Models\Player;
+use App\Models\Card;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
@@ -13,26 +14,28 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class PlayerToolBlocked implements ShouldBroadcast
+class PlayerPlacedTunnel implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $game;
     public $player;
-    public $target_player;
-    public $tool;
+    public $card;
+    public $coordinates;
+    public $inverted;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Game $game, Player $player, Player $targetPlayer, string $tool)
+    public function __construct(Game $game, Player $player, Card $card, array $coordinates, bool $inverted)
     {
         $this->game = $game;
         $this->player = $player;
-        $this->target_player = $targetPlayer;
-        $this->tool = $tool;
+        $this->card = $card;
+        $this->coordinates = $coordinates;
+        $this->inverted = $inverted;
     }
 
     /**

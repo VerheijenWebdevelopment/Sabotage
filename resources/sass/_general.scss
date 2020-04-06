@@ -384,7 +384,7 @@ i {
 
 .dialog {
     position: relative;
-    background-color: hsl(0, 0%, 100%);
+    background-color: #121212;
     .dialog__close-button {
         top: 15px;
         right: 10px;
@@ -430,6 +430,9 @@ i {
         }
         .dialog-text {
             margin: 0 0 15px 0;
+            &.nm {
+                margin: 0;
+            }
             &.centered {
                 text-align: center;
             }
@@ -455,7 +458,7 @@ i {
         padding: 25px;
         flex-direction: row;
         box-sizing: border-box;
-        background-color: #f2f2f2;
+        background-color: #0c0c0c;
         .dialog-controls__left, .dialog-controls__right {
             flex: 1;
             display: flex;

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Game;
 use App\Models\GameChatMessage;
 use App\Models\Player;
+use App\Models\Card;
 
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
@@ -22,6 +23,11 @@ use App\Events\Game\GameStarted;
 use App\Events\Game\PlayerLeftGame;
 use App\Events\Game\PlayerJoinedGame;
 use App\Events\Game\PlayerSelectedRole;
+use App\Events\Game\PlayerToolBlocked;
+use App\Events\Game\PlayerToolRecovered;
+use App\Events\Game\PlayerCheckedGoldLocation;
+use App\Events\Game\PlayerPlacedTunnel;
+use App\Events\Game\PlayerCollapsedTunnel;
 use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
@@ -356,8 +362,10 @@ class GameService implements ModelServiceContract
 
                 // Validate data
                 if (is_null($data)) throw new Exception("Missing required data");
+                if (!array_key_exists("index", $data)) throw new Exception("Missing selected card's index");
 
-                
+                // Perform the operation; returns a new card from the deck
+                return $this->performPlayCard($game, $player, $data);
 
             break;
             
@@ -420,12 +428,252 @@ class GameService implements ModelServiceContract
         $this->endTurn($game, $player);
 
         // Return (preloaded version of) the drawn card
-        return Cards::preload($card);
+        return $card ? Cards::preload($card) : false;
     }
 
     private function performPlayCard(Game $game, Player $player, array $data)
     {
+        // Data we're outputting
+        $output = [];
 
+        // Grab the card the user wants to play
+        $card = Cards::find($player->hand[$data["index"]]);
+
+        // Remove card from player's hand
+        $player = Players::removeCardFromHand($data["index"], $player);
+
+        // If we're dealing with an action card
+        if ($card->type == "action")
+        {
+            // Switch between possible action cards
+            switch ($card->name)
+            {
+                // Single sabotage cards
+                case "sabotage_pickaxe":
+                case "sabotage_light":
+                case "sabotage_cart":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playSabotageCard($game, $player, $card, $data);
+                break;
+
+                // Multi sabotage cards
+                case "sabotage_pickaxe_cart":
+                case "sabotage_pickaxe_light":
+                case "sabotage_light_cart":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    if (!array_key_exists("tool", $data)) throw new Exception("Missing target tool");
+                    $this->playSabotageCard($game, $player, $card, $data);
+                break;
+
+                // Recover cards
+                case "recover_pickaxe":
+                case "recover_light":
+                case "recover_cart":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playRecoverCard($game, $player, $card, $data);
+                break;
+                
+                // Multi recover cards
+                case "recover_pickaxe_cart":
+                case "recover_pickaxe_light":
+                case "recover_light_cart":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    if (!array_key_exists("tool", $data)) throw new Exception("Missing target tool");
+                    $this->playRecoverCard($game, $player, $card, $data);
+                break;
+
+                // Enlighten card
+                case "enlighten":
+                    if (!array_key_exists("gold_location", $data)) throw new Exception("Missing target gold location");
+                    $output["contains_gold"] = $this->playEnlightenCard($game, $player, $data["gold_location"]);
+                break;
+                
+                // Collapse card
+                case "collapse":
+                    if (!array_key_exists("target_coordinates", $data)) throw new Exception("Missing target tile coordinates");
+                    $this->playCollapseCard($game, $player, $card, $data);
+                break;
+            }
+        }
+        // If we're dealing with a tunnel card
+        else
+        {
+            // Validate the request
+            if (!array_key_exists("target_coordinates", $data)) throw new Exception("Missing target tile coordinates");
+            if (!array_key_exists("inverted", $data)) throw new Exception("Missing inverted property");
+
+            // Play the card
+            $this->playTunnelCard($game, $player, $card, $data);
+        }
+
+        // Draw a new card
+        $newCard = $this->drawCard($game, $player);
+        
+        // End the player's turn
+        $this->endTurn($game, $player);
+
+        // Return the drawn card
+        $output["new_card"] = $newCard ? Cards::preload($newCard) : false;
+        
+        return $output;
+    }
+
+    private function playSabotageCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Switch between the possible variants of the sabotage card
+        switch ($card->name)
+        {
+            case "sabotage_pickaxe":
+                $tool = "pickaxe";
+                $targetPlayer->pickaxe_available = false;
+            break;
+            case "sabotage_light":
+                $tool = "light";
+                $targetPlayer->light_available = false;
+            break;
+            case "sabotage_cart":
+                $tool = "cart";
+                $targetPlayer->cart_available = false;
+            break;
+            case "sabotage_pickaxe_light":
+                if ($data["tool"] == "pickaxe") {
+                    $tool = "pickaxe";
+                    $targetPlayer->pickaxe_available = false;
+                } else {
+                    $tool = "light";
+                    $targetPlayer->light_available = false;
+                }
+            break;
+            case "sabotage_pickaxe_cart":
+                if ($data["tool"] == "pickaxe") {
+                    $tool = "pickaxe";
+                    $targetPlayer->pickaxe_available = false;
+                } else {
+                    $tool = "cart";
+                    $targetPlayer->cart_available = false;
+                }
+            break;
+            case "sabotage_light_cart":
+                if ($data["tool"] == "light") {
+                    $tool = "light";
+                    $targetPlayer->light_available = false;
+                } else {
+                    $tool = "cart";
+                    $targetPlayer->cart_available = false;
+                }
+            break;
+        }
+
+        // Save the updated flag on the target player
+        $targetPlayer->save();
+
+        // Broadcast event to the other players
+        broadcast(new PlayerToolBlocked($game, $player, $targetPlayer, $tool))->toOthers();
+    }
+
+    private function playRecoverCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Player::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Switch between the possible variants of the sabotage card
+        switch ($card->name)
+        {
+            case "recover_pickaxe":
+                $tool = "pickaxe";
+                $targetPlayer->pickaxe_available = true;
+            break;
+            case "recover_light":
+                $tool = "light";
+                $targetPlayer->light_available = true;
+            break;
+            case "recover_cart":
+                $tool = "cart";
+                $targetPlayer->cart_available = true;
+            break;
+            case "recover_pickaxe_light":
+                if ($data["tool"] == "pickaxe") {
+                    $tool = "pickaxe";
+                    $targetPlayer->pickaxe_available = true;
+                } else {
+                    $tool = "light";
+                    $targetPlayer->light_available = true;
+                }
+            break;
+            case "recover_pickaxe_cart":
+                if ($data["tool"] == "pickaxe") {
+                    $tool = "pickaxe";
+                    $targetPlayer->pickaxe_available = true;
+                } else {
+                    $tool = "cart";
+                    $targetPlayer->cart_available = true;
+                }
+            break;
+            case "recover_light_cart":
+                if ($data["tool"] == "light") {
+                    $tool = "light";
+                    $targetPlayer->light_available = true;
+                } else {
+                    $tool = "cart";
+                    $targetPlayer->cart_available = true;
+                }
+            break;
+        }
+
+        // Save the updated flag on the target player
+        $targetPlayer->save();
+
+        // Broadcast event to the other players
+        broadcast(new PlayerToolRecovered($game, $player, $targetPlayer, $tool))->toOthers();
+    }
+
+    private function playEnlightenCard(Game $game, Player $player, int $goldLocation)
+    {
+        // Inform other players whats going on
+        broadcast(new PlayerCheckedGoldLocation($game, $player, $goldLocation))->toOthers();
+
+        // Return whether or not the target gold location contains gold or not
+        return $game->gold_location == $goldLocation;
+    }
+
+    private function playCollapseCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the game board
+        $board = $game->board;
+
+        // Set the target tile to null to destroy any placed tunnel
+        $board[$data["target_coordinates"]->y][$data["target_coordinates"]->x] = null;
+        
+        // Update the game's board
+        $game->board = $board;
+        $game->save();
+
+        // Broadcast event to all other players
+        broadcast(new PlayerCollapsedTunnel($game, $player, $card, (array) $data["target_coordinates"]))->toOthers(); 
+    }
+
+    private function playTunnelCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the game board
+        $board = $game->board;
+        
+        // Place the tunnel card on the given coordinates
+        $board[$data["target_coordinates"]->y][$data["target_coordinates"]->x] = [
+            "card_id" => $card->id,
+            "inverted" => $data["inverted"]
+        ];
+
+        // Update the board on the game
+        $game->board = $board;
+        $game->save();
+
+        // Broadcast event to all other players to inform them of the update
+        broadcast(new PlayerPlacedTunnel($game, $player, $card, (array) $data["target_coordinates"], $data["inverted"]))->toOthers();
     }
 
     private function drawCard(Game $game, Player $player = null, $amount = 1)
@@ -445,6 +693,11 @@ class GameService implements ModelServiceContract
 
             // Save the new deck
             $game->deck = $deck;
+
+            // Save the new number of cards in the deck
+            $game->num_cards_in_deck = count($deck);
+
+            // Save changes to the game
             $game->save();
 
             // Return the drawn card

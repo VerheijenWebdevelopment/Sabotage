@@ -18,6 +18,7 @@ class CreateCardsTable extends Migration
             $table->string('type');                             // Action, Tunnel
             $table->string('name');                             // Name of the card
             $table->string('text')->nullable();                 // Text to write on the card
+            $table->text('description')->nullable();            // Description of what the card does
             $table->string('action')->nullable();               // The action this card performs
             $table->text('open_positions')->nullable();         // Directions in which this tunnel card can be connected [top, right, bottom, left]
             $table->timestamps();

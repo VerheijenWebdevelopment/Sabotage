@@ -26,16 +26,16 @@ class BoardService
             for ($x = 0; $x < $width; $x++) {
                 // If this is the start location
                 if ($x == 1 && $y == 3) {
-                    $row[] = $startCard->id;
+                    $row[] = ["card_id" => $startCard->id, "inverted" => false];
                 // If this is the first gold location
                 } else if ($x == 9 && $y == 1) {
-                    $row[] = $goldCard->id;
+                    $row[] = ["card_id" => $goldCard->id, "inverted" => false];
                 // If this is the second gold location
                 } else if ($x == 9 && $y == 3) {
-                    $row[] = $goldCard->id;
+                    $row[] = ["card_id" => $goldCard->id, "inverted" => false];
                 // If this is the third gold location
                 } else if ($x == 9 && $y == 5) {
-                    $row[] = $goldCard->id;
+                    $row[] = ["card_id" => $goldCard->id, "inverted" => false];
                 // If this is any other tile on the grid
                 } else {
                     $row[] = null;

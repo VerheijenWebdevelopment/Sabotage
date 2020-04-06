@@ -90,7 +90,7 @@ class CardService implements ModelServiceContract
         }
 
         // Add 4 demolish cards
-        $actionDemolish = $this->findByName("demolish");
+        $actionDemolish = $this->findByName("collapse");
         for ($i = 0; $i < 4; $i++) $out[] = $actionDemolish->id;
 
         // Add 4 enlighten cards

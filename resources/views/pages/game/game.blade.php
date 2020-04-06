@@ -18,7 +18,9 @@
         cart-icon-url="{{ asset('storage/images/icons/minecart.svg') }}"
         light-icon-url="{{ asset('storage/images/icons/lantern.svg') }}"
         pickaxe-icon-url="{{ asset('storage/images/icons/pickaxe.svg') }}"
-        gold-icon-url="{{ asset('storage/images/icons/gold.svg') }}">
+        gold-icon-url="{{ asset('storage/images/icons/gold.svg') }}"
+        gold-bars-icon-url="{{ asset('storage/images/icons/gold-bars.svg') }}"
+        coal-icon-url="{{ asset('storage/images/icons/rock.svg') }}">
     </game>
 
 @stop

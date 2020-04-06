@@ -11,6 +11,7 @@ class Card extends Model
     protected $fillable = [
         "type",
         "text",
+        "description",
         "action",
         "open_positions",
     ];
