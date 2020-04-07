@@ -491,7 +491,7 @@ class GameService implements ModelServiceContract
                 // Collapse card
                 case "collapse":
                     if (!array_key_exists("target_coordinates", $data)) throw new Exception("Missing target tile coordinates");
-                    $this->playCollapseCard($game, $player, $card, $data);
+                    $output["board"] = $this->playCollapseCard($game, $player, $card, $data);
                 break;
             }
         }
@@ -503,7 +503,7 @@ class GameService implements ModelServiceContract
             if (!array_key_exists("inverted", $data)) throw new Exception("Missing inverted property");
 
             // Play the card
-            $this->playTunnelCard($game, $player, $card, $data);
+            $output["board"] = $this->playTunnelCard($game, $player, $card, $data);
         }
 
         // Draw a new card
@@ -512,9 +512,10 @@ class GameService implements ModelServiceContract
         // End the player's turn
         $this->endTurn($game, $player);
 
-        // Return the drawn card
+        // Add the drawn card to the output
         $output["new_card"] = $newCard ? Cards::preload($newCard) : false;
-        
+
+        // Return the output
         return $output;
     }
 
@@ -654,26 +655,22 @@ class GameService implements ModelServiceContract
         $game->save();
 
         // Broadcast event to all other players
-        broadcast(new PlayerCollapsedTunnel($game, $player, $card, (array) $data["target_coordinates"]))->toOthers(); 
+        broadcast(new PlayerCollapsedTunnel($game, $player, (array) $data["target_coordinates"]))->toOthers();
+
+        // Return the updated board
+        return $board;
     }
 
     private function playTunnelCard(Game $game, Player $player, Card $card, array $data)
     {
-        // Grab the game board
-        $board = $game->board;
-        
-        // Place the tunnel card on the given coordinates
-        $board[$data["target_coordinates"]->y][$data["target_coordinates"]->x] = [
-            "card_id" => $card->id,
-            "inverted" => $data["inverted"]
-        ];
-
-        // Update the board on the game
-        $game->board = $board;
-        $game->save();
+        // Place the card on the board
+        $board = Board::placeCard($game, $card, $data["inverted"], $data["target_coordinates"]->x, $data["target_coordinates"]->y);
 
         // Broadcast event to all other players to inform them of the update
         broadcast(new PlayerPlacedTunnel($game, $player, $card, (array) $data["target_coordinates"], $data["inverted"]))->toOthers();
+
+        // Return the updated board
+        return $board;
     }
 
     private function drawCard(Game $game, Player $player = null, $amount = 1)

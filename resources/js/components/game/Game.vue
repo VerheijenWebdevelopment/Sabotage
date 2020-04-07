@@ -20,7 +20,7 @@
 
                     <!-- Please wait text -->
                     <div id="role-selection__text" v-if="playerAtPlay">
-                        {{ playerAtPlay.user.username }} is currently picking a role.
+                        Waiting for other players to select their role.
                     </div>
 
                 </div>
@@ -404,7 +404,7 @@
                     <div class="select-player">
                         <div class="select-player__title">Select target player</div>
                         <div class="select-player__list">
-                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayers" :key="pi" v-if="player.id !== mutablePlayer.id">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
                                 <div class="player-option" :class="{ selected: dialogs.confirm_sabotage_player.player_id === player.id }" @click="onClickSelectPlayer('sabotage', player.id)">
                                     {{ player.user.username }}
                                 </div>
@@ -412,6 +412,16 @@
                         </div>
                     </div>
                     <!-- Select tool -->
+                    <div class="select-tool" v-if="showSabotageToolSelection(dialogs.confirm_sabotage_player.card_index)">
+                        <div class="select-tool__title">Select tool to sabotage</div>
+                        <div class="select-tool__list">
+                            <div class="select-tool__list-item" v-for="(tool, ti) in getSabotageToolSelectionOptions(dialogs.confirm_sabotage_player.card_index)" :key="ti">
+                                <div class="tool-option" :class="{ selected: dialogs.confirm_sabotage_player.tool === tool }" @click="onClickSelectTool('sabotage', tool)">
+                                    {{ tool }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Controls -->
                 <div class="dialog-controls">
@@ -421,7 +431,7 @@
                         </v-btn>
                     </div>
                     <div class="dialog-controls__right">
-                        <v-btn dark @click="onClickConfirmSabotagePlayer" :loading="dialogs.confirm_sabotage_player.loading" :disabled="dialogs.confirm_sabotage_player.player_id === null">
+                        <v-btn dark @click="onClickConfirmSabotagePlayer" :loading="dialogs.confirm_sabotage_player.loading" :disabled="disableConfirmSabotageTool">
                             Sabotage player's tool
                         </v-btn>
                     </div>
@@ -452,10 +462,14 @@
                         </div>
                     </div>
                     <!-- Select tool -->
-                    <div class="select-tool" v-if="showRecoverToolSelection">
+                    <div class="select-tool" v-if="showRecoverToolSelection(dialogs.confirm_recover_player.card_index)">
                         <div class="select-tool__title">Select tool to recover</div>
                         <div class="select-tool__list">
-
+                            <div class="select-tool__list-item" v-for="(tool, ti) in getRecoverToolSelectionOptions(dialogs.confirm_recover_player.card_index)" :key="ti">
+                                <div class="tool-option" :class="{ selected: dialogs.confirm_recover_player.tool === tool }" @click="onClickSelectTool('recover', tool)">
+                                    {{ tool }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -467,7 +481,7 @@
                         </v-btn>
                     </div>
                     <div class="dialog-controls__right">
-                        <v-btn dark @click="onClickConfirmRecoverPlayer" :loading="dialogs.confirm_recover_player.loading" :disabled="dialogs.confirm_recover_player.player_id === null">
+                        <v-btn dark @click="onClickConfirmRecoverPlayer" :loading="dialogs.confirm_recover_player.loading" :disabled="disableConfirmRecoverTool">
                             Recover player's tool
                         </v-btn>
                     </div>
@@ -524,7 +538,7 @@
                             <div id="preview">
                                 <div class="preview-row" v-for="(row, ri) in dialogs.confirm_place_tunnel.preview" :key="ri">
                                     <div class="preview-col" v-for="(col, ci) in dialogs.confirm_place_tunnel.preview[ri]" :key="ci">
-                                        <div class="preview-card" v-if="col !== null" :style="{ backgroundImage: 'url('+getCardImageById(col.card_id)+')' }"></div>
+                                        <div class="preview-card" v-if="col !== null" :class="{ inverted: col.inverted }" :style="{ backgroundImage: 'url('+getCardImageById(col.card_id)+')' }"></div>
                                     </div>
                                 </div>
                             </div>
@@ -606,6 +620,7 @@
                 },
                 confirm_recover_player: {
                     show: false,
+                    card_index: null,
                     player_id: null,
                     tool: null,
                 },
@@ -710,19 +725,36 @@
                 out += " gold location.";
                 return out;
             },
-            showRecoverToolSelection() {
-                let recoverCard = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
-                if (recoverCard) {
-                    return recoverCard.name === "recover_pickaxe_light" || recoverCard.name === "recover_pickaxe_axe" || recoverCard.name === "recover_light_cart";
+            mutablePlayersExcludingMe() {
+                let out = [];
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id !== this.mutablePlayer.id) {
+                        out.push(this.mutablePlayers[i]);
+                    }
                 }
-                return false;
+                return out;
             },
-            showSabotageToolSelection() {
-                let recoverCard = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
-                if (recoverCard) {
-                    return recoverCard.name === "sabotage_pickaxe_light" || recoverCard.name === "sabotage_pickaxe_axe" || recoverCard.name === "sabotage_light_cart";
+            disableConfirmRecoverTool() {
+                let card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+                if (card) {
+                    if (card.name === "recover_pickaxe_light" || card.name === "recover_pickaxe_cart" || card.name === "recover_light_cart") {
+                        return this.dialogs.confirm_recover_player.player_id === null || this.dialogs.confirm_recover_player.tool === null ? true : false;
+                    } else {
+                        return this.dialogs.confirm_recover_player.player_id === null ? true : false;
+                    }
                 }
-                return false;
+                return true;
+            },
+            disableConfirmSabotageTool() {
+                let card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+                if (card) {
+                    if (card.name === "sabotage_pickaxe_light" || card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_light_cart") {
+                        return this.dialogs.confirm_sabotage_player.player_id === null || this.dialogs.confirm_sabotage_player.tool === null ? true : false;
+                    } else {
+                        return this.dialogs.confirm_sabotage_player.player_id === null ? true : false;
+                    }
+                }
+                return true;
             },
         },
         methods: {
@@ -867,22 +899,18 @@
             onPlayerPlacedTunnel(e) {
                 console.log(this.tag+"[event] player placed tunnel", e);
                 // Update the board
-                this.mutableBoard[e.coordinates.y][e.coordinates.x] = {
-                    card_id: e.card.id,
-                    inverted: e.inverted,
-                };
-                this.$forceUpdate();
+                this.mutableBoard = e.game.board;
                 // Notify user wassup
                 let player = this.getPlayerById(e.player.id);
-                this.$toasted.show(player.user.username+" has placed a tunnel on coordinates "+e.coordinates.x+":"+e.coordinates.y, { duration: 3000 });
+                this.$toasted.show(player.user.username+" has placed a tunnel on "+e.coordinates.x+":"+e.coordinates.y, { duration: 3000 });
             },
             onPlayerCollapsedTunnel(e) {
                 console.log(this.tag+"[event] player collapsed tunnel", e);
                 // Update the board
-                this.mutableBoard[e.coordinates.y][e.coordinates.x] = null;
+                this.mutableBoard = e.game.board
                 // Notify user wassup
                 let player = this.getPlayerById(e.player.id);
-                this.$toasted.show(player.user.username+" has placed a tunnel on coordinates "+e.coordinates.x+":"+e.coordinates.y, { duration: 3000 });
+                this.$toasted.show(player.user.username+" has collapsed the tunnel on "+e.coordinates.x+":"+e.coordinates.y, { duration: 3000 });
             },
             onTurnEnded(e) {
                 console.log(this.tag+"[event] turn ended", e);
@@ -1081,9 +1109,7 @@
             },
             // Confirm sabotage & recover dialog
             onClickSelectPlayer(dialog, playerId) {
-                console.log(this.tag+" clicked player option");
-                console.log(this.tag+" dialog: ", dialog);
-                console.log(this.tag+" player id: ", playerId);
+                console.log(this.tag+" clicked player option", dialog, playerId);
                 if (dialog === "recover") {
                     if (this.dialogs.confirm_recover_player.player_id === playerId) {
                         this.dialogs.confirm_recover_player.player_id = null;
@@ -1099,7 +1125,20 @@
                 }
             },
             onClickSelectTool(dialog, tool) {
-
+                console.log(this.tag+" clicked tool option", dialog, tool);
+                if (dialog === "recover") {
+                    if (this.dialogs.confirm_recover_player.tool === tool) {
+                        this.dialogs.confirm_recover_player.tool = null;
+                    } else {
+                        this.dialogs.confirm_recover_player.tool = tool;
+                    }
+                } else {
+                    if (this.dialogs.confirm_sabotage_player.tool === tool) {
+                        this.dialogs.confirm_sabotage_player.tool = null;
+                    } else {
+                        this.dialogs.confirm_sabotage_player.tool = tool;
+                    }
+                }
             },
             // Confirm sabotage player dialog
             onClickCancelSabotagePlayer() {
@@ -1255,6 +1294,41 @@
             onClickConfirmCollapseTunnel() {
                 console.log(this.tag+" clicked confirm collapse tunnel");
 
+                // Init loading
+                this.dialogs.confirm_collapse_tunnel.loading = true;
+
+                // Compose data to send with API request
+                let data = {
+                    index: this.dialogs.confirm_collapse_tunnel.card_index,
+                    target_coordinates: this.dialogs.confirm_collapse_tunnel.tunnel_coordinates
+                };
+
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+
+                    // If request succeeded
+                    .then(function(response) {
+
+                        // Update the game board
+                        this.mutableBoard = response.data.board;
+
+                        // Update the player's hand
+                        this.mutableHand.splice(this.dialogs.confirm_collapse_tunnel.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push(response.data.new_card);
+
+                        // Hide the dialog
+                        this.dialogs.confirm_collapse_tunnel.loading = false;
+                        this.dialogs.confirm_collapse_tunnel.show = false;
+
+                    }.bind(this))
+
+                    // If request failed
+                    .catch(function(error) {
+                        console.warn(this.tag+" failed to play collapse tunnel card", error);
+                        this.dialogs.confirm_collapse_tunnel.loading = false;
+                        this.$toasted.show("Failed to play collapse tunnel card, error: "+error);
+                    }.bind(this));
+
             },
             // Confirm place tunnel dialog
             onClickCancelPlaceTunnel() {
@@ -1278,21 +1352,14 @@
                 this.sendPerformActionRequest("play_card", data)
                     
                     .then(function(response) {
-                        console.log(this.tag+" operation succeeded");
+                        console.log(this.tag+" operation succeeded!", response);
                         
                         // Grab card from player's hand
                         let card = this.mutableHand[this.dialogs.confirm_place_tunnel.card_index];
                         console.log(this.tag+" card: ", card);
 
                         // Update the game board
-                        let coords = this.dialogs.confirm_place_tunnel.tunnel_coordinates;
-                        console.log(this.tag+" coords: ", coords);
-                        this.mutableBoard[coords.y][coords.x] = {
-                            card_id: card.id,
-                            inverted: this.dialogs.confirm_place_tunnel.inverted,
-                        };
-                        console.log(this.tag+" tile: ", this.mutableBoard[coords.y][coords.x]);
-                        this.$forceUpdate();
+                        this.mutableBoard = response.data.board;
 
                         // Update the player's hand
                         this.mutableHand.splice(this.dialogs.confirm_place_tunnel.card_index, 1);
@@ -1449,7 +1516,11 @@
                         if (ci === coordinates.columnIndex && ri === coordinates.rowIndex) {
                             row.push({ card_id: card.id, inverted: inverted });
                         } else {
-                            row.push(this.mutableBoard[ri][ci]);
+                            if (this.mutableBoard[ri] !== undefined && this.mutableBoard[ri][ci] !== undefined) {
+                                row.push(this.mutableBoard[ri][ci]);
+                            } else {
+                                row.push(null);
+                            }
                         }
                     }
                     out.push(row);
@@ -1530,7 +1601,7 @@
                 // Check tile above
                 let tileAbove = [rowIndex-1, columnIndex];
                 console.log(this.tag+" tile above: ", tileAbove);
-                if (this.mutableBoard[tileAbove[0]][tileAbove[1]] !== null) {
+                if (this.mutableBoard[tileAbove[0]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== null) {
                     console.log(this.tag+" card id: ", this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
                     console.log(this.tag+" card on tile: ", card);
@@ -1543,11 +1614,11 @@
                 // Check tile to the right
                 let tileRight = [rowIndex, columnIndex+1];
                 console.log(this.tag+" tile right: ", tileRight);
-                if (this.mutableBoard[tileRight[0]][tileRight[1]] !== null) {
+                if (this.mutableBoard[tileRight[0]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== null) {
                     console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
                     console.log(this.tag+" card on tile: ", card);
-                    if (card && card.type !== "gold_location" && (cart.type === "start" || card.open_positions.includes("left"))) {
+                    if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("left"))) {
                         console.log(this.tag+" connecting card found on tile to the right, available");
                         return true;
                     }
@@ -1556,7 +1627,7 @@
                 // Check tile below
                 let tileBelow = [rowIndex+1, columnIndex];
                 console.log(this.tag+" tile below: ", tileBelow);
-                if (this.mutableBoard[tileBelow[0]][tileBelow[1]] !== null) {
+                if (this.mutableBoard[tileBelow[0]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== null) {
                     console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
                     console.log(this.tag+" card on tile: ", card);
@@ -1569,7 +1640,7 @@
                 // Check tile to the left
                 let tileLeft  = [rowIndex, columnIndex-1];
                 console.log(this.tag+" tile left: ", tileLeft);
-                if (this.mutableBoard[tileLeft[0]][tileLeft[1]] !== null) {
+                if (this.mutableBoard[tileLeft[0]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== null) {
                     console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
                     console.log(this.tag+" card on tile: ", card);
@@ -1593,7 +1664,7 @@
 
                 // Check card above
                 let coordsAbove = { rowIndex: rowIndex - 1, columnIndex: columnIndex };
-                if (this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex] !== null) {
+                if (this.mutableBoard[coordsAbove.rowIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex] !== null) {
                     console.log("tile above taken");
                     let card = this.getCardById(this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
                     if (card) {
@@ -1601,10 +1672,18 @@
                         if (card.type === "start") {
                             requiredOpenPositions.push("top");
                         } else {
-                            if (card.open_positions.includes("bottom")) {
-                                requiredOpenPositions.push("top");
+                            if (this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
+                                if (card.open_positions.includes("top")) {
+                                    requiredOpenPositions.push("top");
+                                } else {
+                                    requiredClosedPositions.push("top");
+                                }
                             } else {
-                                requiredClosedPositions.push("top");
+                                if (card.open_positions.includes("bottom")) {
+                                    requiredOpenPositions.push("top");
+                                } else {
+                                    requiredClosedPositions.push("top");
+                                }
                             }
                         }
                     }
@@ -1612,7 +1691,7 @@
 
                 // Check card to the right
                 let coordsRight = { rowIndex: rowIndex, columnIndex: columnIndex + 1 };
-                if (this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== null) {
+                if (this.mutableBoard[coordsRight.rowIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== null) {
                     console.log("tile right taken");
                     let card = this.getCardById(this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
                     if (card) {
@@ -1620,10 +1699,18 @@
                         if (card.type === "start") {
                             requiredOpenPositions.push("right");
                         } else {
-                            if (card.open_positions.includes("left")) {
-                                requiredOpenPositions.push("right");
+                            if (this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
+                                if (card.open_positions.includes("right")) {
+                                    requiredOpenPositions.push("right");
+                                } else {
+                                    requiredClosedPositions.push("right");
+                                }
                             } else {
-                                requiredClosedPositions.push("right");
+                                if (card.open_positions.includes("left")) {
+                                    requiredOpenPositions.push("right");
+                                } else {
+                                    requiredClosedPositions.push("right");
+                                }
                             }
                         }
                     }
@@ -1631,7 +1718,7 @@
 
                 // Check card below
                 let coordsBelow = { rowIndex: rowIndex + 1, columnIndex: columnIndex };
-                if (this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== null) {
+                if (this.mutableBoard[coordsBelow.rowIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== null) {
                     console.log("tile below taken");
                     let card = this.getCardById(this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
                     if (card) {
@@ -1639,10 +1726,18 @@
                         if (card.type === "start") {
                             requiredOpenPositions.push("bottom");
                         } else {
-                            if (card.open_positions.includes("top")) {
-                                requiredOpenPositions.push("bottom");
+                            if (this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
+                                if (card.open_positions.includes("bottom")) {
+                                    requiredOpenPositions.push("bottom");
+                                } else {
+                                    requiredClosedPositions.push("bottom");
+                                }
                             } else {
-                                requiredClosedPositions.push("bottom");
+                                if (card.open_positions.includes("top")) {
+                                    requiredOpenPositions.push("bottom");
+                                } else {
+                                    requiredClosedPositions.push("bottom");
+                                }
                             }
                         }
                     }
@@ -1650,7 +1745,7 @@
 
                 // Check card to the left
                 let coordsLeft = { rowIndex: rowIndex, columnIndex: columnIndex - 1};
-                if (this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== null) {
+                if (this.mutableBoard[coordsLeft.rowIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== null) {
                     console.log("tile left taken", this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
                     let card = this.getCardById(this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
                     if (card) {
@@ -1658,10 +1753,18 @@
                         if (card.type === "start") {
                             requiredOpenPositions.push("left");
                         } else {
-                            if (card.open_positions.includes("right")) {
-                                requiredOpenPositions.push("left");
+                            if (this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
+                                if (card.open_positions.includes("left")) {
+                                    requiredOpenPositions.push("left");
+                                } else {
+                                    requiredClosedPositions.push("left");
+                                }
                             } else {
-                                requiredClosedPositions.push("left");
+                                if (card.open_positions.includes("right")) {
+                                    requiredOpenPositions.push("left");
+                                } else {
+                                    requiredClosedPositions.push("left");
+                                }
                             }
                         }                     
                     }
@@ -1672,7 +1775,7 @@
 
                 // If the card meets the requirements (in it's current state)
                 let meetsRequirements = true;
-                if (!card.inverted) {
+                if (!this.dialogs.view_card.inverted) {
                     console.log(this.tag+" checking if (non-inverted) card fits on the tile");
                     // Validate against the required open & closed positions
                     for (let i = 0; i < requiredOpenPositions.length; i++) {
@@ -1729,7 +1832,55 @@
                     }
                 }
                 return false;
-            }
+            },
+            showRecoverToolSelection(cardIndex) {
+                let recoverCard = this.mutableHand[cardIndex];
+                if (recoverCard) {
+                    return recoverCard.name === "recover_pickaxe_light" || recoverCard.name === "recover_pickaxe_axe" || recoverCard.name === "recover_light_cart";
+                }
+                return false;
+            },
+            getRecoverToolSelectionOptions(cardIndex) {
+                let out = [];
+                let recoverCard = this.mutableHand[cardIndex];
+                if (recoverCard) {
+                    if (recoverCard.name === "recover_pickaxe_light") {
+                        out.push("pickaxe");
+                        out.push("light");
+                    } else if (recoverCard.name === "recover_pickaxe_cart") {
+                        out.push("pickaxe");
+                        out.push("cart");
+                    } else {
+                        out.push("light");
+                        out.push("cart");
+                    }
+                }
+                return out;
+            },
+            showSabotageToolSelection(cardIndex) {
+                let sabotageCard = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+                if (sabotageCard) {
+                    return sabotageCard.name === "sabotage_pickaxe_light" || sabotageCard.name === "sabotage_pickaxe_axe" || sabotageCard.name === "sabotage_light_cart";
+                }
+                return false;
+            },
+            getSabotageToolSelectionOptions(cardIndex) {
+                let out = [];
+                let sabotageCard = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+                if (sabotageCard) {
+                    if (sabotageCard.name === "sabotage_pickaxe_light") {
+                        out.push("pickaxe");
+                        out.push("light");
+                    } else if (sabotageCard.name === "sabotage_pickaxe_cart") {
+                        out.push("pickaxe");
+                        out.push("cart");
+                    } else {
+                        out.push("light");
+                        out.push("cart");
+                    }
+                }
+                return out;
+            },
         },
         mounted() {
             this.initialize();
@@ -1896,6 +2047,7 @@
                     #game-info {
                         top: 20px;
                         left: 25px;
+                        z-index: 10;
                         position: absolute;
                         #game-info__current-round {
                             font-size: 2em;
@@ -1916,6 +2068,7 @@
                     #action-mode__wrapper {
                         left: 0;
                         top: 30px;
+                        z-index: 10;
                         width: 100%;
                         display: flex;
                         position: absolute;
@@ -2226,6 +2379,43 @@
             }
         }
     }
+    .select-tool {
+        width: 100%;
+        margin: 15px 0 0 0;
+        .select-tool__title {
+            margin: 0 0 10px 0;
+        }
+        .select-tool__list {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            margin: 0 -15px -30px -15px;
+            .select-tool__list-item {
+                flex: 0 0 50%;
+                box-sizing: border-box;
+                padding: 0 15px 30px 15px;
+                .tool-option {
+                    padding: 15px;
+                    color: #000;
+                    border-radius: 3px;
+                    transition: all .3s;
+                    box-sizing: border-box;
+                    text-transform: capitalize;
+                    background-color: rgba(255, 255, 255, .25);
+                    &:hover {
+                        cursor: pointer;
+                        background-color: rgba(255, 255, 255, .5);
+                    }
+                    &.selected {
+                        background-color: rgba(255, 255, 255, 1);
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
     #place-tunnel {
         display: flex;
         flex-direction: row;
@@ -2256,6 +2446,9 @@
                             background-size: contain;
                             background-repeat: no-repeat;
                             background-position: center center;
+                            &.inverted {
+                                transform: rotate(180deg);
+                            }
                         }
                     }
                 }

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Cards;
+
+use App\Models\Card;
 use App\Models\Game;
 
 class BoardService
@@ -48,13 +50,16 @@ class BoardService
         return $board;
     }
 
-    public function placeCard(Game $game, Card $card, $x, $y)
+    public function placeCard(Game $game, Card $card, bool $inverted, $x, $y)
     {
         // Grab the current state of the board
         $board = $game->board;
 
         // Add the card to the board & save the new board on the game
-        $board[$x][$y] = $card->id;
+        $board[$y][$x] = [
+            "card_id" => $card->id,
+            "inverted" => $inverted,   
+        ];
 
         // If we placed a card on the top row; add a row at the top of the board
         if ($y == 0) $board = $this->addRowToBoard($board, "top");
@@ -73,7 +78,7 @@ class BoardService
         $game->save();
 
         // Return updated game
-        return $game;
+        return $board;
     }
 
     public function addRowToBoard(array $board, string $direction)

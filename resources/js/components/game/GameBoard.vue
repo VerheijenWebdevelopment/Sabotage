@@ -6,7 +6,7 @@
                     <div class="board-cell" v-for="(card, ci) in row" :key="ci" @click="onClickTile(ri, ci)">
                         <div class="coordinates">{{ ci+","+ri }}</div>
                         <div class="card" v-if="card !== null">
-                            <div class="card-image" :style="{ backgroundImage: 'url('+getCardImageById(card.card_id)+')' }"></div>
+                            <div class="card-image" :class="{ inverted: card.inverted }" :style="{ backgroundImage: 'url('+getCardImageById(card.card_id)+')' }"></div>
                         </div>
                     </div>
                 </div>
@@ -158,15 +158,21 @@
                         height: 200px;
                         flex: 0 0 130px;
                         position: relative;
+                        overflow: hidden;
+                        box-sizing: border-box;
                         border-right: 1px dashed rgba(255, 255, 255, 0.1);
                         .coordinates {
                             top: 15px;
                             left: 15px;
+                            z-index: 15;
                             font-size: .8em;
                             position: absolute;
                             color: rgba(255, 255, 255, .15);
                         }
                         .card {
+                            top: 0;
+                            left: 0;
+                            position: absolute;
                             .card-image {
                                 width: 130px;
                                 height: 200px;
@@ -174,6 +180,9 @@
                                 background-size: contain;
                                 background-repeat: no-repeat;
                                 background-position: center center;
+                                &.inverted {
+                                    transform: rotate(180deg);
+                                }
                             }
                         }
                     }

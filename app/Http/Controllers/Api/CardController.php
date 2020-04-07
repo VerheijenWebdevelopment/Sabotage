@@ -68,7 +68,7 @@ class CardController extends Controller
             elseif ($card->type == "tunnel")
             {
                 $image = $this->addTunnel($image, $card);
-                $image = $this->addHeaderText($image, "Tunnel Card");
+                // $image = $this->addHeaderText($image, "Tunnel Card");
             }
         }
 
