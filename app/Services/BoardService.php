@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Log;
 use Cards;
 
 use App\Models\Card;
@@ -144,5 +145,238 @@ class BoardService
 
         // Return updated board
         return $new_board;
+    }
+
+    public function goldLocationsReached(array $board)
+    {
+        // Grab coordinates of start card and gold locations
+        $startCoordinates = $this->findCardCoordsByName("start", $board);
+        $goldLocationCoordinates = $this->determineGoldLocationCoords($startCoordinates);
+
+        // Loop through each of the gold locations
+        $reachedGoldLocations = [];
+        foreach ($goldLocationCoordinates as $number => $coords)
+        {
+            $reached_target = $this->traverseToTarget($startCoordinates, null, $coords, $board);
+            if ($reached_target)
+            {
+                $reachedGoldLocations[] = $number;
+            }
+        }
+
+        // Return the gold locations that have been reached
+        return $reachedGoldLocations;
+    }
+
+    private function findCardCoordsByName($name, array $board)
+    {
+        $card = Cards::findByName($name);
+
+        for ($rowIndex = 0; $rowIndex < count($board); $rowIndex++)
+        {
+            for ($columnIndex = 0; $columnIndex < count($board[$rowIndex]); $columnIndex++)
+            {
+                if ($board[$rowIndex][$columnIndex] != null && $board[$rowIndex][$columnIndex]["card_id"] == $card->id)
+                {
+                    return [
+                        "rowIndex" => $rowIndex, 
+                        "columnIndex" => $columnIndex
+                    ];
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function determineGoldLocationCoords($startCoords)
+    {
+        return [
+            1 => [
+                "rowIndex" => $startCoords["rowIndex"] - 2,
+                "columnIndex" => $startCoords["columnIndex"] + 8,
+            ],
+            2 => [
+                "rowIndex" => $startCoords["rowIndex"],
+                "columnIndex" => $startCoords["columnIndex"] + 8,
+            ],
+            3 => [
+                "rowIndex" => $startCoords["rowIndex"] + 2,
+                "columnIndex" => $startCoords["columnIndex"] + 8,
+            ],
+        ];
+    }
+
+    private function traverseToTarget($coords, $prevCoords, $targetCoords, $board)
+    {
+        // Grab the card on the current tile's coordinates
+        $card = Card::find($board[$coords["rowIndex"]][$coords["columnIndex"]]["card_id"]);
+        $inverted = $board[$coords["rowIndex"]][$coords["columnIndex"]]["inverted"];
+        
+        // Determine which tiles are connected (by tunnel) and save their coordinates & direction we're coming from
+        $connected_tiles = [];
+        if (is_array($card->open_positions) && count($card->open_positions))
+        {
+            foreach ($card->open_positions as $open_position)
+            {
+                switch ($open_position)
+                {
+                    case "top":
+                        if (!$inverted) {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"] - 1, "columnIndex" => $coords["columnIndex"]];
+                        } else {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"] + 1, "columnIndex" => $coords["columnIndex"]];
+                        }
+                    break;
+                    case "right":
+                        if (!$inverted) {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"], "columnIndex" => $coords["columnIndex"] + 1];
+                        } else {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"], "columnIndex" => $coords["columnIndex"] - 1];
+                        }
+                    break;
+                    case "bottom":
+                        if (!$inverted) {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"] + 1, "columnIndex" => $coords["columnIndex"]];
+                        } else {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"] - 1, "columnIndex" => $coords["columnIndex"]];
+                        }
+                    break;
+                    case "left":
+                        if (!$inverted) {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"], "columnIndex" => $coords["columnIndex"] - 1];
+                        } else {
+                            $connected_tiles[] = ["rowIndex" => $coords["rowIndex"], "columnIndex" => $coords["columnIndex"] + 1];
+                        }
+                    break;
+                }
+            }
+        }
+
+        // If one of the connecting tiles is the tile we're targetting, return true!
+        foreach ($connected_tiles as $connected_tile)
+        {
+            Log::debug("Connected tile: ".$connected_tile["rowIndex"].",".$connected_tile["columnIndex"]." (target: ".$targetCoords["rowIndex"].",".$targetCoords["columnIndex"].")");
+            if ($connected_tile["rowIndex"] == $targetCoords["rowIndex"] && $connected_tile["columnIndex"] == $targetCoords["columnIndex"])
+            {
+                return true;
+            }
+        }
+
+        // Determine which of the connected tiles has a card on it
+        $connected_tunnel_tiles = [];
+        foreach ($connected_tiles as $connected_tile)
+        {
+            // If this is the previous tile we were on; skip it
+            if ($this->tileHasBeenTraversed($connected_tile, $prevCoords)) continue;
+
+            // If there is a card on the connected tile; it's a tunnel card jaj
+            if (!is_null($board[$connected_tile["rowIndex"]][$connected_tile["columnIndex"]]))
+            {
+                $connected_tunnel_tiles[] = $connected_tile;
+            }
+        }
+
+        // If we've reached this point the connected tiles are not the target tile; so lets' keep on searching
+        $prevCoords[] = $coords;
+        foreach ($connected_tunnel_tiles as $connected_tunnel_tile)
+        {
+            if ($this->traverseToTarget($connected_tunnel_tile, $prevCoords, $targetCoords, $board))
+            {
+                return true;
+            }
+        }
+        
+        // If we've reached this point, return false
+        return false;
+    }
+
+    private function tileHasBeenTraversed($coords, $prevCoords)
+    {
+        if (is_array($prevCoords) && count($prevCoords))
+        {
+            foreach ($prevCoords as $prevCoord)
+            {
+                if ($prevCoord["rowIndex"] == $coords["rowIndex"] && $prevCoord["columnIndex"] == $coords["columnIndex"])
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function cardIsConnected($direction, $card, $inverted)
+    {
+        switch ($direction)
+        {
+            case "top": // so current card is below
+                if ($inverted) {
+                    return array_key_exists("top", $card->open_positions);
+                } else {
+                    return array_key_exists("bottom", $card->open_positions);
+                }
+            break;
+            case "right": // so current card is to the left
+                if ($inverted) {
+                    return array_key_exists("right", $card->open_positions);
+                } else {
+                    return array_key_exists("left", $card->open_positions);    
+                }
+            break;
+            case "bottom": // so current card is above
+                if ($inverted) {
+                    return array_key_exists("bottom", $card->open_positions);
+                } else {
+                    return array_key_exists("top", $card->open_positions);
+                }
+            break;
+            case "left": // so current is to the right
+                if ($inverted) {
+                    return array_key_exists("left", $card->open_positions);
+                } else {
+                    return array_key_exists("right", $card->open_positions);
+                }
+            break;
+        }
+
+        return false;
+    }
+
+    public function revealGoldLocation(Game $game, int $goldLocation)
+    {
+        // Determine if the revealed gold locations contains gold or not
+        $contains_gold = $goldLocation == $game->gold_location ? true : false;
+
+        // Add the gold location to the list of revealed gold locations
+        $reachedGoldLocations = $game->reached_gold_locations;
+        $reachedGoldLocations[$goldLocation] = $contains_gold;
+        $game->reached_gold_locations = $reachedGoldLocations;
+
+        // Determine the coordinates of the start card & all of the gold location cards
+        $startCardCoords = $this->findCardCoordsByName("start", $game->board);
+        $goldCardCoords = $this->determineGoldLocationCoords($startCardCoords);
+
+        // Grab the coal & gold cards
+        $coalCard = Cards::findByName("coal");
+        $goldCard = Cards::findByName("gold");
+
+        // Grab the coordinates of the revealed gold location
+        $goldLocationCoords = $goldCardCoords[$goldLocation];
+
+        // Update the gold location's card on the board
+        $board = $game->board;
+        $board[$goldLocationCoords["rowIndex"]][$goldLocationCoords["columnIndex"]] = [
+            "card_id" => $contains_gold ? $goldCard->id : $coalCard->id,
+            "inverted" => false,
+        ];
+        $game->board = $board;
+
+        // Save changes we made to the game
+        $game->save();
+
+        // Return the updated game
+        return $game;
     }
 }

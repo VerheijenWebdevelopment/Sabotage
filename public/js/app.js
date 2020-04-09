@@ -3256,6 +3256,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "player", "playerRole", "hand", "roles", "cards", "sendMessageApiEndpoint", "performActionApiEndpoint", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl", "goldIconUrl", "goldBarsIconUrl", "coalIconUrl"],
   data: function data() {
@@ -3444,6 +3460,79 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return true;
+    },
+    allToolsAvailable: function allToolsAvailable() {
+      return this.mutablePlayer.pickaxe_available && this.mutablePlayer.light_available && this.mutablePlayer.cart_available;
+    },
+    missingToolsText: function missingToolsText() {
+      var missing = [];
+      if (!this.mutablePlayer.pickaxe_available) missing.push("pickaxe");
+      if (!this.mutablePlayer.light_available) missing.push("light");
+      if (!this.mutablePlayer.cart_available) missing.push("cart");
+
+      if (missing.length === 0) {
+        return "All of your tools are available";
+      } else if (missing.length === 1) {
+        return "Your " + missing[0] + " is disabled";
+      } else {
+        var out = "Your ";
+
+        if (missing.length === 2) {
+          out += missing[0] + " and " + missing[1] + " are disabled";
+        } else {
+          out += missing[0] + ", " + missing[1] + " and " + missing[2] + " are disabled";
+        }
+
+        return out;
+      }
+    },
+    showPlayCardButton: function showPlayCardButton() {
+      if (this.viewCardDialogCard.type === "tunnel") {
+        console.log("tunnel!", this.allToolsAvailable);
+        return this.allToolsAvailable;
+      }
+
+      return true;
+    },
+    recoverToolDialogTitle: function recoverToolDialogTitle() {
+      if (this.dialogs.confirm_recover_player.card_index !== null) {
+        var out = "Recover player's ";
+        var card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+
+        if (card.name === "recover_pickaxe") {
+          out += "pickaxe";
+        } else if (card.name === "recover_light") {
+          out += "light";
+        } else if (card.name === "recover_cart") {
+          out += "cart";
+        } else {
+          out += "tool";
+        }
+
+        return out;
+      }
+
+      return "";
+    },
+    sabotageToolDialogTitle: function sabotageToolDialogTitle() {
+      if (this.dialogs.confirm_sabotage_player.card_index !== null) {
+        var out = "Sabotage player's ";
+        var card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+
+        if (card.name === "sabotage_pickaxe") {
+          out += "pickaxe";
+        } else if (card.name === "sabotage_light") {
+          out += "light";
+        } else if (card.name === "sabotage_cart") {
+          out += "cart";
+        } else {
+          out += "tool";
+        }
+
+        return out;
+      }
+
+      return "";
     }
   },
   methods: {
@@ -3509,7 +3598,7 @@ __webpack_require__.r(__webpack_exports__);
     // Events
     startListening: function startListening() {
       // Connect to the game's channel
-      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
     },
     onPlayerSelectedRole: function onPlayerSelectedRole(e) {
       console.log(this.tag + "[event] player selected role", e); // Add player's ID to the list of players who have selected a role
@@ -3524,7 +3613,10 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     onPlayerToolBlocked: function onPlayerToolBlocked(e) {
-      console.log(this.tag + "[event] player tool blocked", e); // Update the target player's tool's status
+      console.log(this.tag + "[event] player tool blocked", e); // Grab the player and target player
+
+      var player = this.getPlayerById(e.player.id);
+      var targetPlayer = this.getPlayerById(e.target_player.id); // Update the target player's tool's status
 
       for (var i = 0; i < this.mutablePlayers.length; i++) {
         if (this.mutablePlayers[i].id === e.target_player.id) {
@@ -3538,17 +3630,29 @@ __webpack_require__.r(__webpack_exports__);
 
           break;
         }
+      } // If we were the target player, update our mutablePlayer as well
+
+
+      if (targetPlayer.id === this.mutablePlayer.id) {
+        if (e.tool === "pickaxe") {
+          this.mutablePlayer.pickaxe_available = 0;
+        } else if (e.tool === "light") {
+          this.mutablePlayer.light_available = 0;
+        } else if (e.tool === "cart") {
+          this.mutablePlayer.cart_available = 0;
+        }
       } // Notify the player what just happened
 
 
-      var player = this.getPlayerById(e.player.id);
-      var targetPlayer = this.getPlayerById(e.target_player.id);
       this.$toasted.show(player.user.username + " blocked " + targetPlayer.user.username + "'s " + e.tool, {
         duration: 5000
       });
     },
     onPlayerToolRecovered: function onPlayerToolRecovered(e) {
-      console.log(this.tag + "[event] player tool recovered", e); // Update the target player's tool's status
+      console.log(this.tag + "[event] player tool recovered", e); // Grab the player and target player
+
+      var player = this.getPlayerById(e.player.id);
+      var targetPlayer = this.getPlayerById(e.target_player.id); // Update the target player's tool's status
 
       for (var i = 0; i < this.mutablePlayers.length; i++) {
         if (this.mutablePlayers[i].id === e.target_player.id) {
@@ -3562,11 +3666,20 @@ __webpack_require__.r(__webpack_exports__);
 
           break;
         }
+      } // If we were the target player, update our mutablePlayer as well
+
+
+      if (targetPlayer.id === this.mutablePlayer.id) {
+        if (e.tool === "pickaxe") {
+          this.mutablePlayer.pickaxe_available = 1;
+        } else if (e.tool === "light") {
+          this.mutablePlayer.light_available = 1;
+        } else if (e.tool === "cart") {
+          this.mutablePlayer.cart_available = 1;
+        }
       } // Notify the player what just happened
 
 
-      var player = this.getPlayerById(e.player.id);
-      var targetPlayer = this.getPlayerById(e.target_player.id);
       this.$toasted.show(player.user.username + " recovered " + targetPlayer.user.username + "'s " + e.tool, {
         duration: 5000
       });
@@ -3596,6 +3709,15 @@ __webpack_require__.r(__webpack_exports__);
 
       var player = this.getPlayerById(e.player.id);
       this.$toasted.show(player.user.username + " has collapsed the tunnel on " + e.coordinates.x + ":" + e.coordinates.y, {
+        duration: 3000
+      });
+    },
+    onGoldLocationRevealed: function onGoldLocationRevealed(e) {
+      console.log(this.tag + "[event] gold location revealed: ", e); // Update the board
+
+      this.mutableBoard = e.game.board; // Notify user wassup
+
+      this.$toasted.show("Gold location #" + e.gold_location + " has been revealed!", {
         duration: 3000
       });
     },
@@ -3648,6 +3770,7 @@ __webpack_require__.r(__webpack_exports__);
     onClickHandCard: function onClickHandCard(index) {
       console.log(this.tag + " clicked card in hand", index); // this.mutableHand[index].selected = !this.mutableHand[index].selected;
 
+      this.dialogs.view_card.inverted = false;
       this.dialogs.view_card.index = index;
       this.dialogs.view_card.show = true;
     },
@@ -3756,7 +3879,9 @@ __webpack_require__.r(__webpack_exports__);
 
         this.dialogs.reveal_gold_location.gold_location = this.dialogs.confirm_gold_location.gold_location;
         this.dialogs.reveal_gold_location.contains_gold = response.data.contains_gold;
-        this.dialogs.reveal_gold_location.show = true;
+        this.dialogs.reveal_gold_location.show = true; // Reset this dialog
+
+        this.dialogs.confirm_gold_location.gold_location = null;
       }.bind(this)) // When request fails
       ["catch"](function (error) {
         console.warn(this.tag + " failed to play enlighten card", error);
@@ -3815,8 +3940,7 @@ __webpack_require__.r(__webpack_exports__);
         tool: null
       }; // Grab the card we're about to play
 
-      var card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
-      console.log(this.tag + " card: ", card); // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
+      var card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index]; // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
 
       var tool = null;
 
@@ -3831,9 +3955,8 @@ __webpack_require__.r(__webpack_exports__);
         } else {
           tool = "pickaxe";
         }
-      }
+      } // Send API request to play the sabotage card
 
-      console.log(this.tag + " tool: ", tool); // Send API request to play the sabotage card
 
       this.sendPerformActionRequest("play_card", data) // When request succeeds
       .then(function (response) {
@@ -3857,7 +3980,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
         this.dialogs.confirm_sabotage_player.loading = false;
-        this.dialogs.confirm_sabotage_player.show = false;
+        this.dialogs.confirm_sabotage_player.show = false; // Reset the dialog
+
+        this.dialogs.confirm_sabotage_player.player_id = null;
+        this.dialogs.confirm_sabotage_player.tool = null;
       }.bind(this)) // When request fails
       ["catch"](function (error) {
         console.warn(this.tag + " failed to play sabotage card", error);
@@ -3880,9 +4006,7 @@ __webpack_require__.r(__webpack_exports__);
         player_id: this.dialogs.confirm_recover_player.player_id
       }; // Grab the card we're about to play
 
-      var card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
-      console.log("card id: ", this.dialogs.confirm_recover_player.card_index);
-      console.log("card: ", card); // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
+      var card = this.mutableHand[this.dialogs.confirm_recover_player.card_index]; // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
 
       var tool = "pickaxe";
 
@@ -3895,8 +4019,9 @@ __webpack_require__.r(__webpack_exports__);
         } else if (card.name === "recover_cart") {
           tool = "cart";
         }
-      } // Send API request to play the sabotage card
+      }
 
+      console.log(this.tag + " tool: ", tool); // Send API request to play the sabotage card
 
       this.sendPerformActionRequest("play_card", data) // When request succeeds
       .then(function (response) {
@@ -3920,7 +4045,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
         this.dialogs.confirm_recover_player.loading = false;
-        this.dialogs.confirm_recover_player.show = false;
+        this.dialogs.confirm_recover_player.show = false; // Reset the dialog
+
+        this.dialogs.confirm_sabotage_player.player_id = null;
+        this.dialogs.confirm_sabotage_player.tool = null;
       }.bind(this)) // When request fails
       ["catch"](function (error) {
         console.warn(this.tag + " failed to play sabotage card", error);
@@ -3951,7 +4079,9 @@ __webpack_require__.r(__webpack_exports__);
         if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Hide the dialog
 
         this.dialogs.confirm_collapse_tunnel.loading = false;
-        this.dialogs.confirm_collapse_tunnel.show = false;
+        this.dialogs.confirm_collapse_tunnel.show = false; // Reset this dialog
+
+        this.dialogs.confirm_collapse_tunnel.tunnel_coordinates = null;
       }.bind(this)) // If request failed
       ["catch"](function (error) {
         console.warn(this.tag + " failed to play collapse tunnel card", error);
@@ -3987,7 +4117,9 @@ __webpack_require__.r(__webpack_exports__);
         if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Hide the dialog
 
         this.dialogs.confirm_place_tunnel.loading = false;
-        this.dialogs.confirm_place_tunnel.show = false;
+        this.dialogs.confirm_place_tunnel.show = false; // Reset this dialog
+
+        this.dialogs.confirm_place_tunnel.tunnel_coordinates = null;
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " failed to play tunnel card", error);
         this.dialogs.confirm_place_tunnel.loading = false;
@@ -4095,7 +4227,7 @@ __webpack_require__.r(__webpack_exports__);
             if (this.mutableBoard[data.rowIndex][data.columnIndex] === null) {
               console.log(this.tag + " tile is free"); // Make sure the tile is available
 
-              if (this.tileIsAvailable(data.rowIndex, data.columnIndex)) {
+              if (this.tileHasConnectingCards(data.rowIndex, data.columnIndex)) {
                 console.log(this.tag + " tile is available"); // Grab the card we want to place
 
                 var card = this.mutableHand[this.dialogs.view_card.index];
@@ -4235,98 +4367,101 @@ __webpack_require__.r(__webpack_exports__);
 
       return "";
     },
-    tileIsAvailable: function tileIsAvailable(rowIndex, columnIndex) {
-      console.log(this.tag + " checking if tile is available (row index: " + rowIndex + ", colum index: " + columnIndex + ")"); // Check tile above
+    tileHasCard: function tileHasCard(rowIndex, columnIndex) {
+      // console.log("TILE HAS CARD ", rowIndex, columnIndex);
+      if (this.mutableBoard[rowIndex] !== undefined && this.mutableBoard[rowIndex][columnIndex] !== undefined && this.mutableBoard[rowIndex][columnIndex] !== null) {
+        return true;
+      }
 
-      var tileAbove = [rowIndex - 1, columnIndex];
-      console.log(this.tag + " tile above: ", tileAbove);
+      return false;
+    },
+    tileHasConnectingCards: function tileHasConnectingCards(rowIndex, columnIndex) {
+      // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
+      // console.log("-----------------------");
+      // Check tile above
+      var tileAbove = [rowIndex - 1, columnIndex]; // console.log(this.tag+" tile above: ", tileAbove);
 
-      if (this.mutableBoard[tileAbove[0]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== null) {
-        console.log(this.tag + " card id: ", this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
+      if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
         var card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
-        console.log(this.tag + " card on tile: ", card);
+        var inverted = this.mutableBoard[tileAbove[0]][tileAbove[1]].inverted;
 
-        if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("bottom"))) {
-          console.log(this.tag + " connecting card found on tile above, available");
+        if (card && (card.type === "gold_location" || card.type === "start" || !inverted && card.open_positions.includes("bottom") || inverted && card.open_positions.includes("top"))) {
+          // console.log(this.tag+" found connecting card above, true");                        
           return true;
         }
-      } // Check tile to the right
+      } // console.log("-----------------------");
+      // Check tile to the right
 
 
-      var tileRight = [rowIndex, columnIndex + 1];
-      console.log(this.tag + " tile right: ", tileRight);
+      var tileRight = [rowIndex, columnIndex + 1]; // console.log(this.tag+" tile right: ", tileRight);
 
-      if (this.mutableBoard[tileRight[0]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== null) {
-        console.log(this.tag + " card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
-
+      if (this.tileHasCard(tileRight[0], tileRight[1])) {
+        // console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
         var _card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
 
-        console.log(this.tag + " card on tile: ", _card);
+        var _inverted = this.mutableBoard[tileRight[0]][tileRight[1]].inverted; // console.log(this.tag+" card on tile: ", card);
 
-        if (_card && _card.type !== "gold_location" && (_card.type === "start" || _card.open_positions.includes("left"))) {
-          console.log(this.tag + " connecting card found on tile to the right, available");
+        if (_card && (_card.type === "gold_location" || _card.type === "start" || !_inverted && _card.open_positions.includes("left") || _inverted && _card.open_positions.includes("right"))) {
+          // console.log(this.tag+" found connecting card to the right, true");
           return true;
         }
-      } // Check tile below
+      } // console.log("-----------------------");
+      // Check tile below
 
 
-      var tileBelow = [rowIndex + 1, columnIndex];
-      console.log(this.tag + " tile below: ", tileBelow);
+      var tileBelow = [rowIndex + 1, columnIndex]; // console.log(this.tag+" tile below: ", tileBelow);
 
-      if (this.mutableBoard[tileBelow[0]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== null) {
-        console.log(this.tag + " card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
-
+      if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+        // console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
         var _card2 = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
 
-        console.log(this.tag + " card on tile: ", _card2);
+        var _inverted2 = this.mutableBoard[tileBelow[0]][tileBelow[1]].inverted; // console.log(this.tag+" card on tile: ", card);
 
-        if (_card2 && _card2.type !== "gold_location" && (_card2.type === "start" || _card2.open_positions.includes("top"))) {
-          console.log(this.tag + " connecting card found on tile below, available");
+        if (_card2 && (_card2.type === "gold_location" || _card2.type === "start" || !_inverted2 && _card2.open_positions.includes("top") || _inverted2 && _card2.open_positions.includes("bottom"))) {
+          // console.log(this.tag+" connecting card found on tile below, available");
           return true;
         }
-      } // Check tile to the left
+      } // console.log("-----------------------");
+      // Check tile to the left
 
 
-      var tileLeft = [rowIndex, columnIndex - 1];
-      console.log(this.tag + " tile left: ", tileLeft);
+      var tileLeft = [rowIndex, columnIndex - 1]; // console.log(this.tag+" tile left: ", tileLeft);
 
-      if (this.mutableBoard[tileLeft[0]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== null) {
-        console.log(this.tag + " card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
-
+      if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+        // console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
         var _card3 = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
 
-        console.log(this.tag + " card on tile: ", _card3);
+        var _inverted3 = this.mutableBoard[tileLeft[0]][tileLeft[1]].inverted; // console.log(this.tag+" card on tile: ", card);
 
-        if (_card3 && _card3.type !== "gold_location" && (_card3.type === "start" || _card3.open_positions.includes("right"))) {
-          console.log(this.tag + " connecting card found on tile to the left, available");
+        if (_card3 && (_card3.type === "gold_location" || _card3.type === "start" || !_inverted3 && _card3.open_positions.includes("right") || _inverted3 && _card3.open_positions.includes("left"))) {
+          // console.log(this.tag+" connecting card found on tile to the left, available");
           return true;
         }
-      } // If we've reached this point the tile is available but has no connecting card
+      } // console.log("-----------------------");
+      // If we've reached this point the tile is available but has no connecting card
+      // console.log(this.tag+" tile has no connected tunnels, unavailable");
 
 
-      console.log(this.tag + " tile has no connected tunnels, unavailable");
       return false;
     },
     cardCanBePlacedOnTile: function cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
-      console.log(this.tag + " checking if card can be placed on tile: ", rowIndex, columnIndex, card); // Gather the required open positions based on the cards surrounding the selected coordinate
-
+      // console.log(this.tag+" checking if card can be placed on tile: ", rowIndex, columnIndex, card);
+      // Gather the required open positions based on the cards surrounding the selected coordinate
       var requiredOpenPositions = [];
       var requiredClosedPositions = []; // Check card above
 
       var coordsAbove = {
         rowIndex: rowIndex - 1,
         columnIndex: columnIndex
-      };
+      }; // console.log("checking tile above: ", coordsAbove);
 
-      if (this.mutableBoard[coordsAbove.rowIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex] !== null) {
-        console.log("tile above taken");
-
+      if (this.tileHasCard(coordsAbove.rowIndex, coordsAbove.columnIndex)) {
+        // console.log(this.tag+" tile above taken");
         var _card4 = this.getCardById(this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
 
         if (_card4) {
-          console.log("card found above", _card4);
-
-          if (_card4.type === "start") {
+          // console.log(this.tag+" card found above: ", card);
+          if (_card4.type === "start" || _card4.type === "gold_location") {
             requiredOpenPositions.push("top");
           } else {
             if (this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
@@ -4350,17 +4485,15 @@ __webpack_require__.r(__webpack_exports__);
       var coordsRight = {
         rowIndex: rowIndex,
         columnIndex: columnIndex + 1
-      };
+      }; // console.log("checking tile to right", coordsRight);
 
-      if (this.mutableBoard[coordsRight.rowIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== null) {
-        console.log("tile right taken");
-
+      if (this.tileHasCard(coordsRight.rowIndex, coordsRight.columnIndex)) {
+        // console.log("tile right taken");
         var _card5 = this.getCardById(this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
 
         if (_card5) {
-          console.log("card found right", _card5);
-
-          if (_card5.type === "start") {
+          // console.log("card found right", card);
+          if (_card5.type === "start" || _card5.type === "gold_location") {
             requiredOpenPositions.push("right");
           } else {
             if (this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
@@ -4384,17 +4517,15 @@ __webpack_require__.r(__webpack_exports__);
       var coordsBelow = {
         rowIndex: rowIndex + 1,
         columnIndex: columnIndex
-      };
+      }; // console.log("checking tile below", coordsBelow);
 
-      if (this.mutableBoard[coordsBelow.rowIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== null) {
-        console.log("tile below taken");
-
+      if (this.tileHasCard(coordsBelow.rowIndex, coordsBelow.columnIndex)) {
+        // console.log("tile below taken");
         var _card6 = this.getCardById(this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
 
         if (_card6) {
-          console.log("card found below", _card6);
-
-          if (_card6.type === "start") {
+          // console.log("card found below", card);
+          if (_card6.type === "start" || _card6.type === "gold_location") {
             requiredOpenPositions.push("bottom");
           } else {
             if (this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
@@ -4418,17 +4549,15 @@ __webpack_require__.r(__webpack_exports__);
       var coordsLeft = {
         rowIndex: rowIndex,
         columnIndex: columnIndex - 1
-      };
+      }; // console.log("checking tile to left", coordsLeft, this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columIndex));
 
-      if (this.mutableBoard[coordsLeft.rowIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== null) {
-        console.log("tile left taken", this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
-
+      if (this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex)) {
+        // console.log("tile left taken");
         var _card7 = this.getCardById(this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
 
         if (_card7) {
-          console.log("card found left", _card7);
-
-          if (_card7.type === "start") {
+          // console.log("card found left", card);
+          if (_card7.type === "start" || _card7.type === "gold_location") {
             requiredOpenPositions.push("left");
           } else {
             if (this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
@@ -4446,16 +4575,16 @@ __webpack_require__.r(__webpack_exports__);
             }
           }
         }
-      }
+      } // console.log(this.tag+" required open positions: ", requiredOpenPositions);
+      // console.log(this.tag+" required closed positions: ", requiredClosedPositions);
+      // If the card meets the requirements (in it's current state)
 
-      console.log(this.tag + " required open positions: ", requiredOpenPositions);
-      console.log(this.tag + " required closed positions: ", requiredClosedPositions); // If the card meets the requirements (in it's current state)
 
       var meetsRequirements = true;
 
       if (!this.dialogs.view_card.inverted) {
-        console.log(this.tag + " checking if (non-inverted) card fits on the tile"); // Validate against the required open & closed positions
-
+        // console.log(this.tag+" checking if (non-inverted) card fits on the tile");
+        // Validate against the required open & closed positions
         for (var i = 0; i < requiredOpenPositions.length; i++) {
           if (!card.open_positions.includes(requiredOpenPositions[i])) {
             meetsRequirements = false;
@@ -4470,8 +4599,8 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
       } else {
-        console.log(this.tag + " checking if (inverted) card fits on the tile"); // Invert the card's open positions
-
+        // console.log(this.tag+" checking if (inverted) card fits on the tile");
+        // Invert the card's open positions
         var invertedOpenPositions = [];
 
         for (var _i2 = 0; _i2 < card.open_positions.length; _i2++) {
@@ -4500,9 +4629,9 @@ __webpack_require__.r(__webpack_exports__);
             break;
           }
         }
-      }
+      } // console.log(this.tag+" tile meets requirements: ", meetsRequirements);
+      // Return result
 
-      console.log(this.tag + " tile meets requirements: ", meetsRequirements); // Return result
 
       return meetsRequirements;
     },
@@ -7820,7 +7949,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  z-index: 10;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
+exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  z-index: 10;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .tooltip-wrapper {\n  padding: 0 15px 0 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  overflow: hidden;\n  position: relative;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  top: 0;\n  left: 0;\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  position: absolute;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
 
 // exports
 
@@ -46445,28 +46574,101 @@ var render = function() {
                                 "div",
                                 { staticClass: "card-info__actions-buttons" },
                                 [
-                                  _c(
-                                    "v-btn",
-                                    {
-                                      staticClass: "icon-only",
-                                      on: { click: _vm.onClickInvertCard }
-                                    },
-                                    [
-                                      _c("i", {
-                                        staticClass: "fas fa-sync-alt"
-                                      })
-                                    ]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "v-btn",
-                                    { on: { click: _vm.onClickPlayCard } },
-                                    [
-                                      _vm._v(
-                                        "\n                                        Play card\n                                    "
+                                  _vm.viewCardDialogCard.type === "tunnel"
+                                    ? _c(
+                                        "span",
+                                        { staticClass: "tooltip-wrapper" },
+                                        [
+                                          _c(
+                                            "v-btn",
+                                            {
+                                              staticClass: "icon-only",
+                                              on: {
+                                                click: _vm.onClickInvertCard
+                                              }
+                                            },
+                                            [
+                                              _c("i", {
+                                                staticClass: "fas fa-sync-alt"
+                                              })
+                                            ]
+                                          )
+                                        ],
+                                        1
                                       )
-                                    ]
-                                  ),
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  _vm.showPlayCardButton
+                                    ? _c(
+                                        "v-btn",
+                                        { on: { click: _vm.onClickPlayCard } },
+                                        [
+                                          _vm._v(
+                                            "\n                                        Play card\n                                    "
+                                          )
+                                        ]
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  !_vm.showPlayCardButton
+                                    ? _c(
+                                        "span",
+                                        { staticClass: "tooltip-wrapper" },
+                                        [
+                                          _c(
+                                            "v-tooltip",
+                                            {
+                                              attrs: { bottom: "" },
+                                              scopedSlots: _vm._u(
+                                                [
+                                                  {
+                                                    key: "activator",
+                                                    fn: function(ref) {
+                                                      var on = ref.on
+                                                      return [
+                                                        _c(
+                                                          "div",
+                                                          _vm._g({}, on),
+                                                          [
+                                                            _c(
+                                                              "v-btn",
+                                                              {
+                                                                attrs: {
+                                                                  disabled: "",
+                                                                  dark: ""
+                                                                }
+                                                              },
+                                                              [
+                                                                _vm._v(
+                                                                  "Play card"
+                                                                )
+                                                              ]
+                                                            )
+                                                          ],
+                                                          1
+                                                        )
+                                                      ]
+                                                    }
+                                                  }
+                                                ],
+                                                null,
+                                                false,
+                                                2800720138
+                                              )
+                                            },
+                                            [
+                                              _vm._v(" "),
+                                              _c("span", [
+                                                _vm._v(
+                                                  _vm._s(_vm.missingToolsText)
+                                                )
+                                              ])
+                                            ]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    : _vm._e(),
                                   _vm._v(" "),
                                   _c(
                                     "v-btn",
@@ -46806,7 +47008,7 @@ var render = function() {
                 _vm._v(" "),
                 _c("div", { staticClass: "dialog-content" }, [
                   _c("div", { staticClass: "dialog-title" }, [
-                    _vm._v("Sabotage player's tool")
+                    _vm._v(_vm._s(_vm.sabotageToolDialogTitle))
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "select-player" }, [
@@ -46994,7 +47196,7 @@ var render = function() {
                 _vm._v(" "),
                 _c("div", { staticClass: "dialog-content" }, [
                   _c("div", { staticClass: "dialog-title" }, [
-                    _vm._v("Recover player's tool")
+                    _vm._v(_vm._s(_vm.recoverToolDialogTitle))
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "select-player" }, [

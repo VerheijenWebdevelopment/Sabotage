@@ -23,6 +23,7 @@ class CardSeeder extends Seeder
             "text" => "Start",
             "name" => "start",
             "description" => "This is where the journey begins.",
+            "open_positions" => ["top", "right", "bottom", "left"],
         ]);
 
         $gold_location_card = Card::create([
@@ -30,6 +31,22 @@ class CardSeeder extends Seeder
             "text" => "Gold Location",
             "name" => "gold_location",
             "description" => "Possible location of shiny gold."
+        ]);
+
+        $gold_location_coal_card = Card::create([
+            "type" => "coal",
+            "text" => "Coal",
+            "name" => "coal",
+            "description" => "This gold location contained coal. Bummer.",
+            "open_positions" => ["top", "right", "bottom", "left"],
+        ]);
+
+        $gold_location_gold_card = Card::create([
+            "type" => "gold",
+            "text" => "Gold",
+            "name" => "gold",
+            "description" => "This gold location contained gold! Awesome.",
+            "open_positions" => ["top", "right", "bottom", "left"],
         ]);
 
         // ------------------------------------------------

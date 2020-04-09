@@ -268,12 +268,28 @@
                                         You can't play this card until it's your turn
                                     </div>
                                     <div class="card-info__actions-buttons" v-if="myTurn">
-                                        <v-btn class="icon-only" @click="onClickInvertCard">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </v-btn>
-                                        <v-btn @click="onClickPlayCard">
+                                        <!-- Invert (tunnel) card -->
+                                        <span class="tooltip-wrapper" v-if="viewCardDialogCard.type === 'tunnel'">
+                                            <v-btn class="icon-only" @click="onClickInvertCard">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </v-btn>
+                                        </span>
+                                        <!-- Play card -->
+                                        <v-btn @click="onClickPlayCard" v-if="showPlayCardButton">
                                             Play card
                                         </v-btn>
+                                        <!-- Can't play card -->
+                                        <span class="tooltip-wrapper" v-if="!showPlayCardButton">
+                                            <v-tooltip bottom>
+                                                <template v-slot:activator="{ on }">
+                                                    <div v-on="on">
+                                                        <v-btn disabled dark>Play card</v-btn>
+                                                    </div>
+                                                </template>
+                                                <span>{{ missingToolsText }}</span>
+                                            </v-tooltip>
+                                        </span>
+                                        <!-- Fold card -->
                                         <v-btn @click="onClickFoldCard">
                                             Fold card
                                         </v-btn>
@@ -399,7 +415,7 @@
                 <!-- Content -->
                 <div class="dialog-content">
                     <!-- Title -->
-                    <div class="dialog-title">Sabotage player's tool</div>
+                    <div class="dialog-title">{{ sabotageToolDialogTitle }}</div>
                     <!-- Select player -->
                     <div class="select-player">
                         <div class="select-player__title">Select target player</div>
@@ -449,7 +465,7 @@
                 <!-- Content -->
                 <div class="dialog-content">
                     <!-- Title -->
-                    <div class="dialog-title">Recover player's tool</div>
+                    <div class="dialog-title">{{ recoverToolDialogTitle }}</div>
                     <!-- Select player -->
                     <div class="select-player">
                         <div class="select-player__title">Select target player</div>
@@ -756,6 +772,69 @@
                 }
                 return true;
             },
+            allToolsAvailable() {
+                return this.mutablePlayer.pickaxe_available && this.mutablePlayer.light_available && this.mutablePlayer.cart_available;
+            },
+            missingToolsText() {
+                let missing = [];
+                if (!this.mutablePlayer.pickaxe_available) missing.push("pickaxe");
+                if (!this.mutablePlayer.light_available) missing.push("light");
+                if (!this.mutablePlayer.cart_available) missing.push("cart");
+                if (missing.length === 0) {
+                    return "All of your tools are available";
+                } else if (missing.length === 1) {
+                    return "Your "+missing[0]+" is disabled";
+                } else {
+                    let out = "Your ";
+                    if (missing.length === 2) {
+                        out += missing[0]+" and "+missing[1]+" are disabled";
+                    } else {
+                        out += missing[0]+", "+missing[1]+" and "+missing[2]+" are disabled";
+                    }
+                    return out;
+                }
+            },
+            showPlayCardButton() {
+                if (this.viewCardDialogCard.type === "tunnel") {
+                    console.log("tunnel!", this.allToolsAvailable);
+                    return this.allToolsAvailable;
+                }
+                return true;
+            },
+            recoverToolDialogTitle() {
+                if (this.dialogs.confirm_recover_player.card_index !== null) {
+                    let out = "Recover player's ";
+                    let card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
+                    if (card.name === "recover_pickaxe") {
+                        out += "pickaxe";
+                    } else if (card.name === "recover_light") {
+                        out += "light";
+                    } else if (card.name === "recover_cart") {
+                        out += "cart";
+                    } else {
+                        out += "tool";
+                    }
+                    return out;
+                }
+                return "";
+            },
+            sabotageToolDialogTitle() {
+                if (this.dialogs.confirm_sabotage_player.card_index !== null) {
+                    let out = "Sabotage player's ";
+                    let card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
+                    if (card.name === "sabotage_pickaxe") {
+                        out += "pickaxe";
+                    } else if (card.name === "sabotage_light") {
+                        out += "light";
+                    } else if (card.name === "sabotage_cart") {
+                        out += "cart";
+                    } else {
+                        out += "tool";
+                    }
+                    return out;
+                }
+                return "";
+            },
         },
         methods: {
             // Init
@@ -831,6 +910,7 @@
                     .listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation)
                     .listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel)
                     .listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel)
+                    .listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed)
                     .listen('Game\\TurnEnded', this.onTurnEnded)
                     .listen('Game\\RoundEnded', this.onRoundEnded)
                     .listen('Game\\GameEnded', this.onGameEnded);
@@ -852,6 +932,11 @@
             },
             onPlayerToolBlocked(e) {
                 console.log(this.tag+"[event] player tool blocked", e);
+                
+                // Grab the player and target player
+                let player = this.getPlayerById(e.player.id);
+                let targetPlayer = this.getPlayerById(e.target_player.id);
+
                 // Update the target player's tool's status
                 for (let i = 0; i < this.mutablePlayers.length; i++) {
                     if (this.mutablePlayers[i].id === e.target_player.id) {
@@ -865,13 +950,29 @@
                         break;
                     }
                 }
+
+                // If we were the target player, update our mutablePlayer as well
+                if (targetPlayer.id === this.mutablePlayer.id) {
+                    if (e.tool === "pickaxe") {
+                        this.mutablePlayer.pickaxe_available = 0;
+                    } else if (e.tool === "light") {
+                        this.mutablePlayer.light_available = 0;
+                    } else if (e.tool === "cart") {
+                        this.mutablePlayer.cart_available = 0;
+                    }
+                }
+
                 // Notify the player what just happened
-                let player = this.getPlayerById(e.player.id);
-                let targetPlayer = this.getPlayerById(e.target_player.id);
                 this.$toasted.show(player.user.username+" blocked "+targetPlayer.user.username+"'s "+e.tool, { duration: 5000 });
+
             },
             onPlayerToolRecovered(e) {
                 console.log(this.tag+"[event] player tool recovered", e);
+
+                // Grab the player and target player
+                let player = this.getPlayerById(e.player.id);
+                let targetPlayer = this.getPlayerById(e.target_player.id);
+
                 // Update the target player's tool's status
                 for (let i = 0; i < this.mutablePlayers.length; i++) {
                     if (this.mutablePlayers[i].id === e.target_player.id) {
@@ -885,10 +986,21 @@
                         break;
                     }
                 }
+
+                // If we were the target player, update our mutablePlayer as well
+                if (targetPlayer.id === this.mutablePlayer.id) {
+                    if (e.tool === "pickaxe") {
+                        this.mutablePlayer.pickaxe_available = 1;
+                    } else if (e.tool === "light") {
+                        this.mutablePlayer.light_available = 1;
+                    } else if (e.tool === "cart") {
+                        this.mutablePlayer.cart_available = 1;
+                    }
+                }
+
                 // Notify the player what just happened
-                let player = this.getPlayerById(e.player.id);
-                let targetPlayer = this.getPlayerById(e.target_player.id);
                 this.$toasted.show(player.user.username+" recovered "+targetPlayer.user.username+"'s "+e.tool, { duration: 5000 });
+
             },
             onPlayerCheckedGoldLocation(e) {
                 console.log(this.tag+"[event] player checked gold location", e);
@@ -911,6 +1023,13 @@
                 // Notify user wassup
                 let player = this.getPlayerById(e.player.id);
                 this.$toasted.show(player.user.username+" has collapsed the tunnel on "+e.coordinates.x+":"+e.coordinates.y, { duration: 3000 });
+            },
+            onGoldLocationRevealed(e) {
+                console.log(this.tag+"[event] gold location revealed: ", e);
+                // Update the board
+                this.mutableBoard = e.game.board;
+                // Notify user wassup
+                this.$toasted.show("Gold location #"+e.gold_location+" has been revealed!", { duration: 3000 });
             },
             onTurnEnded(e) {
                 console.log(this.tag+"[event] turn ended", e);
@@ -977,6 +1096,7 @@
             onClickHandCard(index) {
                 console.log(this.tag+" clicked card in hand", index);
                 // this.mutableHand[index].selected = !this.mutableHand[index].selected;
+                this.dialogs.view_card.inverted = false;
                 this.dialogs.view_card.index = index;
                 this.dialogs.view_card.show = true;
             },
@@ -1088,16 +1208,23 @@
                     
                     // When request succeeds
                     .then(function(response) {
+                        
                         // Update player's hand
                         this.mutableHand.splice(this.dialogs.confirm_gold_location.card_index, 1);
                         if (response.data.new_card) this.mutableHand.push(response.data.new_card);
+                        
                         // Close this dialog
                         this.dialogs.confirm_gold_location.loading = false;
                         this.dialogs.confirm_gold_location.show = false;
+                        
                         // Open up the gold location reveal dialog
                         this.dialogs.reveal_gold_location.gold_location = this.dialogs.confirm_gold_location.gold_location;
                         this.dialogs.reveal_gold_location.contains_gold = response.data.contains_gold;
                         this.dialogs.reveal_gold_location.show = true;
+
+                        // Reset this dialog
+                        this.dialogs.confirm_gold_location.gold_location = null;
+
                     }.bind(this))
 
                     // When request fails
@@ -1161,7 +1288,6 @@
 
                 // Grab the card we're about to play
                 let card = this.mutableHand[this.dialogs.confirm_sabotage_player.card_index];
-                console.log(this.tag+" card: ", card);
 
                 // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
                 let tool = null;
@@ -1178,16 +1304,16 @@
                     }
                 }
 
-                console.log(this.tag+" tool: ", tool);
-
                 // Send API request to play the sabotage card
                 this.sendPerformActionRequest("play_card", data)
                     
                     // When request succeeds
                     .then(function(response) {
+                        
                         // Update the player's hand
                         this.mutableHand.splice(this.dialogs.confirm_sabotage_player.card_index, 1);
                         if (response.data.new_card) this.mutableHand.push(response.data.new_card);
+                        
                         // Update the target player
                         for (let i = 0; i < this.mutablePlayers.length; i++) {
                             if (this.mutablePlayers[i].id === data.player_id) {
@@ -1201,9 +1327,15 @@
                                 break;
                             }
                         }
+                        
                         // Hide the dialog
                         this.dialogs.confirm_sabotage_player.loading = false;
                         this.dialogs.confirm_sabotage_player.show = false;
+                        
+                        // Reset the dialog
+                        this.dialogs.confirm_sabotage_player.player_id = null;
+                        this.dialogs.confirm_sabotage_player.tool = null;
+
                     }.bind(this))
 
                     // When request fails
@@ -1233,8 +1365,6 @@
 
                 // Grab the card we're about to play
                 let card = this.mutableHand[this.dialogs.confirm_recover_player.card_index];
-                console.log("card id: ", this.dialogs.confirm_recover_player.card_index);
-                console.log("card: ", card);
                 
                 // Determine the tool we're blocking (and add it to the API payload if we're dealing with a multiple choice card)
                 let tool = "pickaxe";
@@ -1248,13 +1378,14 @@
                         tool = "cart";
                     }
                 }
+                console.log(this.tag+" tool: ", tool);
 
                 // Send API request to play the sabotage card
                 this.sendPerformActionRequest("play_card", data)
                     
                     // When request succeeds
                     .then(function(response) {
-
+                        
                         // Update player's hand
                         this.mutableHand.splice(this.dialogs.confirm_recover_player.card_index, 1);
                         if (response.data.new_card) this.mutableHand.push(response.data.new_card);
@@ -1272,10 +1403,14 @@
                                 break;
                             }
                         }
-
+                        
                         // Hide the dialog
                         this.dialogs.confirm_recover_player.loading = false;
                         this.dialogs.confirm_recover_player.show = false;
+                        
+                        // Reset the dialog
+                        this.dialogs.confirm_sabotage_player.player_id = null;
+                        this.dialogs.confirm_sabotage_player.tool = null;
 
                     }.bind(this))
 
@@ -1319,6 +1454,9 @@
                         // Hide the dialog
                         this.dialogs.confirm_collapse_tunnel.loading = false;
                         this.dialogs.confirm_collapse_tunnel.show = false;
+
+                        // Reset this dialog
+                        this.dialogs.confirm_collapse_tunnel.tunnel_coordinates = null;
 
                     }.bind(this))
 
@@ -1368,6 +1506,9 @@
                         // Hide the dialog
                         this.dialogs.confirm_place_tunnel.loading = false;
                         this.dialogs.confirm_place_tunnel.show = false;
+
+                        // Reset this dialog
+                        this.dialogs.confirm_place_tunnel.tunnel_coordinates = null;
 
                     }.bind(this))
 
@@ -1469,7 +1610,7 @@
                         console.log(this.tag+" tile is free");
 
                         // Make sure the tile is available
-                        if (this.tileIsAvailable(data.rowIndex, data.columnIndex)) {
+                        if (this.tileHasConnectingCards(data.rowIndex, data.columnIndex)) {
                             console.log(this.tag+" tile is available");
 
                             // Grab the card we want to place
@@ -1595,68 +1736,82 @@
                 }
                 return "";
             },
-            tileIsAvailable(rowIndex, columnIndex) {
-                console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
-
+            tileHasCard(rowIndex, columnIndex) {
+                // console.log("TILE HAS CARD ", rowIndex, columnIndex);
+                if (this.mutableBoard[rowIndex] !== undefined && this.mutableBoard[rowIndex][columnIndex] !== undefined && this.mutableBoard[rowIndex][columnIndex] !== null) {
+                    return true;
+                }
+                return false;
+            },
+            tileHasConnectingCards(rowIndex, columnIndex) {
+                // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
+                // console.log("-----------------------");
+                
                 // Check tile above
                 let tileAbove = [rowIndex-1, columnIndex];
-                console.log(this.tag+" tile above: ", tileAbove);
-                if (this.mutableBoard[tileAbove[0]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== undefined && this.mutableBoard[tileAbove[0]][tileAbove[1]] !== null) {
-                    console.log(this.tag+" card id: ", this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
+                // console.log(this.tag+" tile above: ", tileAbove);
+                if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
                     let card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
-                    console.log(this.tag+" card on tile: ", card);
-                    if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("bottom"))) {
-                        console.log(this.tag+" connecting card found on tile above, available");
+                    let inverted = this.mutableBoard[tileAbove[0]][tileAbove[1]].inverted;
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("bottom")) || (inverted && card.open_positions.includes("top")))) {
+                        // console.log(this.tag+" found connecting card above, true");                        
                         return true;
                     }
                 }
+                // console.log("-----------------------");
 
                 // Check tile to the right
                 let tileRight = [rowIndex, columnIndex+1];
-                console.log(this.tag+" tile right: ", tileRight);
-                if (this.mutableBoard[tileRight[0]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== undefined && this.mutableBoard[tileRight[0]][tileRight[1]] !== null) {
-                    console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
+                // console.log(this.tag+" tile right: ", tileRight);
+                if (this.tileHasCard(tileRight[0], tileRight[1])) {
+                    // console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
-                    console.log(this.tag+" card on tile: ", card);
-                    if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("left"))) {
-                        console.log(this.tag+" connecting card found on tile to the right, available");
+                    let inverted = this.mutableBoard[tileRight[0]][tileRight[1]].inverted;
+                    // console.log(this.tag+" card on tile: ", card);
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("left")) || (inverted && card.open_positions.includes("right")))) {
+                        // console.log(this.tag+" found connecting card to the right, true");
                         return true;
                     }
                 }
+                // console.log("-----------------------");
 
                 // Check tile below
                 let tileBelow = [rowIndex+1, columnIndex];
-                console.log(this.tag+" tile below: ", tileBelow);
-                if (this.mutableBoard[tileBelow[0]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== undefined && this.mutableBoard[tileBelow[0]][tileBelow[1]] !== null) {
-                    console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
+                // console.log(this.tag+" tile below: ", tileBelow);
+                if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+                    // console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
-                    console.log(this.tag+" card on tile: ", card);
-                    if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("top"))) {
-                        console.log(this.tag+" connecting card found on tile below, available");
+                    let inverted = this.mutableBoard[tileBelow[0]][tileBelow[1]].inverted;
+                    // console.log(this.tag+" card on tile: ", card);
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("top")) || (inverted && card.open_positions.includes("bottom")))) {
+                        // console.log(this.tag+" connecting card found on tile below, available");
                         return true;
                     }
                 }
+                // console.log("-----------------------");
 
                 // Check tile to the left
-                let tileLeft  = [rowIndex, columnIndex-1];
-                console.log(this.tag+" tile left: ", tileLeft);
-                if (this.mutableBoard[tileLeft[0]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== undefined && this.mutableBoard[tileLeft[0]][tileLeft[1]] !== null) {
-                    console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
+                let tileLeft = [rowIndex, columnIndex-1];
+                // console.log(this.tag+" tile left: ", tileLeft);
+                if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+                    // console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
-                    console.log(this.tag+" card on tile: ", card);
-                    if (card && card.type !== "gold_location" && (card.type === "start" || card.open_positions.includes("right"))) {
-                        console.log(this.tag+" connecting card found on tile to the left, available");
+                    let inverted = this.mutableBoard[tileLeft[0]][tileLeft[1]].inverted;
+                    // console.log(this.tag+" card on tile: ", card);
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("right")) || (inverted && card.open_positions.includes("left")))) {
+                        // console.log(this.tag+" connecting card found on tile to the left, available");
                         return true;
                     }
                 }
+                // console.log("-----------------------");
 
                 // If we've reached this point the tile is available but has no connecting card
-                console.log(this.tag+" tile has no connected tunnels, unavailable");
+                // console.log(this.tag+" tile has no connected tunnels, unavailable");
                 return false;
 
             },
             cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
-                console.log(this.tag+" checking if card can be placed on tile: ", rowIndex, columnIndex, card);
+                // console.log(this.tag+" checking if card can be placed on tile: ", rowIndex, columnIndex, card);
 
                 // Gather the required open positions based on the cards surrounding the selected coordinate
                 let requiredOpenPositions = [];
@@ -1664,12 +1819,13 @@
 
                 // Check card above
                 let coordsAbove = { rowIndex: rowIndex - 1, columnIndex: columnIndex };
-                if (this.mutableBoard[coordsAbove.rowIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columIndex] !== undefined && this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex] !== null) {
-                    console.log("tile above taken");
+                // console.log("checking tile above: ", coordsAbove);
+                if (this.tileHasCard(coordsAbove.rowIndex, coordsAbove.columnIndex)) {
+                    // console.log(this.tag+" tile above taken");
                     let card = this.getCardById(this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
                     if (card) {
-                        console.log("card found above", card);
-                        if (card.type === "start") {
+                        // console.log(this.tag+" card found above: ", card);
+                        if (card.type === "start" || card.type === "gold_location") {
                             requiredOpenPositions.push("top");
                         } else {
                             if (this.mutableBoard[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
@@ -1691,12 +1847,13 @@
 
                 // Check card to the right
                 let coordsRight = { rowIndex: rowIndex, columnIndex: columnIndex + 1 };
-                if (this.mutableBoard[coordsRight.rowIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== undefined && this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex] !== null) {
-                    console.log("tile right taken");
+                // console.log("checking tile to right", coordsRight);
+                if (this.tileHasCard(coordsRight.rowIndex, coordsRight.columnIndex)) {
+                    // console.log("tile right taken");
                     let card = this.getCardById(this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
                     if (card) {
-                        console.log("card found right", card);
-                        if (card.type === "start") {
+                        // console.log("card found right", card);
+                        if (card.type === "start" || card.type === "gold_location") {
                             requiredOpenPositions.push("right");
                         } else {
                             if (this.mutableBoard[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
@@ -1718,12 +1875,13 @@
 
                 // Check card below
                 let coordsBelow = { rowIndex: rowIndex + 1, columnIndex: columnIndex };
-                if (this.mutableBoard[coordsBelow.rowIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== undefined && this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex] !== null) {
-                    console.log("tile below taken");
+                // console.log("checking tile below", coordsBelow);
+                if (this.tileHasCard(coordsBelow.rowIndex, coordsBelow.columnIndex)) {
+                    // console.log("tile below taken");
                     let card = this.getCardById(this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
                     if (card) {
-                        console.log("card found below", card);
-                        if (card.type === "start") {
+                        // console.log("card found below", card);
+                        if (card.type === "start" || card.type === "gold_location") {
                             requiredOpenPositions.push("bottom");
                         } else {
                             if (this.mutableBoard[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
@@ -1745,12 +1903,13 @@
 
                 // Check card to the left
                 let coordsLeft = { rowIndex: rowIndex, columnIndex: columnIndex - 1};
-                if (this.mutableBoard[coordsLeft.rowIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== undefined && this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex] !== null) {
-                    console.log("tile left taken", this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
+                // console.log("checking tile to left", coordsLeft, this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columIndex));
+                if (this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex)) {
+                    // console.log("tile left taken");
                     let card = this.getCardById(this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
                     if (card) {
-                        console.log("card found left", card);
-                        if (card.type === "start") {
+                        // console.log("card found left", card);
+                        if (card.type === "start" || card.type === "gold_location") {
                             requiredOpenPositions.push("left");
                         } else {
                             if (this.mutableBoard[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
@@ -1770,13 +1929,13 @@
                     }
                 }
 
-                console.log(this.tag+" required open positions: ", requiredOpenPositions);
-                console.log(this.tag+" required closed positions: ", requiredClosedPositions);
+                // console.log(this.tag+" required open positions: ", requiredOpenPositions);
+                // console.log(this.tag+" required closed positions: ", requiredClosedPositions);
 
                 // If the card meets the requirements (in it's current state)
                 let meetsRequirements = true;
                 if (!this.dialogs.view_card.inverted) {
-                    console.log(this.tag+" checking if (non-inverted) card fits on the tile");
+                    // console.log(this.tag+" checking if (non-inverted) card fits on the tile");
                     // Validate against the required open & closed positions
                     for (let i = 0; i < requiredOpenPositions.length; i++) {
                         if (!card.open_positions.includes(requiredOpenPositions[i])) {
@@ -1791,7 +1950,7 @@
                         }
                     }
                 } else {
-                    console.log(this.tag+" checking if (inverted) card fits on the tile");
+                    // console.log(this.tag+" checking if (inverted) card fits on the tile");
                     // Invert the card's open positions
                     let invertedOpenPositions = [];
                     for (let i = 0; i < card.open_positions.length; i++) {
@@ -1820,7 +1979,7 @@
                     }
                 }
 
-                console.log(this.tag+" tile meets requirements: ", meetsRequirements);
+                // console.log(this.tag+" tile meets requirements: ", meetsRequirements);
                 // Return result
                 return meetsRequirements;
 
@@ -1884,7 +2043,7 @@
         },
         mounted() {
             this.initialize();
-        }
+        },
     }
 </script>
 
@@ -2334,11 +2493,17 @@
 
                 }
                 .card-info__actions-buttons {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
                     .v-btn {
                         margin: 0 15px 0 0;
                         &:last-child {
                             margin: 0;
                         }
+                    }
+                    .tooltip-wrapper {
+                        padding: 0 15px 0 0;
                     }
                 }
             }
@@ -2435,14 +2600,19 @@
                     .preview-col {
                         height: 100px;
                         flex: 0 0 65px;
+                        overflow: hidden;
+                        position: relative;
                         border-right: 1px dashed rgba(255, 255, 255, .1);
                         &:last-child {
                             border-right: 0;
                         }
                         .preview-card {
+                            top: 0;
+                            left: 0;
                             width: 65px;
                             height: 100px;
                             border-radius: 3px;
+                            position: absolute;
                             background-size: contain;
                             background-repeat: no-repeat;
                             background-position: center center;

@@ -32,6 +32,7 @@ use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
 use App\Events\Game\GameMessageSent;
+use App\Events\Game\GoldLocationRevealed;
 
 use App\Http\Requests\Api\Game\JoinGameRequest;
 use App\Http\Requests\Api\Game\LeaveGameRequest;
@@ -223,6 +224,9 @@ class GameService implements ModelServiceContract
 
         // Set players with selected roles to an empty list
         $game->players_with_selected_roles = [];
+        
+        // Do the same for reached gold locations
+        $game->reached_gold_locations = [];
         
         // Randomly determine the location of the gold
         $game->gold_location = rand(1, 3);
@@ -419,7 +423,7 @@ class GameService implements ModelServiceContract
     private function performFoldCard(Game $game, Player $player, int $cardIndex)
     {
         // Remove the card from the player's hand
-        Players::removeCardFromHand($cardIndex, $player);
+        $player = Players::removeCardFromHand($cardIndex, $player);
 
         // Draw a new card
         $card = $this->drawCard($game, $player);
@@ -668,6 +672,25 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to all other players to inform them of the update
         broadcast(new PlayerPlacedTunnel($game, $player, $card, (array) $data["target_coordinates"], $data["inverted"]))->toOthers();
+
+        // Check if we've reached a gold location
+        $reached_gold_locations = Board::goldLocationsReached($board);
+        if (count($reached_gold_locations))
+        {
+            // Loop through all of the reached gold locations
+            foreach ($reached_gold_locations as $gold_location)
+            {
+                // If the gold location had not been revealed yet
+                if (!array_key_exists($gold_location, $game->reached_gold_locations))
+                {
+                    // Replace the gold location card in question with the revealed gold location card (coal/gold card)
+                    $game = Board::revealGoldLocation($game, $gold_location);
+
+                    // Broadcast the event to everyone (including the current user) so we can update the frontend
+                    broadcast(new GoldLocationRevealed($game, $gold_location));
+                }
+            }
+        }
 
         // Return the updated board
         return $board;

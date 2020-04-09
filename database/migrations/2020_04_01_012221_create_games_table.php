@@ -28,6 +28,7 @@ class CreateGamesTable extends Migration
             $table->text('available_roles')->nullable();
             $table->text('players_with_selected_roles')->nullable();
             $table->text('board')->nullable();
+            $table->text('reached_gold_locations')->nullable();
             $table->timestamps();
         });
     }

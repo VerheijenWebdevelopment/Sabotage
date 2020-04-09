@@ -31,6 +31,7 @@ class Game extends Model
         "available_roles",
         "players_with_selected_roles",
         "board",
+        "reached_gold_locations",
     ];
     protected $hidden = [
         "deck",
@@ -91,6 +92,11 @@ class Game extends Model
         return unserialize($value);
     }
 
+    public function getReachedGoldLocationsAttribute($value)
+    {
+        return unserialize($value);
+    }
+
     //
     // Mutators
     //
@@ -118,5 +124,10 @@ class Game extends Model
     public function setBoardAttribute($value)
     {
         $this->attributes["board"] = serialize($value);
+    }
+
+    public function setReachedGoldLocationsAttribute($value)
+    {
+        $this->attributes["reached_gold_locations"] = serialize($value);
     }
 }

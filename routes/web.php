@@ -75,8 +75,7 @@ Route::group(["prefix" => "api"], function() {
 });
 
 Route::group(["prefix" => "test"], function() {
-
     Route::get("card-generation", "TestController@getTestCardGeneration")->name("test.card-generation");
     Route::get("array-manip", "TestController@getTestArrayManip")->name("test.array-manip");
-
+    Route::get("reached-gold", "TestController@getTestReachedGold")->name("test.reached-gold");
 });

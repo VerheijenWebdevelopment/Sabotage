@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Image;
+
 use App\Models\Card;
 use App\Models\Game;
 
@@ -49,65 +51,63 @@ class CardService implements ModelServiceContract
         // Action cards
         //
 
-        // Add 3 of each single sabotage card
-        $actionSabotageCart = $this->findByName("sabotage_cart");
-        $actionSabotageLight = $this->findByName("sabotage_light");
-        $actionSabotagePickaxe = $this->findByName("sabotage_pickaxe");
-        for ($i = 0; $i < 3; $i++) {
-            $out[] = $actionSabotageCart->id;
-            $out[] = $actionSabotageLight->id;
-            $out[] = $actionSabotagePickaxe->id;
-        }
+        // // Add 3 of each single sabotage card
+        // $actionSabotageCart = $this->findByName("sabotage_cart");
+        // $actionSabotageLight = $this->findByName("sabotage_light");
+        // $actionSabotagePickaxe = $this->findByName("sabotage_pickaxe");
+        // for ($i = 0; $i < 3; $i++) {
+        //     $out[] = $actionSabotageCart->id;
+        //     $out[] = $actionSabotageLight->id;
+        //     $out[] = $actionSabotagePickaxe->id;
+        // }
 
-        // Add 2 random combo sabotage cards
-        $actionSabotageCombos = [
-            $this->findByName("sabotage_pickaxe_light"),
-            $this->findByName("sabotage_pickaxe_cart"),
-            $this->findByName("sabotage_light_cart"),
-        ];
-        for ($i < 0; $i < 2; $i++) {
-            $out[] = $actionSabotageCombos[rand(0, 2)]->id;
-        }
+        // // Add 2 random combo sabotage cards
+        // $actionSabotageCombos = [
+        //     $this->findByName("sabotage_pickaxe_light"),
+        //     $this->findByName("sabotage_pickaxe_cart"),
+        //     $this->findByName("sabotage_light_cart"),
+        // ];
+        // for ($i < 0; $i < 2; $i++) {
+        //     $out[] = $actionSabotageCombos[rand(0, 2)]->id;
+        // }
 
-        // Add 3 of each single recover card
-        $actionRecoverCart = $this->findByName("recover_cart");
-        $actionRecoverLight = $this->findByName("recover_light");
-        $actionRecoverPickaxe = $this->findByName("recover_pickaxe");
-        for ($i = 0; $i < 3; $i++) {
-            $out[] = $actionRecoverCart->id;
-            $out[] = $actionRecoverLight->id;
-            $out[] = $actionRecoverPickaxe->id;
-        }
+        // // Add 3 of each single recover card
+        // $actionRecoverCart = $this->findByName("recover_cart");
+        // $actionRecoverLight = $this->findByName("recover_light");
+        // $actionRecoverPickaxe = $this->findByName("recover_pickaxe");
+        // for ($i = 0; $i < 3; $i++) {
+        //     $out[] = $actionRecoverCart->id;
+        //     $out[] = $actionRecoverLight->id;
+        //     $out[] = $actionRecoverPickaxe->id;
+        // }
         
-        // Add 2 random combo recover cards
-        $actionRecoverCombos = [
-            $this->findByName("recover_pickaxe_light"),
-            $this->findByName("recover_pickaxe_cart"),
-            $this->findByName("recover_light_cart"),
-        ];
-        for ($i = 0; $i < 2; $i++) {
-            $out[] = $actionRecoverCombos[rand(0, 2)]->id;
-        }
+        // // Add 2 random combo recover cards
+        // $actionRecoverCombos = [
+        //     $this->findByName("recover_pickaxe_light"),
+        //     $this->findByName("recover_pickaxe_cart"),
+        //     $this->findByName("recover_light_cart"),
+        // ];
+        // for ($i = 0; $i < 2; $i++) {
+        //     $out[] = $actionRecoverCombos[rand(0, 2)]->id;
+        // }
 
-        // Add 4 demolish cards
-        $actionDemolish = $this->findByName("collapse");
-        for ($i = 0; $i < 4; $i++) $out[] = $actionDemolish->id;
+        // // Add 4 demolish cards
+        // $actionDemolish = $this->findByName("collapse");
+        // for ($i = 0; $i < 4; $i++) $out[] = $actionDemolish->id;
 
-        // Add 4 enlighten cards
-        $actionEnlighten = $this->findByName("enlighten");
-        for ($i = 0; $i < 4; $i++) $out[] = $actionEnlighten->id;
+        // // Add 4 enlighten cards
+        // $actionEnlighten = $this->findByName("enlighten");
+        // for ($i = 0; $i < 4; $i++) $out[] = $actionEnlighten->id;
 
         //
         // Tunnel cards
         //
 
         // Add 1 of every one slot card (x4)
-        $out[] = [
-            $this->findByName("single_top")->id,
-            $this->findByName("single_right")->id,
-            $this->findByName("single_bottom")->id,
-            $this->findByName("single_left")->id,
-        ];
+        // $out[] = $this->findByName("single_top")->id;
+        // $out[] = $this->findByName("single_right")->id;
+        // $out[] = $this->findByName("single_bottom")->id;
+        // $out[] = $this->findByName("single_left")->id;
         
         // Add 5 of all the corner 2 slot cards (x20)
         $twoSlotTunnelOne = $this->findByName("double_top_right");
@@ -144,11 +144,192 @@ class CardService implements ModelServiceContract
         // Add 4 of the four slot cards (x4)
         $fourSlotTunnel = $this->findByName("quadruple");
         for ($i = 0; $i < 4; $i++) $out[] = $fourSlotTunnel->id;
-        
+
         // Shuffle the deck
         shuffle($out);
 
         // Return the generated list of card id's
         return $out;
+    }
+
+    public function generateCardImage($id)
+    {
+        // Image dimensions
+        $w = 260;
+        $h = 400;
+
+        // Create a new canvas to paint our art on
+        $image = Image::canvas($w, $h, "#333");
+
+        // Find the card we want to generate the image of
+        $card = $this->find($id);
+
+        // If we failed to find a card
+        if (!$card)
+        {
+            $image->text("Unknown card", ($w/2), ($h/2), function($font) {
+                $font->size(24);
+                $font->align("center");
+                $font->valign("center");
+                $font->color("#ffffff");
+                $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+            });
+        }
+        // If we managed to find the card
+        else
+        {
+            // If we're dealing with a start card
+            if ($card->type == "start")
+            {
+                $image = $this->addTunnel($image, $card);
+                $image->text("Start", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffffff");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
+            // If we're dealing with a gold location card
+            elseif ($card->type == "gold_location")
+            {
+                $image->text("Gold Location", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffffff");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
+            // Gold location > Coal card
+            elseif ($card->type == "coal")
+            {
+                $image = $this->addTunnel($image, $card);
+                $image->text("Coal", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffffff");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
+            // Gold location > Gold card
+            elseif ($card->type == "gold")
+            {
+                $image = $this->addTunnel($image, $card);
+                $image->text("Gold", ($w/2), ($h/2), function($font) {
+                    $font->size(24);
+                    $font->align("center");
+                    $font->valign("center");
+                    $font->color("#ffd900");
+                    $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+                });
+            }
+            // If we're dealing with an action card
+            elseif ($card->type == "action")
+            {
+                $image = $this->addHeaderText($image, "Action Card");
+                $image = $this->addCardLabelText($image, $card->text);
+            }
+            // If we're dealing with a tunnel card
+            elseif ($card->type == "tunnel")
+            {
+                $image = $this->addTunnel($image, $card);
+                // $image = $this->addHeaderText($image, "Tunnel Card");
+            }
+        }
+
+        return $image;
+    }
+
+    private function addHeaderText(\Intervention\Image\Image $image, $text)
+    {
+        // Header dimensions
+        $w = 260;
+        $h = 40;
+
+        // Draw header background
+        $image->rectangle(0, 0, $w, $h, function($draw) {
+            $draw->background("rgba(0, 0, 0, 0.25)");
+        });
+
+        // Write header text
+        $image->text($text, ($w/2), ($h/2), function($font) {
+            $font->size(16);
+            $font->align("center");
+            $font->valign("center");
+            $font->color("#ffffff");
+            $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+        });
+
+        // Return updated image
+        return $image;
+    }
+
+    private function addCardLabelText(\Intervention\Image\Image $image, $text)
+    {
+        // Write card label
+        $image->text($text, 130, 350, function($font) use ($text) {
+            if (strlen($text) >= 20) {
+                $font->size(16);
+            } else {
+                $font->size(18);
+            }
+            $font->align("center");
+            $font->valign("center");
+            $font->color("#ffffff");
+            $font->file(public_path("storage/fonts/SpecialElite.ttf"));
+        });
+
+        // Return updated image
+        return $image;
+    }
+
+    private function addTunnel(\Intervention\Image\Image $image, Card $card, $color = "#7a4600")
+    {
+        // Image dimensions
+        $w = 260;
+        $h = 400;
+
+        // Grid dimensions
+        $gw  = $w / 3;
+        $ghs = $gw;
+        $ghl = ($h - $gw) / 2;
+
+        // Draw the center tile for all tunnel types
+        $image->rectangle($gw, $ghl, ($gw*2), ($ghs + $ghl), function($draw) use ($color) {
+            $draw->background($color);
+        });
+
+        // Draw all the open position tiles
+        foreach ($card->open_positions as $position)
+        {
+            switch ($position)
+            {
+                case "top":
+                    $image->rectangle($gw, 0, ($gw*2), $ghl, function($draw) use ($color) {
+                        $draw->background($color);
+                    });
+                break;
+                case "right":
+                    $image->rectangle(($gw*2), $ghl, ($gw*3), ($ghs+$ghl), function($draw) use ($color) {
+                        $draw->background($color);
+                    });
+                break;
+                case "bottom":
+                    $image->rectangle($gw, ($ghs+$ghl), ($gw*2), $h, function($draw) use ($color) {
+                        $draw->background($color);
+                    });
+                break;
+                case "left":
+                    $image->rectangle(0, $ghl, $gw, ($ghs+$ghl), function($draw) use ($color) {
+                        $draw->background($color);
+                    });
+                break;
+            }
+        }
+
+        // Return the updated image
+        return $image;
     }
 }
