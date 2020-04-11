@@ -109,22 +109,22 @@ class CardService implements ModelServiceContract
         // $out[] = $this->findByName("single_bottom")->id;
         // $out[] = $this->findByName("single_left")->id;
         
-        // Add 5 of all the corner 2 slot cards (x20)
-        $twoSlotTunnelOne = $this->findByName("double_top_right");
-        $twoSlotTunnelTwo = $this->findByName("double_right_bottom");
-        $twoSlotTunnelThree = $this->findByName("double_bottom_left");
-        $twoSlotTunnelFour = $this->findByName("double_left_top");
-        for ($i = 0; $i < 5; $i++) {
-            $out[] = $twoSlotTunnelOne->id;
-            $out[] = $twoSlotTunnelTwo->id;
-            $out[] = $twoSlotTunnelThree->id;
-            $out[] = $twoSlotTunnelFour->id;
-        }
+        // // Add 5 of all the corner 2 slot cards (x20)
+        // $twoSlotTunnelOne = $this->findByName("double_top_right");
+        // $twoSlotTunnelTwo = $this->findByName("double_right_bottom");
+        // $twoSlotTunnelThree = $this->findByName("double_bottom_left");
+        // $twoSlotTunnelFour = $this->findByName("double_left_top");
+        // for ($i = 0; $i < 5; $i++) {
+        //     $out[] = $twoSlotTunnelOne->id;
+        //     $out[] = $twoSlotTunnelTwo->id;
+        //     $out[] = $twoSlotTunnelThree->id;
+        //     $out[] = $twoSlotTunnelFour->id;
+        // }
 
         // Add 4 of all of the straight 2 slot cards (x8)
         $twoSlotTunnelFive = $this->findByName("double_top_bottom");
         $twoSlotTunnelSix = $this->findByName("double_left_right");
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 2; $i++) {
             $out[] = $twoSlotTunnelFive->id;
             $out[] = $twoSlotTunnelSix->id;
         }
@@ -134,7 +134,7 @@ class CardService implements ModelServiceContract
         $threeSlotTunnelTwo = $this->findByName("triple_right_bottom_left");
         $threeSlotTunnelThree = $this->findByName("triple_bottom_left_top");
         $threeSlotTunnelFour = $this->findByName("triple_left_top_right");
-        for ($i = 0; $i < 2; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             $out[] = $threeSlotTunnelOne->id;
             $out[] = $threeSlotTunnelTwo->id;
             $out[] = $threeSlotTunnelThree->id;
@@ -331,5 +331,41 @@ class CardService implements ModelServiceContract
 
         // Return the updated image
         return $image;
+    }
+
+    public function generateRewardCards(Game $game)
+    {
+        // Determine how many cards we should return
+        $numCards = $game->players->count();
+
+        // Generate the pool of cards to grab the cards from
+        $pool = $this->generateRewardCardPool();
+
+        // Return the top number of cards from the pool
+        return array_slice($pool, 0, $numCards);
+    }
+
+    private function generateRewardCardPool()
+    {
+        // List of reward card id's that are available
+        $output = [];
+
+        // Grab all of the gold reward cards
+        $one_gold = $this->findByName("reward_one_gold");
+        $two_gold = $this->findByName("reward_two_gold");
+        $three_gold = $this->findByName("reward_three_gold");
+        $four_gold = $this->findByName("reward_four_gold");
+
+        // Add the cards to the pool
+        for ($i = 0; $i < 20; $i++) $output[] = $one_gold->id;
+        for ($i = 0; $i < 10; $i++) $output[] = $two_gold->id;
+        for ($i = 0; $i < 5; $i++) $output[] = $three_gold->id;
+        for ($i = 0; $i < 2; $i++) $output[] = $four_gold->id;
+
+        // Shuffle that fucker
+        shuffle($output);
+
+        // And return it
+        return $output;
     }
 }

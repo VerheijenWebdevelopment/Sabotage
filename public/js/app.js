@@ -3272,6 +3272,108 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "player", "playerRole", "hand", "roles", "cards", "sendMessageApiEndpoint", "performActionApiEndpoint", "cartIconUrl", "lightIconUrl", "pickaxeIconUrl", "goldIconUrl", "goldBarsIconUrl", "coalIconUrl"],
   data: function data() {
@@ -3350,7 +3452,14 @@ __webpack_require__.r(__webpack_exports__);
         select_tile: {
           enable: false
         }
-      }
+      },
+      rewards: {
+        loading: false,
+        revealed_players: [],
+        saboteur_reward: 0,
+        winning_team: ""
+      },
+      winners: null
     };
   },
   computed: {
@@ -3405,7 +3514,11 @@ __webpack_require__.r(__webpack_exports__);
       return false;
     },
     viewCardDialogCard: function viewCardDialogCard() {
-      return this.mutableHand[this.dialogs.view_card.index];
+      if (this.mutableHand.length > 0 && this.dialogs.view_card.index !== null) {
+        return this.mutableHand[this.dialogs.view_card.index];
+      }
+
+      return false;
     },
     foldCardDialogCard: function foldCardDialogCard() {
       return this.mutableHand[this.dialogs.fold_card.index];
@@ -3533,6 +3646,94 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return "";
+    },
+    currentPlayerIsReadyForNextRound: function currentPlayerIsReadyForNextRound() {
+      if (this.mutableGame.revealed_players !== undefined && this.mutableGame.revealed_players !== null && this.mutableGame.revealed_players.length > 0) {
+        for (var i = 0; i < this.mutableGame.revealed_players.length; i++) {
+          if (this.mutableGame.revealed_players[i].player.id === this.mutablePlayer.id) {
+            return this.mutableGame.revealed_players[i].ready;
+          }
+        }
+      }
+
+      return false;
+    },
+    currentPlayerHasSelectedReward: function currentPlayerHasSelectedReward() {
+      for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+        if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+          return this.rewards.revealed_players[i].selected_reward;
+        }
+      }
+
+      return false;
+    },
+    showRewardPlayers: function showRewardPlayers() {
+      // If the saboteurs won; show the players at all times (since no further actions are required)
+      if (this.rewards.winning_team === 'saboteurs') {
+        return true; // If the gold diggers won;
+      } else {
+        // And the player is a digger; show the players once the player has selected their reward
+        if (this.mutablePlayerRole.name === 'digger') {
+          return this.currentPlayerHasSelectedReward; // If the player is a saboteur; show the players at all times
+        } else {
+          return true;
+        }
+      }
+    },
+    showRewardCards: function showRewardCards() {
+      return this.rewards.winning_team === 'golddiggers' && this.mutablePlayerRole.name === 'digger' && !this.currentPlayerHasSelectedReward && this.myTurn;
+    },
+    showRewardReadyUp: function showRewardReadyUp() {
+      if (this.rewards.winning_team === 'saboteurs') {
+        return true;
+      } else {
+        if (this.mutablePlayerRole.name === 'digger') {
+          return this.currentPlayerHasSelectedReward;
+        } else {
+          return true;
+        }
+      }
+    },
+    currentPlayerRevealed: function currentPlayerRevealed() {
+      if (this.rewards.revealed_players.length > 0) {
+        for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+          if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+            return this.rewards.revealed_players[i];
+          }
+        }
+      }
+
+      return false;
+    },
+    allRevealedPlayersHaveChosenReward: function allRevealedPlayersHaveChosenReward() {
+      var players_found = 0;
+      var players_rewarded = 0;
+
+      for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+        if (this.rewards.revealed_players[i].winner) {
+          players_found += 1;
+
+          if (this.rewards.revealed_players[i].selected_reward) {
+            players_rewarded += 1;
+          }
+        }
+      }
+
+      return players_found == players_rewarded;
+    },
+    gameWinners: function gameWinners() {
+      var out = [];
+
+      for (var i = 0; i < this.winners.length; i++) {
+        for (var j = 0; j < this.mutablePlayers.length; j++) {
+          if (this.winners[i] === this.mutablePlayers[j].id) {
+            out.push(this.mutablePlayers[j]);
+            break;
+          }
+        }
+      }
+
+      return out;
     }
   },
   methods: {
@@ -3583,6 +3784,9 @@ __webpack_require__.r(__webpack_exports__);
       this.round = this.game.round;
       this.phase = this.game.phase;
       this.playersTurn = this.game.player_turn;
+      this.rewards.revealed_players = this.game.revealed_players;
+      this.rewards.saboteur_reward = this.game.saboteur_reward;
+      this.rewards.winning_team = this.game.winning_team;
     },
     initializeHand: function initializeHand(hand) {
       this.mutableHand = [];
@@ -3598,7 +3802,7 @@ __webpack_require__.r(__webpack_exports__);
     // Events
     startListening: function startListening() {
       // Connect to the game's channel
-      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\NewRoundStarted', this.onNewRoundStarted).listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound).listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
     },
     onPlayerSelectedRole: function onPlayerSelectedRole(e) {
       console.log(this.tag + "[event] player selected role", e); // Add player's ID to the list of players who have selected a role
@@ -3721,6 +3925,50 @@ __webpack_require__.r(__webpack_exports__);
         duration: 3000
       });
     },
+    onNewRoundStarted: function onNewRoundStarted(e) {
+      console.log(this.tag + "[event] new round started", e); // this.mutableGame.turn = 1;
+      // this.mutableGame.num_cards_in_deck = e.game.num_cards_in_deck;
+      // this.mutableBoard = e.game.board;
+      // this.mutablePlayerRole = null;
+      // this.round = e.game.round;
+      // this.phase = "role_selection";
+
+      location.reload();
+    },
+    onPlayerReadyForNextRound: function onPlayerReadyForNextRound(e) {
+      console.log(this.tag + "[event] player ready for next round", e); // Update the player's ready status
+
+      for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+        if (this.rewards.revealed_players[i].player.id == e.player.id) {
+          this.rewards.revealed_players[i].ready = true;
+          break;
+        }
+      }
+    },
+    onPlayerWasAwardedGold: function onPlayerWasAwardedGold(e) {
+      console.log(this.tag + "[event] player was awarded gold", e); // Update available cards
+
+      this.mutableGame.num_cards_reward_deck = e.game.num_cards_reward_deck; // Update the revealed player entry for the player who was awarded gold
+
+      if (this.rewards.revealed_players.length > 0) {
+        for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+          if (this.rewards.revealed_players[i].player.id === e.player.id) {
+            this.rewards.revealed_players[i].gold_awarded = e.gold;
+            this.rewards.revealed_players[i].selected_reward = true;
+            this.rewards.revealed_players[i].gold_reward_card = e.reward_card;
+            break;
+          }
+        }
+      } // Update player's score
+
+
+      for (var _i = 0; _i < this.mutablePlayers.length; _i++) {
+        if (this.mutablePlayers[_i].id === e.player.id) {
+          this.mutablePlayers[_i].score += e.gold;
+          break;
+        }
+      }
+    },
     onTurnEnded: function onTurnEnded(e) {
       console.log(this.tag + "[event] turn ended", e); // Set the number of the player who's turn it is currently
 
@@ -3729,9 +3977,23 @@ __webpack_require__.r(__webpack_exports__);
     },
     onRoundEnded: function onRoundEnded(e) {
       console.log(this.tag + "[event] round ended", e);
+      setTimeout(function () {
+        // Set the appropriate game phase
+        this.phase = "rewards"; // Set the player who is at turn
+
+        this.playersTurn = e.game.player_turn; // Save the updated mutable game
+
+        this.rewards.revealed_players = e.data.revealed_players;
+        this.rewards.saboteur_reward = e.data.saboteur_reward;
+        this.rewards.winning_team = e.data.winning_team;
+        this.mutableGame.num_cards_reward_deck = e.data.num_cards_reward_deck;
+      }.bind(this), 2000);
     },
     onGameEnded: function onGameEnded(e) {
-      console.log(this.tag + "[event] game ended", e);
+      console.log(this.tag + "[event] game ended", e); // Set the appropriate game phase
+
+      this.phase = "endgame";
+      this.winners = e.winners;
     },
     // Role selection
     onClickRoleCard: function onClickRoleCard(index) {
@@ -4128,6 +4390,51 @@ __webpack_require__.r(__webpack_exports__);
         });
       }.bind(this));
     },
+    // Rewards phase
+    onClickReadyForNextRound: function onClickReadyForNextRound() {
+      console.log(this.tag + " clicked ready for next round button"); // Start loading
+
+      this.rewards.loading = true; // Send API request
+
+      this.sendPerformActionRequest("flag_ready").then(function (response) {
+        console.log(this.tag + " succesfully flagged player as ready", response); // Stop loading
+
+        this.rewards.loading = false; // Update the player's ready state
+
+        for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+          if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+            this.rewards.revealed_players[i].ready = true;
+            break;
+          }
+        }
+      }.bind(this))["catch"](function (error) {
+        console.warn(this.tag + " failed to flag player as ready, error: ", error);
+        this.rewards.loading = false;
+      }.bind(this));
+    },
+    onClickRewardCard: function onClickRewardCard(index) {
+      console.log(this.tag + " clicked reward card, index: ", index);
+      this.rewards.loading = true;
+      var data = {
+        index: index
+      };
+      this.sendPerformActionRequest("select_gold_reward_card", data).then(function (response) {
+        console.log(this.tag + " request succeeded", response);
+        this.rewards.loading = false;
+
+        for (var i = 0; i < this.rewards.revealed_players.length; i++) {
+          if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+            this.rewards.revealed_players[i].gold_reward_card = response.data.reward_card;
+            this.rewards.revealed_players[i].gold_awarded = response.data.reward;
+            this.rewards.revealed_players[i].selected_reward = true;
+            break;
+          }
+        }
+      }.bind(this))["catch"](function (error) {
+        console.warn(this.tag + " failed to send select reward card request", error);
+        this.rewards.loading = false;
+      }.bind(this));
+    },
     // Game board
     onClickedBoardTile: function onClickedBoardTile(data) {
       console.log(this.tag + " clicked board tile: ", data); // If we're in gold location selection mode
@@ -4377,69 +4684,73 @@ __webpack_require__.r(__webpack_exports__);
     },
     tileHasConnectingCards: function tileHasConnectingCards(rowIndex, columnIndex) {
       // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
-      // console.log("-----------------------");
       // Check tile above
-      var tileAbove = [rowIndex - 1, columnIndex]; // console.log(this.tag+" tile above: ", tileAbove);
+      var tileAbove = [rowIndex - 1, columnIndex];
+      var tileRight = [rowIndex, columnIndex + 1];
+      var tileBelow = [rowIndex + 1, columnIndex];
+      var tileLeft = [rowIndex, columnIndex - 1]; // Connected tiles we find
+
+      var connectedCards = []; // Count the number of connected gold location tiles
+
+      var connectedGoldLocations = 0; // console.log(this.tag+" tile above: ", tileAbove);
 
       if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
         var card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
         var inverted = this.mutableBoard[tileAbove[0]][tileAbove[1]].inverted;
 
         if (card && (card.type === "gold_location" || card.type === "start" || !inverted && card.open_positions.includes("bottom") || inverted && card.open_positions.includes("top"))) {
-          // console.log(this.tag+" found connecting card above, true");                        
-          return true;
+          connectedCards.push(card);
+          if (card.type === "gold_location") connectedGoldLocations += 1;
         }
-      } // console.log("-----------------------");
-      // Check tile to the right
+      } // Check tile to the right
 
-
-      var tileRight = [rowIndex, columnIndex + 1]; // console.log(this.tag+" tile right: ", tileRight);
 
       if (this.tileHasCard(tileRight[0], tileRight[1])) {
-        // console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
         var _card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
 
-        var _inverted = this.mutableBoard[tileRight[0]][tileRight[1]].inverted; // console.log(this.tag+" card on tile: ", card);
+        var _inverted = this.mutableBoard[tileRight[0]][tileRight[1]].inverted;
 
         if (_card && (_card.type === "gold_location" || _card.type === "start" || !_inverted && _card.open_positions.includes("left") || _inverted && _card.open_positions.includes("right"))) {
-          // console.log(this.tag+" found connecting card to the right, true");
-          return true;
+          connectedCards.push(_card);
+          if (_card.type === "gold_location") connectedGoldLocations += 1;
         }
-      } // console.log("-----------------------");
-      // Check tile below
+      } // Check tile below
 
-
-      var tileBelow = [rowIndex + 1, columnIndex]; // console.log(this.tag+" tile below: ", tileBelow);
 
       if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
-        // console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
         var _card2 = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
 
-        var _inverted2 = this.mutableBoard[tileBelow[0]][tileBelow[1]].inverted; // console.log(this.tag+" card on tile: ", card);
+        var _inverted2 = this.mutableBoard[tileBelow[0]][tileBelow[1]].inverted;
 
         if (_card2 && (_card2.type === "gold_location" || _card2.type === "start" || !_inverted2 && _card2.open_positions.includes("top") || _inverted2 && _card2.open_positions.includes("bottom"))) {
-          // console.log(this.tag+" connecting card found on tile below, available");
-          return true;
+          connectedCards.push(_card2);
+          if (_card2.type === "gold_location") connectedGoldLocations += 1;
         }
-      } // console.log("-----------------------");
-      // Check tile to the left
+      } // Check tile to the left
 
-
-      var tileLeft = [rowIndex, columnIndex - 1]; // console.log(this.tag+" tile left: ", tileLeft);
 
       if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
-        // console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
         var _card3 = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
 
-        var _inverted3 = this.mutableBoard[tileLeft[0]][tileLeft[1]].inverted; // console.log(this.tag+" card on tile: ", card);
+        var _inverted3 = this.mutableBoard[tileLeft[0]][tileLeft[1]].inverted;
 
         if (_card3 && (_card3.type === "gold_location" || _card3.type === "start" || !_inverted3 && _card3.open_positions.includes("right") || _inverted3 && _card3.open_positions.includes("left"))) {
-          // console.log(this.tag+" connecting card found on tile to the left, available");
-          return true;
+          connectedCards.push(_card3);
+          if (_card3.type === "gold_location") connectedGoldLocations += 1;
         }
-      } // console.log("-----------------------");
-      // If we've reached this point the tile is available but has no connecting card
-      // console.log(this.tag+" tile has no connected tunnels, unavailable");
+      } // If we've found compatible connected cards
+
+
+      if (connectedCards.length > 0) {
+        // Make sure we're not connected to only gold locations; since that would allow illegal moves
+        if (connectedCards.length === connectedGoldLocations) {
+          console.log(this.tag + " only gold locations connected");
+          return false;
+        } // Otherwise all is good
+
+
+        return true;
+      } // If we've reached this point the tile is available but has no connecting card
 
 
       return false;
@@ -4592,8 +4903,8 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
 
-        for (var _i = 0; _i < requiredClosedPositions.length; _i++) {
-          if (card.open_positions.includes(requiredClosedPositions[_i])) {
+        for (var _i2 = 0; _i2 < requiredClosedPositions.length; _i2++) {
+          if (card.open_positions.includes(requiredClosedPositions[_i2])) {
             meetsRequirements = false;
             break;
           }
@@ -4603,28 +4914,28 @@ __webpack_require__.r(__webpack_exports__);
         // Invert the card's open positions
         var invertedOpenPositions = [];
 
-        for (var _i2 = 0; _i2 < card.open_positions.length; _i2++) {
-          if (card.open_positions[_i2] === "top") {
+        for (var _i3 = 0; _i3 < card.open_positions.length; _i3++) {
+          if (card.open_positions[_i3] === "top") {
             invertedOpenPositions.push("bottom");
-          } else if (card.open_positions[_i2] === "right") {
+          } else if (card.open_positions[_i3] === "right") {
             invertedOpenPositions.push("left");
-          } else if (card.open_positions[_i2] === "bottom") {
+          } else if (card.open_positions[_i3] === "bottom") {
             invertedOpenPositions.push("top");
-          } else if (card.open_positions[_i2] === "left") {
+          } else if (card.open_positions[_i3] === "left") {
             invertedOpenPositions.push("right");
           }
         } // Validate against the required open & closed positions
 
 
-        for (var _i3 = 0; _i3 < requiredOpenPositions.length; _i3++) {
-          if (!invertedOpenPositions.includes(requiredOpenPositions[_i3])) {
+        for (var _i4 = 0; _i4 < requiredOpenPositions.length; _i4++) {
+          if (!invertedOpenPositions.includes(requiredOpenPositions[_i4])) {
             meetsRequirements = false;
             break;
           }
         }
 
-        for (var _i4 = 0; _i4 < requiredClosedPositions.length; _i4++) {
-          if (invertedOpenPositions.includes(requiredClosedPositions[_i4])) {
+        for (var _i5 = 0; _i5 < requiredClosedPositions.length; _i5++) {
+          if (invertedOpenPositions.includes(requiredClosedPositions[_i5])) {
             meetsRequirements = false;
             break;
           }
@@ -4699,6 +5010,15 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return out;
+    },
+    getUsernameByPlayerId: function getUsernameByPlayerId(playerId) {
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === playerId) {
+          return this.mutablePlayers[i].user.username;
+        }
+      }
+
+      return "-";
     }
   },
   mounted: function mounted() {
@@ -7949,7 +8269,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  z-index: 10;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .tooltip-wrapper {\n  padding: 0 15px 0 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  overflow: hidden;\n  position: relative;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  top: 0;\n  left: 0;\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  position: absolute;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
+exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  z-index: 10;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-content #rewards-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  padding: 100px;\n  align-items: center;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #rewards-ui #rewards-ui__title {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__subtitle {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #rewards-ui #rewards-ui__instructions {\n  margin: 0 auto;\n  color: #000000;\n  padding: 8px 15px;\n  border-radius: 3px;\n  margin: 0 0 40px 0;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards__title {\n  font-size: 1.7em;\n  font-weight: 500;\n  margin: 0 0 20px 0;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__loading {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper {\n  flex: 0 0 130px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #000000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.8);\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card:hover {\n  cursor: pointer;\n  background-color: #ffffff;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card .reward-card__number {\n  font-size: 1.5em;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card {\n  margin: 50px 0 0 0;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card #reward-card__title {\n  font-size: 1.3em;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card #reward-card__subtitle {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players {\n  width: 100%;\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 50px -15px -30px -15px;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper {\n  flex: 0 0 250px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player {\n  width: 100%;\n  padding: 20px;\n  color: #000000;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ffffff;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player.winner {\n  margin: -5px;\n  border: 5px solid #00a100;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-username {\n  text-align: center;\n  font-size: 1.2em;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-avatar {\n  width: 100px;\n  height: 100px;\n  margin: 15px auto;\n  border-radius: 50px;\n  background-color: #f2f2f2;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-role__wrapper {\n  margin: 2px 0;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-role__wrapper .player-role {\n  color: #fff;\n  font-size: 0.7em;\n  padding: 2px 5px;\n  text-align: center;\n  border-radius: 3px;\n  display: inline-block;\n  box-sizing: border-box;\n  background-color: #333;\n  text-transform: uppercase;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-reward {\n  margin: 20px 0;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-reward .gold {\n  color: #db9600;\n  font-weight: 500;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready .ready {\n  color: #39b410;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready .not-ready {\n  color: #b20404;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up {\n  margin: 50px 0 0 0;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up #ready-up__text {\n  text-align: center;\n  margin: 0 0 15px 0;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up #ready-up__action {\n  text-align: center;\n}\n#game #game-content #game-over-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-over-ui #winners #winners-title {\n  font-size: 1.5em;\n  font-weight: 500;\n  text-align: center;\n  margin: 50px 0 10px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-over-ui #winners #winners-list {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper {\n  flex: 0 0 200px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner {\n  width: 250px;\n  height: 100px;\n  padding: 25px;\n  display: flex;\n  color: #000000;\n  border-radius: 3px;\n  align-items: center;\n  flex-direction: column;\n  box-sizing: border-box;\n  justify-content: center;\n  background-color: #fff;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner .winner-title {\n  font-size: 1.1em;\n  font-weight: 500;\n  text-align: center;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner .winner-score {\n  text-align: center;\n  color: #ffd900;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .tooltip-wrapper {\n  padding: 0 15px 0 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  overflow: hidden;\n  position: relative;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  top: 0;\n  left: 0;\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  position: absolute;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
 
 // exports
 
@@ -46413,7 +46733,291 @@ var render = function() {
         _vm._v(" "),
         _vm.mutableGame !== null && _vm.phase === "rewards"
           ? _c("div", { attrs: { id: "rewards-ui" } }, [
-              _vm._v("\n            Rewards\n        ")
+              _c("h1", { attrs: { id: "rewards-ui__title" } }, [
+                _vm._v("Round has ended!")
+              ]),
+              _vm._v(" "),
+              _c("h2", { attrs: { id: "rewards-ui__subtitle" } }, [
+                _vm._v(_vm._s(_vm.rewards.winning_team) + " have won")
+              ]),
+              _vm._v(" "),
+              _vm.rewards.winning_team === "saboteurs"
+                ? _c("div", { attrs: { id: "rewards-ui__instructions" } }, [
+                    _vm._v(
+                      "\n                All saboteurs have been awarded " +
+                        _vm._s(_vm.rewards.saboteur_reward) +
+                        " gold\n            "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.rewards.winning_team === "golddiggers" &&
+              _vm.mutablePlayerRole.name === "digger" &&
+              !_vm.myTurn &&
+              !_vm.allRevealedPlayersHaveChosenReward
+                ? _c("div", { attrs: { id: "rewards-ui__instructions" } }, [
+                    _vm._v(
+                      "\n                " +
+                        _vm._s(_vm.playerAtPlay.user.username) +
+                        " is choosing their reward\n            "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.rewards.winning_team === "golddiggers" &&
+              _vm.mutablePlayerRole.name !== "digger"
+                ? _c("div", { attrs: { id: "rewards-ui__instructions" } }, [
+                    _vm._v(
+                      "\n                Golddiggers are choosing their rewards\n            "
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.showRewardPlayers
+                ? _c(
+                    "div",
+                    { attrs: { id: "rewards-ui__players" } },
+                    _vm._l(_vm.rewards.revealed_players, function(
+                      revealedPlayer,
+                      rpi
+                    ) {
+                      return _c(
+                        "div",
+                        { key: rpi, staticClass: "player-wrapper" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "player",
+                              class: { winner: revealedPlayer.winner }
+                            },
+                            [
+                              _c("div", { staticClass: "player-username" }, [
+                                _vm._v(
+                                  _vm._s(
+                                    _vm.getUsernameByPlayerId(
+                                      revealedPlayer.player.id
+                                    )
+                                  )
+                                )
+                              ]),
+                              _vm._v(" "),
+                              _c(
+                                "div",
+                                { staticClass: "player-role__wrapper" },
+                                [
+                                  _c("div", { staticClass: "player-role" }, [
+                                    _vm._v(_vm._s(revealedPlayer.role.label))
+                                  ])
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "player-reward" }, [
+                                _c("span", { staticClass: "gold" }, [
+                                  _vm._v(
+                                    _vm._s(revealedPlayer.gold_awarded) +
+                                      " gold"
+                                  )
+                                ]),
+                                _vm._v(" awarded\n                        ")
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "player-ready" }, [
+                                revealedPlayer.ready
+                                  ? _c("span", { staticClass: "ready" }, [
+                                      _vm._v("Ready!")
+                                    ])
+                                  : _vm._e(),
+                                _vm._v(" "),
+                                !revealedPlayer.ready
+                                  ? _c("span", { staticClass: "not-ready" }, [
+                                      _vm._v("Not ready")
+                                    ])
+                                  : _vm._e()
+                              ])
+                            ]
+                          )
+                        ]
+                      )
+                    }),
+                    0
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.showRewardCards
+                ? _c(
+                    "div",
+                    { attrs: { id: "rewards-ui__reward-cards__wrapper" } },
+                    [
+                      _c(
+                        "div",
+                        { attrs: { id: "rewards-ui__reward-cards__title" } },
+                        [_vm._v("Select your reward")]
+                      ),
+                      _vm._v(" "),
+                      _vm.rewards.loading
+                        ? _c("div", { attrs: { id: "rewards-ui__loading" } }, [
+                            _vm._v(
+                              "\n                    Loading\n                "
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.rewards.winning_team === "golddiggers" &&
+                      !_vm.rewards.loading &&
+                      _vm.currentPlayerRevealed
+                        ? _c(
+                            "div",
+                            { attrs: { id: "rewards-ui__reward-cards" } },
+                            _vm._l(
+                              _vm.mutableGame.num_cards_reward_deck,
+                              function(n, ni) {
+                                return _c(
+                                  "div",
+                                  {
+                                    key: ni,
+                                    staticClass: "reward-card__wrapper"
+                                  },
+                                  [
+                                    _c(
+                                      "div",
+                                      {
+                                        staticClass: "reward-card",
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.onClickRewardCard(ni)
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "reward-card__title" },
+                                          [_vm._v("Reward Card")]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "div",
+                                          {
+                                            staticClass: "reward-card__number"
+                                          },
+                                          [_vm._v("#" + _vm._s(ni + 1))]
+                                        )
+                                      ]
+                                    )
+                                  ]
+                                )
+                              }
+                            ),
+                            0
+                          )
+                        : _vm._e()
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.currentPlayerRevealed.gold_reward_card !== null
+                ? _c("div", { attrs: { id: "rewards-ui__reward-card" } }, [
+                    _c("div", { attrs: { id: "reward-card__title" } }, [
+                      _vm._v(
+                        _vm._s(_vm.currentPlayerRevealed.gold_reward_card.text)
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { attrs: { id: "reward-card__subtitle" } }, [
+                      _vm._v(
+                        _vm._s(
+                          _vm.currentPlayerRevealed.gold_reward_card.description
+                        )
+                      )
+                    ])
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.showRewardReadyUp
+                ? _c("div", { attrs: { id: "rewards-ui__ready-up" } }, [
+                    _vm.currentPlayerRevealed.ready
+                      ? _c("div", { attrs: { id: "ready-up__text" } }, [
+                          _vm._v(
+                            "\n                    Waiting for other players to be ready\n                "
+                          )
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    !_vm.currentPlayerRevealed.ready
+                      ? _c(
+                          "div",
+                          { attrs: { id: "ready-up__button" } },
+                          [
+                            _c(
+                              "v-btn",
+                              {
+                                attrs: {
+                                  color: "success",
+                                  dark: "",
+                                  loading: _vm.rewards.loading
+                                },
+                                on: { click: _vm.onClickReadyForNextRound }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                        Ready for next round!\n                    "
+                                )
+                              ]
+                            )
+                          ],
+                          1
+                        )
+                      : _vm._e()
+                  ])
+                : _vm._e()
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.mutableGame !== null && _vm.phase === "endgame"
+          ? _c("div", { attrs: { id: "game-over-ui" } }, [
+              _c("h1", { attrs: { id: "game-over-ui__title" } }, [
+                _vm._v("Game over!")
+              ]),
+              _vm._v(" "),
+              _c("div", { attrs: { id: "winners" } }, [
+                _c("div", { attrs: { id: "winners-title" } }, [
+                  _vm._v("Winners")
+                ]),
+                _vm._v(" "),
+                _vm.winners !== null
+                  ? _c(
+                      "div",
+                      { attrs: { id: "winners-list" } },
+                      _vm._l(_vm.gameWinners, function(winner, wi) {
+                        return _c(
+                          "div",
+                          { key: wi, staticClass: "winner-wrapper" },
+                          [
+                            _c("div", { staticClass: "winner" }, [
+                              _c("div", { staticClass: "winner-name" }, [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(winner.user.username) +
+                                    "\n                            "
+                                )
+                              ]),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "winner-score" }, [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(winner.score) +
+                                    " gold\n                            "
+                                )
+                              ])
+                            ])
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  : _vm._e()
+              ])
             ])
           : _vm._e()
       ]),
@@ -46474,7 +47078,7 @@ var render = function() {
           }
         },
         [
-          this.dialogs.view_card.index !== null
+          _vm.viewCardDialogCard
             ? _c("div", { staticClass: "dialog" }, [
                 _c(
                   "div",
@@ -46706,7 +47310,8 @@ var render = function() {
           }
         },
         [
-          _vm.dialogs.fold_card.index !== null
+          _vm.dialogs.fold_card.index !== null &&
+          _vm.foldCardDialogCard !== undefined
             ? _c("div", { staticClass: "dialog" }, [
                 _c(
                   "div",

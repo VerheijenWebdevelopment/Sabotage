@@ -3,6 +3,7 @@
 namespace App\Events\Game;
 
 use App\Models\Game;
+use App\Models\Player;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
@@ -12,22 +13,22 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class GameEnded implements ShouldBroadcast
+class PlayerIsReadyForNextRound implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $game;
-    public $winners;
+    public $player;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Game $game, array $winners)
+    public function __construct(Game $game, Player $player)
     {
         $this->game = $game;
-        $this->winners = $winners;
+        $this->player = $player;
     }
 
     /**

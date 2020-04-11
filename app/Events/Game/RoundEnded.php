@@ -17,15 +17,17 @@ class RoundEnded implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $game;
+    public $data;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Game $game)
+    public function __construct(Game $game, array $data)
     {
         $this->game = $game;
+        $this->data = $data;
     }
 
     /**

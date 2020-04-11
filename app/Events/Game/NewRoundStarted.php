@@ -12,22 +12,20 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class GameEnded implements ShouldBroadcast
+class NewRoundStarted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $game;
-    public $winners;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Game $game, array $winners)
+    public function __construct(Game $game)
     {
         $this->game = $game;
-        $this->winners = $winners;
     }
 
     /**

@@ -15,6 +15,7 @@ class CreateGamesTable extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('winner_id')->nullable();
             $table->unsignedInteger('game_master_id');
             $table->string('status')->default('open');
             $table->unsignedInteger('round')->default(1);
@@ -29,6 +30,11 @@ class CreateGamesTable extends Migration
             $table->text('players_with_selected_roles')->nullable();
             $table->text('board')->nullable();
             $table->text('reached_gold_locations')->nullable();
+            $table->string('winning_team')->nullable();
+            $table->text('reward_deck')->nullable();
+            $table->unsignedInteger('num_cards_reward_deck')->default(0);
+            $table->text('revealed_players')->nullable();
+            $table->unsignedInteger('saboteur_reward')->nullable();
             $table->timestamps();
         });
     }

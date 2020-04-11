@@ -32,16 +32,28 @@ class Game extends Model
         "players_with_selected_roles",
         "board",
         "reached_gold_locations",
+        "reward_deck",
+        "num_cards_reward_deck",
+        "revealed_players",
+        "saboteur_reward",
+        "winning_team",
     ];
     protected $hidden = [
         "deck",
         "roles",
         "gold_location",
+        "reward_deck",
+        "saboteur_reward",
     ];
 
     //
     // Relationships
     //
+
+    public function winners()
+    {
+        return $this->belongsToMany(Player::class, "winners", "game_id", "player_id");
+    }
 
     public function gameMaster()
     {
@@ -97,6 +109,16 @@ class Game extends Model
         return unserialize($value);
     }
 
+    public function getRewardDeckAttribute($value)
+    {
+        return unserialize($value);
+    }
+
+    public function getRevealedPlayersAttribute($value)
+    {
+        return unserialize($value);
+    }
+    
     //
     // Mutators
     //
@@ -129,5 +151,15 @@ class Game extends Model
     public function setReachedGoldLocationsAttribute($value)
     {
         $this->attributes["reached_gold_locations"] = serialize($value);
+    }
+
+    public function setRewardDeckAttribute($value)
+    {
+        $this->attributes["reward_deck"] = serialize($value);
+    }
+
+    public function setRevealedPlayersAttribute($value)
+    {
+        $this->attributes["revealed_players"] = serialize($value);
     }
 }

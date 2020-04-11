@@ -50,6 +50,38 @@ class CardSeeder extends Seeder
         ]);
 
         // ------------------------------------------------
+        // Reward cards
+        // ------------------------------------------------
+
+        $reward_one_gold = Card::create([
+            "type" => "reward",
+            "text" => "One Gold",
+            "name" => "reward_one_gold",
+            "description" => "One piece of gold, noice!",
+        ]);
+
+        $reward_two_gold = Card::create([
+            "type" => "reward",
+            "text" => "Two Gold",
+            "name" => "reward_two_gold",
+            "description" => "Two pieces of gold, noicer!",
+        ]);
+        
+        $reward_three_gold = Card::create([
+            "type" => "reward",
+            "text" => "Three Gold",
+            "name" => "reward_three_gold",
+            "description" => "Three pieces of gold, luckkky",
+        ]);
+
+        $reward_four_gold = Card::create([
+            "type" => "reward",
+            "text" => "Four Gold",
+            "name" => "reward_four_gold",
+            "description" => "Four pieces of gold, ",
+        ]);
+
+        // ------------------------------------------------
         // Action cards
         // ------------------------------------------------
 

@@ -53,6 +53,11 @@ class Player extends Model
         return $this->hasMany(GameChatMessage::class);
     }
 
+    public function wonGames()
+    {
+        return $this->belongsToMany(Game::class, "winners", "player_id", "game_id");
+    }
+
     //
     // Accessors 
     //

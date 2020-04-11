@@ -20,8 +20,13 @@ class LobbyController extends Controller
 
     public function getLeaderboards()
     {
+        $users = Users::getAllPreloaded();
+        $users = $users->sortByDesc(function($user) {
+            return $user->highscore;
+        })->values();
+
         return view("pages.lobby.leaderboards", [
-            "users" => Users::getAllPreloaded(),
+            "users" => $users,
         ]);
     }
 }

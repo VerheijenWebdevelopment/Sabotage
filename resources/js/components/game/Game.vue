@@ -199,7 +199,109 @@
 
             <!-- Rewards UI -->
             <div id="rewards-ui" v-if="mutableGame !== null && phase === 'rewards'">
-                Rewards
+
+                <!-- Title -->
+                <h1 id="rewards-ui__title">Round has ended!</h1>
+                
+                <!-- Subtitle -->
+                <h2 id="rewards-ui__subtitle">{{ rewards.winning_team }} have won</h2>
+
+                <!-- Instructions (saboteurs won) -->
+                <div id="rewards-ui__instructions" v-if="rewards.winning_team === 'saboteurs'">
+                    All saboteurs have been awarded {{ rewards.saboteur_reward }} gold
+                </div>
+
+                <!-- Instructions (golddiggers won) -->
+                <div id="rewards-ui__instructions" v-if="rewards.winning_team === 'golddiggers' && mutablePlayerRole.name === 'digger' && !myTurn && !allRevealedPlayersHaveChosenReward">
+                    {{ playerAtPlay.user.username }} is choosing their reward
+                </div>
+                <div id="rewards-ui__instructions" v-if="rewards.winning_team === 'golddiggers' && mutablePlayerRole.name !== 'digger'">
+                    Golddiggers are choosing their rewards
+                </div>
+
+                <!-- Players -->
+                <div id="rewards-ui__players" v-if="showRewardPlayers">
+                    <div class="player-wrapper" v-for="(revealedPlayer, rpi) in rewards.revealed_players" :key="rpi">
+                        <div class="player" :class="{ 'winner': revealedPlayer.winner }">
+                            <div class="player-username">{{ getUsernameByPlayerId(revealedPlayer.player.id) }}</div>
+                            <div class="player-role__wrapper">
+                                <div class="player-role">{{ revealedPlayer.role.label }}</div>
+                            </div>
+                            <div class="player-reward">
+                                <span class="gold">{{ revealedPlayer.gold_awarded }} gold</span> awarded
+                            </div>
+                            <div class="player-ready">
+                                <span class="ready" v-if="revealedPlayer.ready">Ready!</span>
+                                <span class="not-ready" v-if="!revealedPlayer.ready">Not ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Golddigger reward selection -->
+                <div id="rewards-ui__reward-cards__wrapper" v-if="showRewardCards">
+                    <!-- Title -->
+                    <div id="rewards-ui__reward-cards__title">Select your reward</div>
+                    <!-- Loading -->
+                    <div id="rewards-ui__loading" v-if="rewards.loading">
+                        Loading
+                    </div>
+                    <!-- Reward cards -->
+                    <div id="rewards-ui__reward-cards" v-if="rewards.winning_team === 'golddiggers' && !rewards.loading && currentPlayerRevealed">
+                        <div class="reward-card__wrapper" v-for="(n, ni) in mutableGame.num_cards_reward_deck" :key="ni">
+                            <div class="reward-card" @click="onClickRewardCard(ni)">
+                                <div class="reward-card__title">Reward Card</div>
+                                <div class="reward-card__number">#{{ ni + 1 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reward card -->
+                <div id="rewards-ui__reward-card" v-if="currentPlayerRevealed.gold_reward_card !== null">
+                    <div id="reward-card__title">{{ currentPlayerRevealed.gold_reward_card.text }}</div>
+                    <div id="reward-card__subtitle">{{ currentPlayerRevealed.gold_reward_card.description }}</div>
+                </div>
+
+                <!-- Ready up for next round -->
+                <div id="rewards-ui__ready-up" v-if="showRewardReadyUp">
+                    <!-- Waiting on other player -->
+                    <div id="ready-up__text" v-if="currentPlayerRevealed.ready">
+                        Waiting for other players to be ready
+                    </div>
+                    <!-- Ready button -->
+                    <div id="ready-up__button" v-if="!currentPlayerRevealed.ready">
+                        <v-btn color="success" dark @click="onClickReadyForNextRound" :loading="rewards.loading">
+                            Ready for next round!
+                        </v-btn>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Game over UI -->
+            <div id="game-over-ui" v-if="mutableGame !== null && phase === 'endgame'">
+
+                <!-- Title -->
+                <h1 id="game-over-ui__title">Game over!</h1>
+
+                <!-- Winners -->
+                <div id="winners">
+                    <div id="winners-title">Winners</div>
+                    <div id="winners-list" v-if="winners !== null">
+                        <div class="winner-wrapper" v-for="(winner, wi) in gameWinners" :key="wi">
+                            <div class="winner">
+                                <div class="winner-name">
+                                    {{ winner.user.username }}
+                                </div>
+                                <div class="winner-score">
+                                    {{ winner.score }} gold
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -234,7 +336,7 @@
 
         <!-- View card dialog -->
         <v-dialog v-model="dialogs.view_card.show" width="800">
-            <div class="dialog" v-if="this.dialogs.view_card.index !== null">
+            <div class="dialog" v-if="viewCardDialogCard">
                 <!-- Close button -->
                 <div class="dialog__close-button" @click="dialogs.view_card.show = false">
                     <i class="fas fa-times"></i>
@@ -304,7 +406,7 @@
 
         <!-- Fold card dialog -->
         <v-dialog v-model="dialogs.fold_card.show" width="550">
-            <div class="dialog" v-if="dialogs.fold_card.index !== null">
+            <div class="dialog" v-if="dialogs.fold_card.index !== null && foldCardDialogCard !== undefined">
                 <!-- Close button -->
                 <div class="dialog__close-button" @click="onClickCancelFold">
                     <i class="fas fa-times"></i>
@@ -676,7 +778,14 @@
                 select_tile: {
                     enable: false,
                 },
-            }
+            },
+            rewards: {
+                loading: false,
+                revealed_players: [],
+                saboteur_reward: 0,
+                winning_team: "",
+            },
+            winners: null,
         }), 
         computed: {
             playerAtPlay() {
@@ -724,7 +833,10 @@
                 return false;
             },
             viewCardDialogCard() {
-                return this.mutableHand[this.dialogs.view_card.index];
+                if (this.mutableHand.length > 0 && this.dialogs.view_card.index !== null) {
+                    return this.mutableHand[this.dialogs.view_card.index];
+                }
+                return false;
             },
             foldCardDialogCard() {
                 return this.mutableHand[this.dialogs.fold_card.index];
@@ -835,6 +947,88 @@
                 }
                 return "";
             },
+            currentPlayerIsReadyForNextRound() {
+                if (this.mutableGame.revealed_players !== undefined && this.mutableGame.revealed_players !== null && this.mutableGame.revealed_players.length > 0) {
+                    for (let i = 0; i < this.mutableGame.revealed_players.length; i++) {
+                        if (this.mutableGame.revealed_players[i].player.id === this.mutablePlayer.id) {
+                            return this.mutableGame.revealed_players[i].ready;
+                        }
+                    }
+                }
+                return false;
+            },
+            currentPlayerHasSelectedReward() {
+                for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                    if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+                        return this.rewards.revealed_players[i].selected_reward;
+                    }
+                }
+                return false;
+            },
+            showRewardPlayers() {
+                // If the saboteurs won; show the players at all times (since no further actions are required)
+                if (this.rewards.winning_team === 'saboteurs') {
+                    return true;
+                // If the gold diggers won;
+                } else {
+                    // And the player is a digger; show the players once the player has selected their reward
+                    if (this.mutablePlayerRole.name === 'digger') {
+                        return this.currentPlayerHasSelectedReward;
+                    // If the player is a saboteur; show the players at all times
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            showRewardCards() {
+                return this.rewards.winning_team === 'golddiggers' && this.mutablePlayerRole.name === 'digger' && !this.currentPlayerHasSelectedReward && this.myTurn;
+            },
+            showRewardReadyUp() {
+                if (this.rewards.winning_team === 'saboteurs') {
+                    return true;
+                } else {
+                    if (this.mutablePlayerRole.name === 'digger') {
+                        return this.currentPlayerHasSelectedReward;
+                    } else {
+                        return true;
+                    }
+                }
+            },
+            currentPlayerRevealed() {
+                if (this.rewards.revealed_players.length > 0) {
+                    for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                        if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+                            return this.rewards.revealed_players[i];
+                        }
+                    }
+                }
+                return false;
+            },
+            allRevealedPlayersHaveChosenReward() {
+                let players_found = 0;
+                let players_rewarded = 0;
+                for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                    if (this.rewards.revealed_players[i].winner) {
+                        players_found += 1;
+                        if (this.rewards.revealed_players[i].selected_reward) {
+                            players_rewarded += 1;
+                        }
+                    }
+                }
+                return players_found == players_rewarded;
+            },
+            gameWinners() {
+                let out = [];
+                for (let i = 0; i < this.winners.length; i++) {
+                    for (let j = 0; j < this.mutablePlayers.length; j++) {
+                        if (this.winners[i] === this.mutablePlayers[j].id) {
+                            out.push(this.mutablePlayers[j]);
+                            break;
+                        }
+                    }
+                }
+                return out;
+            },
         },
         methods: {
             // Init
@@ -890,6 +1084,10 @@
                 this.phase = this.game.phase;
                 this.playersTurn = this.game.player_turn;
 
+                this.rewards.revealed_players = this.game.revealed_players;
+                this.rewards.saboteur_reward = this.game.saboteur_reward;
+                this.rewards.winning_team = this.game.winning_team;
+
             },
             initializeHand(hand) {
                 this.mutableHand = [];
@@ -911,6 +1109,9 @@
                     .listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel)
                     .listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel)
                     .listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed)
+                    .listen('Game\\NewRoundStarted', this.onNewRoundStarted)
+                    .listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound)
+                    .listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold)
                     .listen('Game\\TurnEnded', this.onTurnEnded)
                     .listen('Game\\RoundEnded', this.onRoundEnded)
                     .listen('Game\\GameEnded', this.onGameEnded);
@@ -1031,6 +1232,58 @@
                 // Notify user wassup
                 this.$toasted.show("Gold location #"+e.gold_location+" has been revealed!", { duration: 3000 });
             },
+            onNewRoundStarted(e) {
+                console.log(this.tag+"[event] new round started", e);
+
+                // this.mutableGame.turn = 1;
+                // this.mutableGame.num_cards_in_deck = e.game.num_cards_in_deck;
+                // this.mutableBoard = e.game.board;
+                // this.mutablePlayerRole = null;
+                // this.round = e.game.round;
+                // this.phase = "role_selection";
+
+                location.reload(); 
+
+            },
+            onPlayerReadyForNextRound(e) {
+                console.log(this.tag+"[event] player ready for next round", e);
+
+                // Update the player's ready status
+                for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                    if (this.rewards.revealed_players[i].player.id == e.player.id) {
+                        this.rewards.revealed_players[i].ready = true;
+                        break;
+                    }
+                }
+
+            },
+            onPlayerWasAwardedGold(e) {
+                console.log(this.tag+"[event] player was awarded gold", e);
+
+                // Update available cards
+                this.mutableGame.num_cards_reward_deck = e.game.num_cards_reward_deck;
+
+                // Update the revealed player entry for the player who was awarded gold
+                if (this.rewards.revealed_players.length > 0) {
+                    for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                        if (this.rewards.revealed_players[i].player.id === e.player.id) {
+                            this.rewards.revealed_players[i].gold_awarded = e.gold;
+                            this.rewards.revealed_players[i].selected_reward = true;
+                            this.rewards.revealed_players[i].gold_reward_card = e.reward_card;
+                            break;
+                        }
+                    }
+                }
+
+                // Update player's score
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.player.id) {
+                        this.mutablePlayers[i].score += e.gold;
+                        break;
+                    }
+                }
+
+            },
             onTurnEnded(e) {
                 console.log(this.tag+"[event] turn ended", e);
 
@@ -1042,9 +1295,31 @@
             onRoundEnded(e) {
                 console.log(this.tag+"[event] round ended", e);
 
+                setTimeout(function() {
+
+                    // Set the appropriate game phase
+                    this.phase = "rewards";
+
+                    // Set the player who is at turn
+                    this.playersTurn = e.game.player_turn;
+    
+                    // Save the updated mutable game
+                    this.rewards.revealed_players = e.data.revealed_players;
+                    this.rewards.saboteur_reward = e.data.saboteur_reward;
+                    this.rewards.winning_team = e.data.winning_team;
+
+                    this.mutableGame.num_cards_reward_deck = e.data.num_cards_reward_deck;
+                    
+                }.bind(this), 2000);
+
             },
             onGameEnded(e) {
                 console.log(this.tag+"[event] game ended", e);
+                
+                // Set the appropriate game phase
+                this.phase = "endgame";
+
+                this.winners = e.winners;
 
             },
             // Role selection
@@ -1519,6 +1794,71 @@
                     }.bind(this));
 
             },
+            // Rewards phase
+            onClickReadyForNextRound() {
+                console.log(this.tag+" clicked ready for next round button");
+
+                // Start loading
+                this.rewards.loading = true;
+
+                // Send API request
+                this.sendPerformActionRequest("flag_ready")
+
+                    .then(function(response) {
+                        console.log(this.tag+" succesfully flagged player as ready", response);
+
+                        // Stop loading
+                        this.rewards.loading = false;
+
+                        // Update the player's ready state
+                        for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                            if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+                                this.rewards.revealed_players[i].ready = true;
+                                break;
+                            }
+                        }
+
+                    }.bind(this))
+
+                    .catch(function(error) {
+                        console.warn(this.tag+" failed to flag player as ready, error: ", error);
+                        this.rewards.loading = false;
+                    }.bind(this));
+
+            },
+            onClickRewardCard(index) {
+                console.log(this.tag+" clicked reward card, index: ", index);
+
+                this.rewards.loading = true;
+
+                let data = { index: index };
+
+                this.sendPerformActionRequest("select_gold_reward_card", data)
+
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", response);
+                        
+                        this.rewards.loading = false;
+
+                        for (let i = 0; i < this.rewards.revealed_players.length; i++) {
+                            if (this.rewards.revealed_players[i].player.id === this.mutablePlayer.id) {
+                                this.rewards.revealed_players[i].gold_reward_card = response.data.reward_card;
+                                this.rewards.revealed_players[i].gold_awarded = response.data.reward;
+                                this.rewards.revealed_players[i].selected_reward = true;
+                                break;
+                            }
+                        }
+
+                    }.bind(this))
+
+                    .catch(function(error) {
+                        console.warn(this.tag+" failed to send select reward card request", error);
+
+                        this.rewards.loading = false;
+
+                    }.bind(this));
+
+            },
             // Game board
             onClickedBoardTile(data) {
                 console.log(this.tag+" clicked board tile: ", data);
@@ -1745,68 +2085,74 @@
             },
             tileHasConnectingCards(rowIndex, columnIndex) {
                 // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
-                // console.log("-----------------------");
                 
                 // Check tile above
                 let tileAbove = [rowIndex-1, columnIndex];
+                let tileRight = [rowIndex, columnIndex+1];
+                let tileBelow = [rowIndex+1, columnIndex];
+                let tileLeft  = [rowIndex, columnIndex-1];
+
+                // Connected tiles we find
+                let connectedCards = [];
+
+                // Count the number of connected gold location tiles
+                let connectedGoldLocations = 0;
+
                 // console.log(this.tag+" tile above: ", tileAbove);
                 if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
                     let card = this.getCardById(this.mutableBoard[tileAbove[0]][tileAbove[1]].card_id);
                     let inverted = this.mutableBoard[tileAbove[0]][tileAbove[1]].inverted;
                     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("bottom")) || (inverted && card.open_positions.includes("top")))) {
-                        // console.log(this.tag+" found connecting card above, true");                        
-                        return true;
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
-                // console.log("-----------------------");
 
                 // Check tile to the right
-                let tileRight = [rowIndex, columnIndex+1];
-                // console.log(this.tag+" tile right: ", tileRight);
                 if (this.tileHasCard(tileRight[0], tileRight[1])) {
-                    // console.log(this.tag+" card id: ", this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileRight[0]][tileRight[1]].card_id);
                     let inverted = this.mutableBoard[tileRight[0]][tileRight[1]].inverted;
-                    // console.log(this.tag+" card on tile: ", card);
                     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("left")) || (inverted && card.open_positions.includes("right")))) {
-                        // console.log(this.tag+" found connecting card to the right, true");
-                        return true;
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
-                // console.log("-----------------------");
 
                 // Check tile below
-                let tileBelow = [rowIndex+1, columnIndex];
-                // console.log(this.tag+" tile below: ", tileBelow);
                 if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
-                    // console.log(this.tag+" card id: ", this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileBelow[0]][tileBelow[1]].card_id);
                     let inverted = this.mutableBoard[tileBelow[0]][tileBelow[1]].inverted;
-                    // console.log(this.tag+" card on tile: ", card);
                     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("top")) || (inverted && card.open_positions.includes("bottom")))) {
-                        // console.log(this.tag+" connecting card found on tile below, available");
-                        return true;
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
-                // console.log("-----------------------");
 
                 // Check tile to the left
-                let tileLeft = [rowIndex, columnIndex-1];
-                // console.log(this.tag+" tile left: ", tileLeft);
                 if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
-                    // console.log(this.tag+" card id: ", this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
                     let card = this.getCardById(this.mutableBoard[tileLeft[0]][tileLeft[1]].card_id);
                     let inverted = this.mutableBoard[tileLeft[0]][tileLeft[1]].inverted;
-                    // console.log(this.tag+" card on tile: ", card);
                     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("right")) || (inverted && card.open_positions.includes("left")))) {
-                        // console.log(this.tag+" connecting card found on tile to the left, available");
-                        return true;
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
-                // console.log("-----------------------");
+
+                // If we've found compatible connected cards
+                if (connectedCards.length > 0)
+                {
+                    // Make sure we're not connected to only gold locations; since that would allow illegal moves
+                    if (connectedCards.length === connectedGoldLocations)
+                    {
+                        console.log(this.tag+" only gold locations connected");
+                        return false;
+                    }
+
+                    // Otherwise all is good
+                    return true;
+                }
 
                 // If we've reached this point the tile is available but has no connecting card
-                // console.log(this.tag+" tile has no connected tunnels, unavailable");
                 return false;
 
             },
@@ -2039,6 +2385,14 @@
                     }
                 }
                 return out;
+            },
+            getUsernameByPlayerId(playerId) {
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === playerId) {
+                        return this.mutablePlayers[i].user.username;
+                    }
+                }
+                return "-";
             },
         },
         mounted() {
@@ -2380,6 +2734,220 @@
                         }
                         #my-actions__wait {
                             text-align: right;
+                        }
+                    }
+                }
+            }
+            #rewards-ui {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                padding: 100px;
+                align-items: center;
+                box-sizing: border-box;
+                flex-direction: column;
+                justify-content: center;
+                #rewards-ui__title {
+                    text-align: center;
+                }
+                #rewards-ui__subtitle {
+                    font-size: .9em;
+                    text-align: center;
+                    text-transform: uppercase;
+                }
+                #rewards-ui__instructions {
+                    margin: 0 auto;
+                    color: #000000;
+                    padding: 8px 15px;
+                    border-radius: 3px;
+                    margin: 0 0 40px 0;
+                    box-sizing: border-box;
+                    background-color: rgba(255, 255, 255, 0.75);
+                }
+                #rewards-ui__reward-cards__wrapper {
+                    #rewards-ui__reward-cards__title {
+                        font-size: 1.7em;
+                        font-weight: 500;
+                        margin: 0 0 20px 0;
+                        text-align: center;
+                    }
+                    #rewards-ui__loading {
+                        text-align: center;
+                    }
+                    #rewards-ui__reward-cards {
+                        display: flex;
+                        flex-wrap: wrap;
+                        flex-direction: row;
+                        justify-content: center;
+                        margin: 0 -15px -30px -15px;
+                        .reward-card__wrapper {
+                            flex: 0 0 130px;
+                            box-sizing: border-box;
+                            padding: 0 15px 30px 15px;
+                            .reward-card {
+                                width: 130px;
+                                height: 200px;
+                                display: flex;
+                                color: #000000;
+                                border-radius: 3px;
+                                transition: all .3s;
+                                align-items: center;
+                                flex-direction: column;
+                                justify-content: center;
+                                background-color: rgba(255, 255, 255, 0.8);
+                                &:hover {
+                                    cursor: pointer;
+                                    background-color: #ffffff;
+                                }
+                                .reward-card__title {
+                                    
+                                }
+                                .reward-card__number {
+                                    font-size: 1.5em;
+                                }
+                            }
+                        }
+                    }
+                }
+                #rewards-ui__reward-card {
+                    margin: 50px 0 0 0;
+                    #reward-card__title {
+                        font-size: 1.3em;
+                        text-align: center;
+                    }
+                    #reward-card__subtitle {
+                        text-align: center;
+                    }
+                }
+                #rewards-ui__players {
+                    width: 100%;
+                    display: flex;
+                    flex-wrap: wrap;
+                    flex-direction: row;
+                    justify-content: center;
+                    margin: 50px -15px -30px -15px;
+                    .player-wrapper {
+                        flex: 0 0 250px;
+                        box-sizing: border-box;
+                        padding: 0 15px 30px 15px;
+                        .player {
+                            width: 100%;
+                            padding: 20px;
+                            color: #000000;
+                            border-radius: 3px;
+                            box-sizing: border-box;
+                            background-color: #ffffff;
+                            &.winner {
+                                margin: -5px;
+                                border: 5px solid #00a100;
+                            }
+                            .player-username {
+                                text-align: center;
+                                font-size: 1.2em;
+                            }
+                            .player-avatar {
+                                width: 100px;
+                                height: 100px;
+                                margin: 15px auto;
+                                border-radius: 50px;
+                                background-color: hsl(0, 0%, 95%);
+                            }
+                            .player-role__wrapper {
+                                margin: 2px 0;
+                                display: flex;
+                                flex-direction: row;
+                                align-items: center;
+                                justify-content: center;
+                                .player-role {
+                                    color: #fff;
+                                    font-size: .7em;
+                                    padding: 2px 5px;
+                                    text-align: center;
+                                    border-radius: 3px;
+                                    display: inline-block;
+                                    box-sizing: border-box;
+                                    background-color: #333;
+                                    text-transform: uppercase;
+                                }
+                            }
+                            .player-reward {
+                                margin: 20px 0;
+                                text-align: center;
+                                .gold {
+                                    color: #db9600;
+                                    font-weight: 500;
+                                }
+                            }
+                            .player-ready {
+                                text-align: center;
+                                .ready {
+                                    color: #39b410;
+                                }
+                                .not-ready {
+                                    color: #b20404;
+                                }
+                            }
+                        }
+                    }
+                }
+                #rewards-ui__ready-up {
+                    margin: 50px 0 0 0;
+                    #ready-up__text {
+                        text-align: center;
+                        margin: 0 0 15px 0;
+                    }
+                    #ready-up__action {
+                        text-align: center;
+                    }
+                }
+            }
+            #game-over-ui {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                justify-content: center;
+                #winners {
+                    #winners-title {
+                        font-size: 1.5em;
+                        font-weight: 500;
+                        text-align: center;
+                        margin: 50px 0 10px 0;
+                        text-transform: uppercase;
+                    }
+                    #winners-list {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 -15px -30px -15px;
+                        .winner-wrapper {
+                            flex: 0 0 200px;
+                            box-sizing: border-box;
+                            padding: 0 15px 30px 15px;
+                            .winner {
+                                width: 250px;
+                                height: 100px;
+                                padding: 25px;
+                                display: flex;
+                                color: #000000;
+                                border-radius: 3px;
+                                align-items: center;
+                                flex-direction: column;
+                                box-sizing: border-box;
+                                justify-content: center;
+                                background-color: #fff;
+                                .winner-title {
+                                    font-size: 1.1em;
+                                    font-weight: 500;
+                                    text-align: center;
+                                }   
+                                .winner-score {
+                                    text-align: center;
+                                    color: #ffd900;
+                                }
+                            }
                         }
                     }
                 }
