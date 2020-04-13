@@ -51,15 +51,15 @@ class CardService implements ModelServiceContract
         // Action cards
         //
 
-        // // Add 3 of each single sabotage card
-        // $actionSabotageCart = $this->findByName("sabotage_cart");
-        // $actionSabotageLight = $this->findByName("sabotage_light");
-        // $actionSabotagePickaxe = $this->findByName("sabotage_pickaxe");
-        // for ($i = 0; $i < 3; $i++) {
-        //     $out[] = $actionSabotageCart->id;
-        //     $out[] = $actionSabotageLight->id;
-        //     $out[] = $actionSabotagePickaxe->id;
-        // }
+        // Add 3 of each single sabotage card
+        $actionSabotageCart = $this->findByName("sabotage_cart");
+        $actionSabotageLight = $this->findByName("sabotage_light");
+        $actionSabotagePickaxe = $this->findByName("sabotage_pickaxe");
+        for ($i = 0; $i < 3; $i++) {
+            $out[] = $actionSabotageCart->id;
+            $out[] = $actionSabotageLight->id;
+            $out[] = $actionSabotagePickaxe->id;
+        }
 
         // // Add 2 random combo sabotage cards
         // $actionSabotageCombos = [
@@ -71,42 +71,81 @@ class CardService implements ModelServiceContract
         //     $out[] = $actionSabotageCombos[rand(0, 2)]->id;
         // }
 
-        // // Add 3 of each single recover card
-        // $actionRecoverCart = $this->findByName("recover_cart");
-        // $actionRecoverLight = $this->findByName("recover_light");
-        // $actionRecoverPickaxe = $this->findByName("recover_pickaxe");
-        // for ($i = 0; $i < 3; $i++) {
-        //     $out[] = $actionRecoverCart->id;
-        //     $out[] = $actionRecoverLight->id;
-        //     $out[] = $actionRecoverPickaxe->id;
-        // }
+        // Add 2 of each single recover card
+        $actionRecoverCart = $this->findByName("recover_cart");
+        $actionRecoverLight = $this->findByName("recover_light");
+        $actionRecoverPickaxe = $this->findByName("recover_pickaxe");
+        for ($i = 0; $i < 3; $i++) {
+            $out[] = $actionRecoverCart->id;
+            $out[] = $actionRecoverLight->id;
+            $out[] = $actionRecoverPickaxe->id;
+        }
         
-        // // Add 2 random combo recover cards
-        // $actionRecoverCombos = [
-        //     $this->findByName("recover_pickaxe_light"),
-        //     $this->findByName("recover_pickaxe_cart"),
-        //     $this->findByName("recover_light_cart"),
-        // ];
-        // for ($i = 0; $i < 2; $i++) {
-        //     $out[] = $actionRecoverCombos[rand(0, 2)]->id;
-        // }
+        // // Add 1 of each combo recover card
+        $actionRecoverCombos = [
+            $this->findByName("recover_pickaxe_light"),
+            $this->findByName("recover_pickaxe_cart"),
+            $this->findByName("recover_light_cart"),
+        ];
+        for ($i = 0; $i < 1; $i++) {
+            $out[] = $actionRecoverCombos[rand(0, 2)]->id;
+        }
 
-        // // Add 4 demolish cards
-        // $actionDemolish = $this->findByName("collapse");
-        // for ($i = 0; $i < 4; $i++) $out[] = $actionDemolish->id;
+        // Add 3 demolish cards
+        $actionDemolish = $this->findByName("collapse");
+        for ($i = 0; $i < 3; $i++) $out[] = $actionDemolish->id;
 
-        // // Add 4 enlighten cards
-        // $actionEnlighten = $this->findByName("enlighten");
-        // for ($i = 0; $i < 4; $i++) $out[] = $actionEnlighten->id;
+        // Add 6 enlighten cards
+        $actionEnlighten = $this->findByName("enlighten");
+        for ($i = 0; $i < 6; $i++) $out[] = $actionEnlighten->id;
 
         //
         // Tunnel cards
         //
 
+        $out[] = 27;
+        $out[] = 27;
+        $out[] = 27;
+        $out[] = 27;
+        $out[] = 27;
+
+        $out[] = 28;
+        $out[] = 28;
+        $out[] = 28;
+        $out[] = 28;
+
+        $out[] = 31;
+        $out[] = 31;
+        $out[] = 31;
+        $out[] = 31;
+
+        $out[] = 32;
+        $out[] = 32;
+        $out[] = 32;
+
+        $out[] = 33;
+        $out[] = 33;
+        $out[] = 33;
+        $out[] = 33;
+        $out[] = 33;
+
+        $out[] = 34;
+        $out[] = 34;
+        $out[] = 34;
+        $out[] = 34;
+        $out[] = 34;
+
+        $out[] = 37;
+        $out[] = 37;
+        $out[] = 37;
+        $out[] = 37;
+        $out[] = 37;
+
+
         // Add 1 of every one slot card (x4)
-        // $out[] = $this->findByName("single_top")->id;
-        // $out[] = $this->findByName("single_right")->id;
-        // $out[] = $this->findByName("single_bottom")->id;
+        $out[] = $this->findByName("single_top")->id;
+        $out[] = $this->findByName("single_right")->id;
+        $out[] = $this->findByName("single_bottom")->id;
         // $out[] = $this->findByName("single_left")->id;
         
         // // Add 5 of all the corner 2 slot cards (x20)
@@ -121,29 +160,29 @@ class CardService implements ModelServiceContract
         //     $out[] = $twoSlotTunnelFour->id;
         // }
 
-        // Add 4 of all of the straight 2 slot cards (x8)
-        $twoSlotTunnelFive = $this->findByName("double_top_bottom");
-        $twoSlotTunnelSix = $this->findByName("double_left_right");
-        for ($i = 0; $i < 2; $i++) {
-            $out[] = $twoSlotTunnelFive->id;
-            $out[] = $twoSlotTunnelSix->id;
-        }
+        // // Add 4 of all of the straight 2 slot cards (x8)
+        // $twoSlotTunnelFive = $this->findByName("double_top_bottom");
+        // $twoSlotTunnelSix = $this->findByName("double_left_right");
+        // for ($i = 0; $i < 2; $i++) {
+        //     $out[] = $twoSlotTunnelFive->id;
+        //     $out[] = $twoSlotTunnelSix->id;
+        // }
 
-        // Add 2 of every three slot card (x8)
-        $threeSlotTunnelOne = $this->findByName("triple_top_right_bottom");
-        $threeSlotTunnelTwo = $this->findByName("triple_right_bottom_left");
-        $threeSlotTunnelThree = $this->findByName("triple_bottom_left_top");
-        $threeSlotTunnelFour = $this->findByName("triple_left_top_right");
-        for ($i = 0; $i < 1; $i++) {
-            $out[] = $threeSlotTunnelOne->id;
-            $out[] = $threeSlotTunnelTwo->id;
-            $out[] = $threeSlotTunnelThree->id;
-            $out[] = $threeSlotTunnelFour->id;
-        }
+        // // Add 2 of every three slot card (x8)
+        // $threeSlotTunnelOne = $this->findByName("triple_top_right_bottom");
+        // $threeSlotTunnelTwo = $this->findByName("triple_right_bottom_left");
+        // $threeSlotTunnelThree = $this->findByName("triple_bottom_left_top");
+        // $threeSlotTunnelFour = $this->findByName("triple_left_top_right");
+        // for ($i = 0; $i < 1; $i++) {
+        //     $out[] = $threeSlotTunnelOne->id;
+        //     $out[] = $threeSlotTunnelTwo->id;
+        //     $out[] = $threeSlotTunnelThree->id;
+        //     $out[] = $threeSlotTunnelFour->id;
+        // }
 
-        // Add 4 of the four slot cards (x4)
-        $fourSlotTunnel = $this->findByName("quadruple");
-        for ($i = 0; $i < 4; $i++) $out[] = $fourSlotTunnel->id;
+        // // Add 4 of the four slot cards (x4)
+        // $fourSlotTunnel = $this->findByName("quadruple");
+        // for ($i = 0; $i < 4; $i++) $out[] = $fourSlotTunnel->id;
 
         // Shuffle the deck
         shuffle($out);
