@@ -15,7 +15,6 @@ class UserSeeder extends Seeder
         DB::table("users")->delete();
 
         $nick = User::create([
-            "name" => "Nick Verheijen",
             "username" => "Haskabab",
             "email" => "verheijen.webdevelopment@gmail.com",
             "password" => bcrypt("engeland"),
@@ -23,19 +22,23 @@ class UserSeeder extends Seeder
         ]);
 
         $henk = User::create([
-            "name" => "Henk de Vries",
-            "username" => "De Henk Tank",
+            "username" => "Putin",
             "email" => "henk@gmail.com",
             "password" => bcrypt("engeland"),
             "is_admin" => true,
         ]);
 
         $bob = User::create([
-            "name" => "Bob de Graaf",
-            "username" => "Bob Lee Swagger",
+            "username" => "Stalin",
             "email" => "bob@gmail.com",
             "password" => bcrypt("engeland"),
             "is_admin" => true,
+        ]);
+
+        $test = User::create([
+            "username" => "Testman",
+            "email" => "test@test.nl",
+            "password" => bcrypt("engeland"),
         ]);
     }
 }

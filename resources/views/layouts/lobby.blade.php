@@ -30,14 +30,26 @@
                         </a>
                     </div>
                     <ul id="topnav-links">
-                        <li><a href="{{ route('lobby') }}">Lobby</a></li>
-                        <li><a href="{{ route('lobby.leaderboards') }}">Leaderboards</a>
+                        <li>
+                            <a href="{{ route('lobby') }}">@lang("lobby.layout_lobby")</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('lobby.leaderboards') }}">@lang("lobby.layout_highscores")</a>
+                        </li>
                         @if (auth()->user()->is_admin)
-                            <li><a href="{{ route('horizon.index') }}">Horizon</a></li>
-                            <li><a href="{{ url('/laravel-websockets') }}">Websockets</a></li>
+                            <li>
+                                <a href="{{ route('horizon.index') }}">Horizon</a>
+                            </li>
+                            <li>
+                                <a href="{{ url('/laravel-websockets') }}">Websockets</a>
+                            </li>
                         @endif
-                        <li><a href="{{ route('settings') }}">Settings</a></li>
-                        <li><a href="{{ route('logout') }}">Logout</a></li>
+                        <li>
+                            <a href="{{ route('settings') }}">@lang("lobby.layout_settings")</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('logout') }}">@lang("lobby.layout_logout")</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -50,7 +62,7 @@
             <!-- Footer -->
             <div id="footer-wrapper">
                 <footer id="footer">
-                    &copy; Copyrighted by Nick Verheijen, and probably some other people as well. 2020 - &infin;
+                    &copy; OpperKabouter Inc. 2020 - &infin;
                 </footer>
             </div>
 

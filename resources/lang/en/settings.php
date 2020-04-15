@@ -24,6 +24,7 @@ return [
     // Profile
     "profile_title" => "Your profile",
     "profile_edit" => "Edit profile",
+    "profile_change_password" => "Change password",
     "profile_id" => "ID",
     "profile_username" => "Username",
     "profile_name" => "Name",
@@ -31,6 +32,10 @@ return [
     "profile_highscore" => "Highscore",
     "profile_games_played" => "Games played",
     "profile_created_at" => "Registered on",
+    "profile_gold_collected" => "gold collected",
+    "profile_game" => "game",
+    "profile_games" => "games",
+    "profile_played" => "played",
 
     // Update profile
     "updated_profile" => "Your profile has been updated!",

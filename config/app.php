@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'nl',
 
     /*
     |--------------------------------------------------------------------------
@@ -230,6 +230,7 @@ return [
 
         'Users' => \App\Facades\UsersFacade::class,
         'Games' => \App\Facades\GamesFacade::class,
+        'Rounds' => \App\Facades\RoundsFacade::class,
         'Cards' => \App\Facades\CardsFacade::class,
         'Roles' => \App\Facades\RolesFacade::class,
         'Board' => \App\Facades\BoardFacade::class,

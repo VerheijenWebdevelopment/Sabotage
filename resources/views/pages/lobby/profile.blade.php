@@ -21,20 +21,10 @@
 
         <!-- Details -->
         <div id="profile-details" class="details elevation-1">
-            <!-- ID -->
-            <div class="detail">
-                <div class="key">@lang("settings.profile_id")</div>
-                <div class="val">#{{ $user->id }}</div>
-            </div>
             <!-- Username --> 
             <div class="detail">
                 <div class="key">@lang("settings.profile_username")</div>
                 <div class="val">{{ $user->username }}</div>
-            </div>
-            <!-- Name --> 
-            <div class="detail">
-                <div class="key">@lang("settings.profile_name")</div>
-                <div class="val">{{ $user->name }}</div>
             </div>
             <!-- Email -->
             <div class="detail">
@@ -44,12 +34,12 @@
             <!-- Highscore -->
             <div class="detail">
                 <div class="key">@lang("settings.profile_highscore")</div>
-                <div class="val">{{ $user->highscore }} gold collected</div>
+                <div class="val">{{ $user->highscore }} @lang("settings.profile_gold_collected")</div>
             </div>
             <!-- Games played -->
             <div class="detail">
                 <div class="key">@lang("settings.profile_games_played")</div>
-                <div class="val">{{ $user->games_played }} {{ $user->games_played == 1 ? 'game' : 'games' }} played</div>
+                <div class="val">{{ $user->games_played }} {{ $user->games_played == 1 ? __("settings.profile_game") : __("settings.profile_games") }} @lang("settings.profile_played")</div>
             </div>
             <!-- Created at -->
             <div class="detail">
@@ -60,8 +50,13 @@
 
         <!-- Actions -->
         <div id="profile-actions">
-            <v-btn depressed color="warning" href="{{ route('settings.update-profile') }}">
+            <v-btn color="warning" href="{{ route('settings.update-profile') }}">
+                <i class="far fa-edit"></i>
                 @lang("settings.profile_edit")
+            </v-btn>
+            <v-btn color="warning" href="{{ route('settings.change-password') }}">
+                <i class="fas fa-key"></i>
+                @lang("settings.profile_change_password")
             </v-btn>
         </div>
 

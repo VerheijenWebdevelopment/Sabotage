@@ -2,27 +2,16 @@
     <div id="register-form" class="elevation-1">
 
         <!-- Title -->
-        <h1 id="register-form__title">{{ titleText }}</h1>
+        <h1 id="register-form__title">{{ strings.title }}</h1>
 
         <!-- Username -->
         <div class="form-field">
             <v-text-field
                 name="username"
-                :label="usernameText"
+                :label="strings.username"
                 v-model="form.username"
                 :errors="hasErrors('username')"
                 :error-messages="getErrors('username')">
-            </v-text-field>
-        </div>
-
-        <!-- Name -->
-        <div class="form-field">
-            <v-text-field 
-                name="name" 
-                :label="nameText" 
-                v-model="form.name" 
-                :error="hasErrors('name')" 
-                :error-messages="getErrors('name')">
             </v-text-field>
         </div>
         
@@ -30,7 +19,7 @@
         <div class="form-field">
             <v-text-field 
                 name="email" 
-                :label="emailText" 
+                :label="strings.email" 
                 v-model="form.email"
                 :error="hasErrors('email')"
                 :error-messages="getErrors('email')">
@@ -43,7 +32,7 @@
                 <v-text-field 
                     type="password" 
                     name="password"
-                    :label="passwordText" 
+                    :label="strings.password" 
                     v-model="form.password"
                     :error="hasErrors('password')"
                     :error-messages="getErrors('password')">
@@ -53,7 +42,7 @@
                 <v-text-field 
                     type="password" 
                     name="password_confirmation" 
-                    :label="confirmPasswordText" 
+                    :label="strings.confirm_password" 
                     v-model="form.confirmPassword"
                     :error="hasErrors('password_confirmation')"
                     :error-messages="getErrors('password_confirmation')">
@@ -61,16 +50,27 @@
             </div>
         </div>
         
+        <!-- Avatar -->
+        <div class="form-field">
+            <avatar-selector
+                :label="strings.avatar"
+                :avatars="avatars"
+                :base-url="baseUrl"
+                v-model="form.avatar_url">
+            </avatar-selector>
+            <input type="hidden" name="avatar" :value="form.avatar_url">
+        </div>
+
         <!-- Controls -->
         <div id="register-form__controls">
             <div id="register-form__controls-left">
                 <!-- Link to login -->
-                <a :href="loginHref">{{ loginText }}</a>
+                <a :href="loginHref">{{ strings.login }}</a>
             </div>
             <div id="register-form__controls-right">
                 <!-- Submit button -->
                 <v-btn type="submit" color="primary" depressed>
-                    {{ submitText }}
+                    {{ strings.submit }}
                 </v-btn>
             </div>
         </div>
@@ -83,14 +83,9 @@
         props: [
             "errors",
             "oldInput",
-            "titleText",
-            "usernameText",
-            "nameText",
-            "emailText",
-            "passwordText",
-            "confirmPasswordText",
-            "submitText",
-            "loginText",
+            "baseUrl",
+            "avatars",
+            "strings",
             "loginHref",
         ],
         data: () => ({
@@ -109,9 +104,10 @@
                 console.log(this.tag+" initialize");
                 console.log(this.tag+" errors: ", this.errors);
                 console.log(this.tag+" old input: ", this.oldInput);
+                console.log(this.tag+" base url: ", this.baseUrl);
+                console.log(this.tag+" avatars: ", this.avatars);
                 console.log(this.tag+" title text: ", this.titleText);
                 console.log(this.tag+" username text: ", this.usernameText);
-                console.log(this.tag+" name text: ", this.nameText);
                 console.log(this.tag+" last name text: ", this.lastNameText);
                 console.log(this.tag+" email text: ", this.emailText);
                 console.log(this.tag+" password text: ", this.passwordText);
@@ -123,7 +119,6 @@
             initializeData() {
                 if (this.oldInput !== undefined && this.oldInput !== null) {
                     if (this.oldInput.username !== null) this.form.username = this.oldInput.username;
-                    if (this.oldInput.name !== null) this.form.name = this.oldInput.name;
                     if (this.oldInput.email !== null) this.form.email = this.oldInput.email;
                 }
             },

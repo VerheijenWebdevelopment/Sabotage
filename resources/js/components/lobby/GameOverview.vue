@@ -7,22 +7,28 @@
             <!-- Header -->
             <div id="my-game__header">
                 <div id="my-game__header-left">
+                    <!-- Icon -->
+                    <div id="my-game__icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
                     <!-- Title -->
                     <div id="my-game__title">
-                        Game #{{ mutableGames[activeGameIndex].id }}
+                        {{ strings.game }} #{{ mutableGames[activeGameIndex].id }}
                     </div>
                 </div>
                 <div id="my-game__header-right">
                     <!-- Leave -->
                     <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
                         <v-btn small text color="red" @click="onClickLeave" :loading="leaveLoading">
-                            Leave
+                            <i class="fas fa-sign-out-alt"></i>
+                            {{ strings.leave_game }}
                         </v-btn>
                     </div>
                     <!-- Delete -->
                     <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
                         <v-btn small text color="red" @click="onClickDelete" :loading="deleteLoading">
-                            Delete
+                            <i class="fas fa-trash-alt"></i>
+                            {{ strings.delete_game }}
                         </v-btn>
                     </div>
                 </div>
@@ -48,16 +54,18 @@
                 <!-- Start -->
                 <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
                     <v-btn depressed color="success" :disabled="startButtonDisabled" @click="onClickStart" :loading="startLoading">
-                        Start game!
+                        <!-- <i class="fas fa-play"></i> -->
+                        <i class="fas fa-gavel"></i>
+                        {{ strings.start_game }}
                     </v-btn>
                 </div>
                 <!-- Waiting for start -->
                 <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
                     <span v-if="mutableGames[activeGameIndex].status === 'open'">
-                        Waiting for game master to start the game.
+                        {{ strings.waiting_for_gm }}
                     </span>
                     <span v-if="mutableGames[activeGameIndex].status === 'ongoing'">
-                        Game has started
+                        {{ strings.game_started }}
                     </span>
                 </div>
             </div>
@@ -70,15 +78,20 @@
             <!-- Header -->
             <div id="game-overview__header">
                 <div id="game-overview__header-left">
+                    <!-- Icon -->
+                    <div id="header-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
                     <!-- Title -->
                     <div id="header-title">
-                        Open & ongoing games
+                        {{ strings.open_outstanding_games }}
                     </div>
                 </div>
                 <div id="game-overview__header-right" v-if="!hasJoinedGame">
                     <!-- Create -->
                     <v-btn small depressed color="primary" @click="onClickCreate" :loading="createLoading">
-                        Start a new game
+                        <i class="fas fa-plus"></i>
+                        {{ strings.create_game }}
                     </v-btn>
                 </div>
             </div>
@@ -86,14 +99,14 @@
             <!-- Games -->
             <div id="game-overview__games" v-if="mutableGames.length > 0">
                 <div id="game-overview__games-headings">
-                    <div class="games-heading">ID</div>
-                    <div class="games-heading">Players</div>
-                    <div class="games-heading">Status</div>
-                    <div class="games-heading">Actions</div>
+                    <div class="games-heading">{{ strings.list_id }}</div>
+                    <div class="games-heading">{{ strings.list_players }}</div>
+                    <div class="games-heading">{{ strings.list_status }}</div>
+                    <div class="games-heading">{{ strings.list_actions }}</div>
                 </div>
                 <div class="game" v-for="(game, gi) in mutableGames" :key="gi">
                     <div class="game-id">
-                        Game #{{ game.id }}
+                        {{ strings.game }} #{{ game.id }}
                     </div>
                     <div class="game-players">
                         {{ game.players.length }} {{ getPlayerText(game.players.length) }}
@@ -105,7 +118,8 @@
                     </div>
                     <div class="game-actions">
                         <v-btn small depressed color="success" @click="onClickJoin(gi)" :disabled="hasJoinedGame || game.status !== 'open'" :loading="joinLoading">
-                            Join
+                            <i class="fas fa-sign-in-alt"></i>
+                            {{ strings.join_game }}
                         </v-btn>
                     </div>
                 </div>
@@ -113,7 +127,7 @@
 
             <!-- No games -->
             <div id="game-overview__no-games" v-if="mutableGames.length === 0">
-                There are no open or ongoing games
+                {{ strings.no_open_outstanding_games }}
             </div>
 
         </div>
@@ -132,6 +146,7 @@
             "joinApiEndpoint",
             "leaveApiEndpoint",
             "startApiEndpoint",
+            "strings",
         ],
         data: () => ({
             tag: "[game-overview]",
@@ -165,6 +180,7 @@
                 console.log(this.tag+" join api endpoint: ", this.joinApiEndpoint);
                 console.log(this.tag+" leave api endpoint: ", this.leaveApiEndpoint);
                 console.log(this.tag+" start api endpoint: ", this.startApiEndpoint);
+                console.log(this.tag+" strings: ", this.strings);
                 this.initializeData();
                 this.startListening();
             },
@@ -494,6 +510,10 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    #my-game__icon {
+                        margin: 0 10px 0 0;
+                        font-size: 1.5em;
+                    }
                     #my-game__title {
                         font-size: 1.2em;
                         font-weight: 500;
@@ -560,6 +580,10 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    #header-icon {
+                        font-size: 1.5em;
+                        margin: 0 15px 0 0;
+                    }
                     #header-title {
                         font-size: 1.2em;
                         font-weight: 500;

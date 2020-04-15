@@ -1899,6 +1899,92 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["value", "label", "avatars", "baseUrl"],
+  data: function data() {
+    return {
+      tag: "[avatar-selector]",
+      mutableAvatars: []
+    };
+  },
+  watch: {
+    mutableAvatars: {
+      deep: true,
+      handler: function handler() {
+        for (var i = 0; i < this.mutableAvatars.length; i++) {
+          if (this.mutableAvatars[i].selected) {
+            this.$emit("input", this.mutableAvatars[i].value);
+            break;
+          }
+        }
+      }
+    }
+  },
+  methods: {
+    initialize: function initialize() {
+      if (this.avatars !== undefined && this.avatars !== null && this.avatars.length > 0) {
+        for (var i = 0; i < this.avatars.length; i++) {
+          this.mutableAvatars.push({
+            selected: i === 0 && (this.value === undefined || this.value === null) ? true : false,
+            url: this.baseUrl + this.avatars[i],
+            value: this.avatars[i]
+          });
+        }
+      }
+
+      if (this.value !== undefined && this.value !== null && this.value !== "") {
+        for (var _i = 0; _i < this.mutableAvatars.length; _i++) {
+          if (this.mutableAvatars[_i].value === this.value) {
+            this.mutableAvatars[_i].selected = true;
+            break;
+          }
+        }
+      }
+    },
+    onClickAvatar: function onClickAvatar(index) {
+      if (this.mutableAvatars[index].selected) {
+        this.mutableAvatars[index].selected = false;
+      } else {
+        for (var i = 0; i < this.mutableAvatars.length; i++) {
+          this.mutableAvatars[i].selected = false;
+        }
+
+        this.mutableAvatars[index].selected = true;
+      }
+    }
+  },
+  mounted: function mounted() {
+    this.initialize();
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/LoginForm.vue?vue&type=script&lang=js&":
 /*!*************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/LoginForm.vue?vue&type=script&lang=js& ***!
@@ -2207,7 +2293,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["errors", "oldInput", "titleText", "usernameText", "nameText", "emailText", "passwordText", "confirmPasswordText", "submitText", "loginText", "loginHref"],
+  props: ["errors", "oldInput", "baseUrl", "avatars", "strings", "loginHref"],
   data: function data() {
     return {
       tag: "[register-form]",
@@ -2226,9 +2312,10 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " initialize");
       console.log(this.tag + " errors: ", this.errors);
       console.log(this.tag + " old input: ", this.oldInput);
+      console.log(this.tag + " base url: ", this.baseUrl);
+      console.log(this.tag + " avatars: ", this.avatars);
       console.log(this.tag + " title text: ", this.titleText);
       console.log(this.tag + " username text: ", this.usernameText);
-      console.log(this.tag + " name text: ", this.nameText);
       console.log(this.tag + " last name text: ", this.lastNameText);
       console.log(this.tag + " email text: ", this.emailText);
       console.log(this.tag + " password text: ", this.passwordText);
@@ -2240,7 +2327,6 @@ __webpack_require__.r(__webpack_exports__);
     initializeData: function initializeData() {
       if (this.oldInput !== undefined && this.oldInput !== null) {
         if (this.oldInput.username !== null) this.form.username = this.oldInput.username;
-        if (this.oldInput.name !== null) this.form.name = this.oldInput.name;
         if (this.oldInput.email !== null) this.form.email = this.oldInput.email;
       }
     },
@@ -2623,8 +2709,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: [],
+  props: ["titleText", "noRecordsText"],
   data: function data() {
     return {
       tag: "[chat-online-users]",
@@ -5602,8 +5691,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["user", "games", "gameHref", "createApiEndpoint", "deleteApiEndpoint", "joinApiEndpoint", "leaveApiEndpoint", "startApiEndpoint"],
+  props: ["user", "games", "gameHref", "createApiEndpoint", "deleteApiEndpoint", "joinApiEndpoint", "leaveApiEndpoint", "startApiEndpoint", "strings"],
   data: function data() {
     return {
       tag: "[game-overview]",
@@ -5639,6 +5742,7 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " join api endpoint: ", this.joinApiEndpoint);
       console.log(this.tag + " leave api endpoint: ", this.leaveApiEndpoint);
       console.log(this.tag + " start api endpoint: ", this.startApiEndpoint);
+      console.log(this.tag + " strings: ", this.strings);
       this.initializeData();
       this.startListening();
     },
@@ -6098,30 +6202,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["user", "errors", "oldInput", "usernameText", "nameText", "emailText", "avatarText", "cancelText", "cancelHref", "submitText"],
+  props: ["user", "errors", "oldInput", "avatars", "strings", "baseUrl", "cancelHref"],
   data: function data() {
     return {
       tag: "[update-profile-form]",
       form: {
         name: "",
         email: "",
-        username: ""
+        username: "",
+        avatar: ""
       }
     };
   },
@@ -6131,26 +6221,21 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " user: ", this.user);
       console.log(this.tag + " errors: ", this.errors);
       console.log(this.tag + " old input: ", this.oldInput);
-      console.log(this.tag + " username text: ", this.usernameText);
-      console.log(this.tag + " name text: ", this.nameText);
-      console.log(this.tag + " email text: ", this.emailText);
-      console.log(this.tag + " avatar text: ", this.avatarText);
-      console.log(this.tag + " cancel text: ", this.cancelText);
+      console.log(this.tag + " strings: ", this.strings);
       console.log(this.tag + " cancel href: ", this.cancelHref);
-      console.log(this.tag + " submit text: ", this.submitText);
       this.initializeData();
     },
     initializeData: function initializeData() {
       if (this.user !== undefined && this.user !== null) {
-        this.form.name = this.user.name;
         this.form.email = this.user.email;
         this.form.username = this.user.username;
+        this.form.avatar = this.user.avatar_url;
       }
 
       if (this.oldInput !== undefined && this.oldInput !== null) {
-        if (this.oldInput.name !== null) this.form.name = this.oldInput.name;
         if (this.oldInput.email !== null) this.form.email = this.oldInput.email;
         if (this.oldInput.username !== null) this.form.username = this.oldInput.username;
+        if (this.oldInput.avatar !== null) this.form.avatar = this.oldInput.avatar;
       }
     },
     hasErrors: function hasErrors(field) {
@@ -8143,6 +8228,25 @@ function isnan (val) {
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#avatar-selector {\n  margin: 0 0 30px 0;\n}\n#avatar-selector #avatar-selector__label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(0, 0, 0, 0.65);\n}\n#avatar-selector #avatar-selector__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  align-items: center;\n  margin: 0 -5px -10px -5px;\n}\n#avatar-selector #avatar-selector__list .avatar-selector__list-item {\n  flex: 0 0 70px;\n  box-sizing: border-box;\n  padding: 0 5px 10px 5px;\n}\n#avatar-selector #avatar-selector__list .avatar-selector__list-item .avatar {\n  width: 70px;\n  height: 70px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #f2f2f2;\n}\n#avatar-selector #avatar-selector__list .avatar-selector__list-item .avatar.selected {\n  border: 4px solid #0cee00;\n}\n#avatar-selector #avatar-selector__list .avatar-selector__list-item .avatar:hover {\n  cursor: pointer;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/LoginForm.vue?vue&type=style&index=0&lang=scss&":
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/LoginForm.vue?vue&type=style&index=0&lang=scss& ***!
@@ -8250,7 +8354,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#chat-online-users {\n  border-radius: 3px;\n  background-color: #fff;\n}\n#chat-online-users #chat-online-users__header {\n  padding: 15px 25px;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__header #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#chat-online-users #chat-online-users__content #online-users .user {\n  display: flex;\n  padding: 15px 25px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__content #online-users .user:last-child {\n  border-bottom: 0;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-avatar {\n  height: 24px;\n  flex: 0 0 24px;\n  margin: 0 10px 0 0;\n  border-radius: 12px;\n  background-color: #cccccc;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#chat-online-users #chat-online-users__content #no-online-users {\n  padding: 15px 25px;\n  text-align: center;\n  box-sizing: border-box;\n}", ""]);
+exports.push([module.i, "#chat-online-users {\n  border-radius: 3px;\n  background-color: #fff;\n}\n#chat-online-users #chat-online-users__header {\n  display: flex;\n  padding: 15px;\n  align-items: center;\n  flex-direction: row;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__header #header-icon {\n  font-size: 1.5em;\n  margin: 0 15px 0 0;\n}\n#chat-online-users #chat-online-users__header #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#chat-online-users #chat-online-users__content #online-users .user {\n  display: flex;\n  padding: 15px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#chat-online-users #chat-online-users__content #online-users .user:last-child {\n  border-bottom: 0;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-avatar {\n  height: 40px;\n  flex: 0 0 40px;\n  margin: 0 15px 0 0;\n  border-radius: 20px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #cccccc;\n}\n#chat-online-users #chat-online-users__content #online-users .user .user-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#chat-online-users #chat-online-users__content #no-online-users {\n  padding: 15px 25px;\n  box-sizing: border-box;\n}", ""]);
 
 // exports
 
@@ -8345,7 +8449,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#leaderboards #users {\n  overflow: hidden;\n  border-radius: 3px;\n  background-color: #fff;\n}\n#leaderboards #users #users-headers {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: whitesmoke;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#leaderboards #users #users-headers .users-header {\n  flex: 1;\n  display: flex;\n  font-weight: 500;\n  flex-direction: row;\n  align-items: center;\n}\n#leaderboards #users #users-headers .users-header:nth-child(2) {\n  justify-content: center;\n}\n#leaderboards #users #users-headers .users-header:last-child {\n  justify-content: flex-end;\n}\n#leaderboards #users .user {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#leaderboards #users .user .username {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#leaderboards #users .user .games-played {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#leaderboards #users .user .highscore {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#leaderboards #no-users {\n  padding: 25px;\n  overflow: hidden;\n  border-radius: 3px;\n  text-align: center;\n  box-sizing: border-box;\n  background-color: #fff;\n}", ""]);
+exports.push([module.i, "#leaderboards #users {\n  overflow: hidden;\n  border-radius: 3px;\n  background-color: #fff;\n}\n#leaderboards #users #users-headers {\n  display: flex;\n  color: #ffffff;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #262626;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#leaderboards #users #users-headers .users-header {\n  flex: 1;\n  display: flex;\n  font-weight: 500;\n  flex-direction: row;\n  align-items: center;\n}\n#leaderboards #users #users-headers .users-header:nth-child(2) {\n  justify-content: center;\n}\n#leaderboards #users #users-headers .users-header:last-child {\n  justify-content: flex-end;\n}\n#leaderboards #users .user {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#leaderboards #users .user .username {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#leaderboards #users .user .games-played {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#leaderboards #users .user .highscore {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#leaderboards #no-users {\n  padding: 25px;\n  overflow: hidden;\n  border-radius: 3px;\n  text-align: center;\n  box-sizing: border-box;\n  background-color: #fff;\n}", ""]);
 
 // exports
 
@@ -8364,7 +8468,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game-overview__wrapper #my-game {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #my-game #my-game__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__players .player {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n}\n#game-overview__wrapper #my-game #my-game__players .player:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-icon {\n  display: flex;\n  flex: 0 0 30px;\n  margin: 0 15px 0 0;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__actions {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: flex-end;\n  background-color: #f2f2f2;\n}\n#game-overview__wrapper #my-game #my-game__actions .v-btn {\n  margin: 0 0 0 15px;\n}\n#game-overview__wrapper #game-overview {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #game-overview #game-overview__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right .v-btn {\n  margin: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #f2f2f2;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading {\n  flex: 1;\n  display: flex;\n  font-weight: bold;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:last-child {\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(2), #game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(3) {\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games .game:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-id {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-players {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill {\n  color: #000;\n  font-size: 0.8em;\n  padding: 3px 6px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ddd;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.open {\n  color: #fff;\n  background-color: #228900;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.ongoing {\n  color: #fff;\n  background-color: #00a6ff;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-actions {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__no-games {\n  padding: 15px 25px;\n  box-sizing: border-box;\n}", ""]);
+exports.push([module.i, "#game-overview__wrapper #my-game {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #my-game #my-game__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__icon {\n  margin: 0 10px 0 0;\n  font-size: 1.5em;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__players .player {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n}\n#game-overview__wrapper #my-game #my-game__players .player:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-icon {\n  display: flex;\n  flex: 0 0 30px;\n  margin: 0 15px 0 0;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__actions {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: flex-end;\n  background-color: #f2f2f2;\n}\n#game-overview__wrapper #my-game #my-game__actions .v-btn {\n  margin: 0 0 0 15px;\n}\n#game-overview__wrapper #game-overview {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #game-overview #game-overview__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-icon {\n  font-size: 1.5em;\n  margin: 0 15px 0 0;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right .v-btn {\n  margin: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #f2f2f2;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading {\n  flex: 1;\n  display: flex;\n  font-weight: bold;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:last-child {\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(2), #game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(3) {\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games .game:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-id {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-players {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill {\n  color: #000;\n  font-size: 0.8em;\n  padding: 3px 6px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ddd;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.open {\n  color: #fff;\n  background-color: #228900;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.ongoing {\n  color: #fff;\n  background-color: #00a6ff;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-actions {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__no-games {\n  padding: 15px 25px;\n  box-sizing: border-box;\n}", ""]);
 
 // exports
 
@@ -44556,6 +44660,36 @@ runtime.setup(pusher_Pusher);
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./AvatarSelector.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/LoginForm.vue?vue&type=style&index=0&lang=scss&":
 /*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/LoginForm.vue?vue&type=style&index=0&lang=scss& ***!
@@ -45573,6 +45707,58 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var _typeof="fun
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78&":
+/*!**********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78& ***!
+  \**********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { attrs: { id: "avatar-selector" } }, [
+    _c("div", { attrs: { id: "avatar-selector__label" } }, [
+      _vm._v(_vm._s(_vm.label))
+    ]),
+    _vm._v(" "),
+    _c(
+      "div",
+      { attrs: { id: "avatar-selector__list" } },
+      _vm._l(_vm.mutableAvatars, function(option, oi) {
+        return _c(
+          "div",
+          { key: oi, staticClass: "avatar-selector__list-item" },
+          [
+            _c("div", {
+              staticClass: "avatar",
+              class: { selected: option.selected },
+              style: { backgroundImage: "url(" + option.url + ")" },
+              on: {
+                click: function($event) {
+                  return _vm.onClickAvatar(oi)
+                }
+              }
+            })
+          ]
+        )
+      }),
+      0
+    )
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/LoginForm.vue?vue&type=template&id=5547a011&":
 /*!*****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/auth/LoginForm.vue?vue&type=template&id=5547a011& ***!
@@ -45810,7 +45996,7 @@ var render = function() {
     { staticClass: "elevation-1", attrs: { id: "register-form" } },
     [
       _c("h1", { attrs: { id: "register-form__title" } }, [
-        _vm._v(_vm._s(_vm.titleText))
+        _vm._v(_vm._s(_vm.strings.title))
       ]),
       _vm._v(" "),
       _c(
@@ -45820,7 +46006,7 @@ var render = function() {
           _c("v-text-field", {
             attrs: {
               name: "username",
-              label: _vm.usernameText,
+              label: _vm.strings.username,
               errors: _vm.hasErrors("username"),
               "error-messages": _vm.getErrors("username")
             },
@@ -45842,31 +46028,8 @@ var render = function() {
         [
           _c("v-text-field", {
             attrs: {
-              name: "name",
-              label: _vm.nameText,
-              error: _vm.hasErrors("name"),
-              "error-messages": _vm.getErrors("name")
-            },
-            model: {
-              value: _vm.form.name,
-              callback: function($$v) {
-                _vm.$set(_vm.form, "name", $$v)
-              },
-              expression: "form.name"
-            }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "form-field" },
-        [
-          _c("v-text-field", {
-            attrs: {
               name: "email",
-              label: _vm.emailText,
+              label: _vm.strings.email,
               error: _vm.hasErrors("email"),
               "error-messages": _vm.getErrors("email")
             },
@@ -45891,7 +46054,7 @@ var render = function() {
               attrs: {
                 type: "password",
                 name: "password",
-                label: _vm.passwordText,
+                label: _vm.strings.password,
                 error: _vm.hasErrors("password"),
                 "error-messages": _vm.getErrors("password")
               },
@@ -45915,7 +46078,7 @@ var render = function() {
               attrs: {
                 type: "password",
                 name: "password_confirmation",
-                label: _vm.confirmPasswordText,
+                label: _vm.strings.confirm_password,
                 error: _vm.hasErrors("password_confirmation"),
                 "error-messages": _vm.getErrors("password_confirmation")
               },
@@ -45932,10 +46095,37 @@ var render = function() {
         )
       ]),
       _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-field" },
+        [
+          _c("avatar-selector", {
+            attrs: {
+              label: _vm.strings.avatar,
+              avatars: _vm.avatars,
+              "base-url": _vm.baseUrl
+            },
+            model: {
+              value: _vm.form.avatar_url,
+              callback: function($$v) {
+                _vm.$set(_vm.form, "avatar_url", $$v)
+              },
+              expression: "form.avatar_url"
+            }
+          }),
+          _vm._v(" "),
+          _c("input", {
+            attrs: { type: "hidden", name: "avatar" },
+            domProps: { value: _vm.form.avatar_url }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
       _c("div", { attrs: { id: "register-form__controls" } }, [
         _c("div", { attrs: { id: "register-form__controls-left" } }, [
           _c("a", { attrs: { href: _vm.loginHref } }, [
-            _vm._v(_vm._s(_vm.loginText))
+            _vm._v(_vm._s(_vm.strings.login))
           ])
         ]),
         _vm._v(" "),
@@ -45949,7 +46139,7 @@ var render = function() {
               [
                 _vm._v(
                   "\n                " +
-                    _vm._s(_vm.submitText) +
+                    _vm._s(_vm.strings.submit) +
                     "\n            "
                 )
               ]
@@ -46341,7 +46531,13 @@ var render = function() {
     "div",
     { staticClass: "elevation-1", attrs: { id: "chat-online-users" } },
     [
-      _vm._m(0),
+      _c("div", { attrs: { id: "chat-online-users__header" } }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c("div", { attrs: { id: "header-title" } }, [
+          _vm._v(_vm._s(_vm.titleText))
+        ])
+      ]),
       _vm._v(" "),
       _c("div", { attrs: { id: "chat-online-users__content" } }, [
         _vm.users.length > 0
@@ -46350,7 +46546,10 @@ var render = function() {
               { attrs: { id: "online-users" } },
               _vm._l(_vm.users, function(user, ui) {
                 return _c("div", { key: ui, staticClass: "user" }, [
-                  _c("div", { staticClass: "user-avatar" }),
+                  _c("div", {
+                    staticClass: "user-avatar",
+                    style: { backgroundImage: "url(" + user.avatar_url + ")" }
+                  }),
                   _vm._v(" "),
                   _c("div", { staticClass: "user-name" }, [
                     _vm._v(_vm._s(user.username))
@@ -46363,7 +46562,9 @@ var render = function() {
         _vm._v(" "),
         _vm.users.length === 0
           ? _c("div", { attrs: { id: "no-online-users" } }, [
-              _vm._v("\n            There are no users online\n        ")
+              _vm._v(
+                "\n            " + _vm._s(_vm.noRecordsText) + "\n        "
+              )
             ])
           : _vm._e()
       ])
@@ -46375,8 +46576,8 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { attrs: { id: "chat-online-users__header" } }, [
-      _c("div", { attrs: { id: "header-title" } }, [_vm._v("Online users")])
+    return _c("div", { attrs: { id: "header-icon" } }, [
+      _c("i", { staticClass: "fas fa-users" })
     ])
   }
 ]
@@ -48569,11 +48770,13 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c("div", { attrs: { id: "users-headers" } }, [
-      _c("div", { staticClass: "users-header" }, [_vm._v("Username")]),
+      _c("div", { staticClass: "users-header" }, [_vm._v("Speler")]),
       _vm._v(" "),
-      _c("div", { staticClass: "users-header" }, [_vm._v("Games played")]),
+      _c("div", { staticClass: "users-header" }, [
+        _vm._v("Aantal gespeelde spellen")
+      ]),
       _vm._v(" "),
-      _c("div", { staticClass: "users-header" }, [_vm._v("Highscore")])
+      _c("div", { staticClass: "users-header" }, [_vm._v("Goud gevonden")])
     ])
   }
 ]
@@ -48603,9 +48806,13 @@ var render = function() {
       ? _c("div", { staticClass: "elevation-1", attrs: { id: "my-game" } }, [
           _c("div", { attrs: { id: "my-game__header" } }, [
             _c("div", { attrs: { id: "my-game__header-left" } }, [
+              _vm._m(0),
+              _vm._v(" "),
               _c("div", { attrs: { id: "my-game__title" } }, [
                 _vm._v(
-                  "\n                    Game #" +
+                  "\n                    " +
+                    _vm._s(_vm.strings.game) +
+                    " #" +
                     _vm._s(_vm.mutableGames[_vm.activeGameIndex].id) +
                     "\n                "
                 )
@@ -48629,8 +48836,11 @@ var render = function() {
                           on: { click: _vm.onClickLeave }
                         },
                         [
+                          _c("i", { staticClass: "fas fa-sign-out-alt" }),
                           _vm._v(
-                            "\n                        Leave\n                    "
+                            "\n                        " +
+                              _vm._s(_vm.strings.leave_game) +
+                              "\n                    "
                           )
                         ]
                       )
@@ -48655,8 +48865,11 @@ var render = function() {
                           on: { click: _vm.onClickDelete }
                         },
                         [
+                          _c("i", { staticClass: "fas fa-trash-alt" }),
                           _vm._v(
-                            "\n                        Delete\n                    "
+                            "\n                        " +
+                              _vm._s(_vm.strings.delete_game) +
+                              "\n                    "
                           )
                         ]
                       )
@@ -48714,8 +48927,11 @@ var render = function() {
                         on: { click: _vm.onClickStart }
                       },
                       [
+                        _c("i", { staticClass: "fas fa-gavel" }),
                         _vm._v(
-                          "\n                    Start game!\n                "
+                          "\n                    " +
+                            _vm._s(_vm.strings.start_game) +
+                            "\n                "
                         )
                       ]
                     )
@@ -48729,7 +48945,9 @@ var render = function() {
                   _vm.mutableGames[_vm.activeGameIndex].status === "open"
                     ? _c("span", [
                         _vm._v(
-                          "\n                    Waiting for game master to start the game.\n                "
+                          "\n                    " +
+                            _vm._s(_vm.strings.waiting_for_gm) +
+                            "\n                "
                         )
                       ])
                     : _vm._e(),
@@ -48737,7 +48955,9 @@ var render = function() {
                   _vm.mutableGames[_vm.activeGameIndex].status === "ongoing"
                     ? _c("span", [
                         _vm._v(
-                          "\n                    Game has started\n                "
+                          "\n                    " +
+                            _vm._s(_vm.strings.game_started) +
+                            "\n                "
                         )
                       ])
                     : _vm._e()
@@ -48749,7 +48969,17 @@ var render = function() {
     _vm._v(" "),
     _c("div", { staticClass: "elevation-1", attrs: { id: "game-overview" } }, [
       _c("div", { attrs: { id: "game-overview__header" } }, [
-        _vm._m(0),
+        _c("div", { attrs: { id: "game-overview__header-left" } }, [
+          _vm._m(1),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "header-title" } }, [
+            _vm._v(
+              "\n                    " +
+                _vm._s(_vm.strings.open_outstanding_games) +
+                "\n                "
+            )
+          ])
+        ]),
         _vm._v(" "),
         !_vm.hasJoinedGame
           ? _c(
@@ -48768,8 +48998,11 @@ var render = function() {
                     on: { click: _vm.onClickCreate }
                   },
                   [
+                    _c("i", { staticClass: "fas fa-plus" }),
                     _vm._v(
-                      "\n                    Start a new game\n                "
+                      "\n                    " +
+                        _vm._s(_vm.strings.create_game) +
+                        "\n                "
                     )
                   ]
                 )
@@ -48784,13 +49017,31 @@ var render = function() {
             "div",
             { attrs: { id: "game-overview__games" } },
             [
-              _vm._m(1),
+              _c("div", { attrs: { id: "game-overview__games-headings" } }, [
+                _c("div", { staticClass: "games-heading" }, [
+                  _vm._v(_vm._s(_vm.strings.list_id))
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "games-heading" }, [
+                  _vm._v(_vm._s(_vm.strings.list_players))
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "games-heading" }, [
+                  _vm._v(_vm._s(_vm.strings.list_status))
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "games-heading" }, [
+                  _vm._v(_vm._s(_vm.strings.list_actions))
+                ])
+              ]),
               _vm._v(" "),
               _vm._l(_vm.mutableGames, function(game, gi) {
                 return _c("div", { key: gi, staticClass: "game" }, [
                   _c("div", { staticClass: "game-id" }, [
                     _vm._v(
-                      "\n                    Game #" +
+                      "\n                    " +
+                        _vm._s(_vm.strings.game) +
+                        " #" +
                         _vm._s(game.id) +
                         "\n                "
                     )
@@ -48842,8 +49093,11 @@ var render = function() {
                           }
                         },
                         [
+                          _c("i", { staticClass: "fas fa-sign-in-alt" }),
                           _vm._v(
-                            "\n                        Join\n                    "
+                            "\n                        " +
+                              _vm._s(_vm.strings.join_game) +
+                              "\n                    "
                           )
                         ]
                       )
@@ -48859,7 +49113,11 @@ var render = function() {
       _vm._v(" "),
       _vm.mutableGames.length === 0
         ? _c("div", { attrs: { id: "game-overview__no-games" } }, [
-            _vm._v("\n            There are no open or ongoing games\n        ")
+            _vm._v(
+              "\n            " +
+                _vm._s(_vm.strings.no_open_outstanding_games) +
+                "\n        "
+            )
           ])
         : _vm._e()
     ])
@@ -48870,24 +49128,16 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { attrs: { id: "game-overview__header-left" } }, [
-      _c("div", { attrs: { id: "header-title" } }, [
-        _vm._v("\n                    Open & ongoing games\n                ")
-      ])
+    return _c("div", { attrs: { id: "my-game__icon" } }, [
+      _c("i", { staticClass: "fas fa-gamepad" })
     ])
   },
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { attrs: { id: "game-overview__games-headings" } }, [
-      _c("div", { staticClass: "games-heading" }, [_vm._v("ID")]),
-      _vm._v(" "),
-      _c("div", { staticClass: "games-heading" }, [_vm._v("Players")]),
-      _vm._v(" "),
-      _c("div", { staticClass: "games-heading" }, [_vm._v("Status")]),
-      _vm._v(" "),
-      _c("div", { staticClass: "games-heading" }, [_vm._v("Actions")])
+    return _c("div", { attrs: { id: "header-icon" } }, [
+      _c("i", { staticClass: "fas fa-gamepad" })
     ])
   }
 ]
@@ -49053,7 +49303,7 @@ var render = function() {
           _c("v-text-field", {
             attrs: {
               name: "username",
-              label: _vm.usernameText,
+              label: _vm.strings.username,
               errors: _vm.hasErrors("username"),
               "error-messages": _vm.getErrors("username")
             },
@@ -49075,31 +49325,8 @@ var render = function() {
         [
           _c("v-text-field", {
             attrs: {
-              name: "name",
-              label: _vm.nameText,
-              errors: _vm.hasErrors("name"),
-              "error-messages": _vm.getErrors("name")
-            },
-            model: {
-              value: _vm.form.name,
-              callback: function($$v) {
-                _vm.$set(_vm.form, "name", $$v)
-              },
-              expression: "form.name"
-            }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "form-field" },
-        [
-          _c("v-text-field", {
-            attrs: {
               name: "email",
-              label: _vm.emailText,
+              label: _vm.strings.email,
               errors: _vm.hasErrors("email"),
               "error-messages": _vm.getErrors("email")
             },
@@ -49115,39 +49342,32 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _c("div", { staticClass: "image-field" }, [
-        _c("div", { staticClass: "image-field__label" }, [
-          _vm._v(_vm._s(_vm.avatarText))
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "image-field__image-wrapper" }, [
-          _c("div", {
-            staticClass: "image-field__image",
-            style: { backgroundImage: "url(" + _vm.user.avatar_url + ")" }
+      _c(
+        "div",
+        { staticClass: "form-field" },
+        [
+          _c("avatar-selector", {
+            attrs: {
+              label: _vm.strings.avatar,
+              avatars: _vm.avatars,
+              "base-url": _vm.baseUrl
+            },
+            model: {
+              value: _vm.form.avatar_url,
+              callback: function($$v) {
+                _vm.$set(_vm.form, "avatar_url", $$v)
+              },
+              expression: "form.avatar_url"
+            }
+          }),
+          _vm._v(" "),
+          _c("input", {
+            attrs: { type: "hidden", name: "avatar" },
+            domProps: { value: _vm.form.avatar_url }
           })
-        ]),
-        _vm._v(" "),
-        _vm._m(0),
-        _vm._v(" "),
-        _vm.hasErrors("avatar")
-          ? _c(
-              "div",
-              { staticClass: "image-field__errors" },
-              _vm._l(_vm.getErrors("avatar"), function(error, ei) {
-                return _c(
-                  "div",
-                  { key: ei, staticClass: "image-field__error" },
-                  [
-                    _vm._v(
-                      "\n                " + _vm._s(error) + "\n            "
-                    )
-                  ]
-                )
-              }),
-              0
-            )
-          : _vm._e()
-      ]),
+        ],
+        1
+      ),
       _vm._v(" "),
       _c("div", { staticClass: "form-controls" }, [
         _c(
@@ -49157,7 +49377,9 @@ var render = function() {
             _c("v-btn", { attrs: { text: "", href: _vm.cancelHref } }, [
               _c("i", { staticClass: "fas fa-arrow-left" }),
               _vm._v(
-                "\n                " + _vm._s(_vm.cancelText) + "\n            "
+                "\n                " +
+                  _vm._s(_vm.strings.cancel) +
+                  "\n            "
               )
             ])
           ],
@@ -49175,7 +49397,7 @@ var render = function() {
                 _c("i", { staticClass: "fas fa-save" }),
                 _vm._v(
                   "\n                " +
-                    _vm._s(_vm.submitText) +
+                    _vm._s(_vm.strings.submit) +
                     "\n            "
                 )
               ]
@@ -49187,16 +49409,7 @@ var render = function() {
     ]
   )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "image-field__input" }, [
-      _c("input", { attrs: { type: "file", name: "avatar" } })
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -102883,6 +103096,7 @@ module.exports = function(module) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
+	"./components/auth/AvatarSelector.vue": "./resources/js/components/auth/AvatarSelector.vue",
 	"./components/auth/LoginForm.vue": "./resources/js/components/auth/LoginForm.vue",
 	"./components/auth/RecoverAccountForm.vue": "./resources/js/components/auth/RecoverAccountForm.vue",
 	"./components/auth/RegisterForm.vue": "./resources/js/components/auth/RegisterForm.vue",
@@ -102965,7 +103179,8 @@ if (useTLSOverride) {
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_2__["default"]({
   broadcaster: 'pusher',
   key: "8E93Tu0lnedU7NHWGugD",
-  wsHost: window.location.hostname,
+  // wsHost: window.location.hostname,
+  wsHost: 'saboteur.test',
   wsPort: "6001",
   wssPort: "6001",
   disableStats: false,
@@ -102992,6 +103207,93 @@ var app = new Vue({
     }
   })
 });
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/AvatarSelector.vue":
+/*!*********************************************************!*\
+  !*** ./resources/js/components/auth/AvatarSelector.vue ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./AvatarSelector.vue?vue&type=template&id=e958ab78& */ "./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78&");
+/* harmony import */ var _AvatarSelector_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AvatarSelector.vue?vue&type=script&lang=js& */ "./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./AvatarSelector.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _AvatarSelector_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/auth/AvatarSelector.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************!*\
+  !*** ./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./AvatarSelector.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss& ***!
+  \*******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader!../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./AvatarSelector.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78&":
+/*!****************************************************************************************!*\
+  !*** ./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78& ***!
+  \****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./AvatarSelector.vue?vue&type=template&id=e958ab78& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/auth/AvatarSelector.vue?vue&type=template&id=e958ab78&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_AvatarSelector_vue_vue_type_template_id_e958ab78___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 

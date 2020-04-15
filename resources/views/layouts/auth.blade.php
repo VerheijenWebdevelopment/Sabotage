@@ -38,7 +38,7 @@
             <!-- Footer -->
             <div id="footer-wrapper">
                 <footer id="footer">
-                    &copy; Copyrighted by.. someone else probably.
+                    &copy; OpperKabouter Inc. 2020 - &infin;
                 </footer>
             </div>
 

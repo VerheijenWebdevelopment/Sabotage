@@ -9,7 +9,7 @@
 
         <!-- Header -->
         <div id="lobby-header">
-            <h1 id="lobby-header__title">Leaderboards</h1>
+            <h1 id="lobby-header__title">Highscores</h1>
         </div>
 
         <!-- Content -->

@@ -24,14 +24,10 @@
                 :user="{{ $user->toJson() }}"
                 :errors="{{ $errors->toJson() }}"
                 :old-input="{{ $oldInput->toJson() }}"
-                title-text="@lang('settings.update_profile_title')"
-                username-text="@lang('settings.update_profile_username')"
-                name-text="@lang('settings.update_profile_name')"
-                email-text="@lang('settings.update_profile_email')"
-                avatar-text="@lang('settings.update_profile_avatar')"
-                cancel-text="@lang('settings.update_profile_cancel')"
-                cancel-href="{{ route('settings.profile') }}"
-                submit-text="@lang('settings.update_profile_submit')">
+                :avatars="{{ $avatars->toJson() }}"
+                :strings="{{ $strings->toJson() }}"
+                base-url="{{ asset('/') }}"
+                cancel-href="{{ route('settings.profile') }}">
             </update-profile-form>
 
         </form>

@@ -69,9 +69,9 @@ class UserService implements ModelServiceContract
     {
         return User::create([
             "username" => $request->username,
-            "name" => $request->name,
             "email" => $request->email,
             "password" => bcrypt($request->password),
+            "avatar_url" => $request->avatar,
         ]);
     }
 
@@ -107,14 +107,8 @@ class UserService implements ModelServiceContract
         
         // Update the fields that are always present
         $user->username = $request->username;
-        $user->name = $request->name;
         $user->email = $request->email;
-
-        // Upload new avatar if we find one in the request's data
-        if ($request->hasFile("avatar"))
-        {
-            $user->avatar_url = Uploader::upload($request->file("avatar"), "images/users/avatars");
-        }
+        $user->avatar_url = $request->avatar;
 
         // Save changes to the user
         $user->save();

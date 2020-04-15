@@ -26,9 +26,8 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             "username" => "required",
-            "name" => "required",
             "email" => "required|email|unique:users,id,".auth()->user()->id,
-            "avatar" => "nullable|image",
+            "avatar" => "required",
         ];
     }
 }

@@ -29,7 +29,8 @@ import Echo from "laravel-echo";
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: process.env.MIX_PUSHER_APP_KEY,
-    wsHost: window.location.hostname,
+    // wsHost: window.location.hostname,
+    wsHost: 'saboteur.test',
     wsPort: process.env.MIX_WEBSOCKET_PORT_WS,
     wssPort: process.env.MIX_WEBSOCKET_PORT_WSS,
     disableStats: false,

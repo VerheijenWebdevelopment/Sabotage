@@ -3,7 +3,10 @@
 
         <!-- Header -->
         <div id="chat-online-users__header">
-            <div id="header-title">Online users</div>
+            <div id="header-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div id="header-title">{{ titleText }}</div>
         </div>
 
         <!-- Content -->
@@ -12,14 +15,14 @@
             <!-- Online users -->
             <div id="online-users" v-if="users.length > 0">
                 <div class="user" v-for="(user, ui) in users" :key="ui">
-                    <div class="user-avatar"></div>
+                    <div class="user-avatar" :style="{ backgroundImage: 'url('+user.avatar_url+')' }"></div>
                     <div class="user-name">{{ user.username }}</div>
                 </div>
             </div>
 
             <!-- No online users -->
             <div id="no-online-users" v-if="users.length === 0">
-                There are no users online
+                {{ noRecordsText }}
             </div>
 
         </div>
@@ -29,7 +32,10 @@
 
 <script>
     export default {
-        props: [],
+        props: [
+            "titleText",
+            "noRecordsText",
+        ],
         data: () => ({
             tag: "[chat-online-users]",
             users: [],
@@ -88,8 +94,15 @@
         border-radius: 3px;
         background-color: #fff;
         #chat-online-users__header {
-            padding: 15px 25px;
+            display: flex;
+            padding: 15px;
+            align-items: center;
+            flex-direction: row;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            #header-icon {
+                font-size: 1.5em;
+                margin: 0 15px 0 0;
+            }
             #header-title {
                 font-size: 1.2em;
                 font-weight: 500;
@@ -99,7 +112,7 @@
             #online-users {
                 .user {
                     display: flex;
-                    padding: 15px 25px;
+                    padding: 15px;
                     flex-direction: row;
                     box-sizing: border-box;
                     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -107,10 +120,13 @@
                         border-bottom: 0;
                     }
                     .user-avatar {
-                        height: 24px;
-                        flex: 0 0 24px;
-                        margin: 0 10px 0 0;
-                        border-radius: 12px;
+                        height: 40px;
+                        flex: 0 0 40px;
+                        margin: 0 15px 0 0;
+                        border-radius: 20px;
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center center;
                         background-color: hsl(0, 0%, 80%);
                     }
                     .user-name {
@@ -123,7 +139,6 @@
             }
             #no-online-users {
                 padding: 15px 25px;
-                text-align: center;
                 box-sizing: border-box;
             }
         }

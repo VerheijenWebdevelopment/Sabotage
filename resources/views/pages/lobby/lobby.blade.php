@@ -28,19 +28,18 @@
                     delete-api-endpoint="{{ route('api.games.delete.post') }}"
                     join-api-endpoint="{{ route('api.games.join.post') }}"
                     leave-api-endpoint="{{ route('api.games.leave.post') }}"
-                    start-api-endpoint="{{ route('api.games.start.post') }}">
+                    start-api-endpoint="{{ route('api.games.start.post') }}"
+                    :strings="{{ $strings->toJson() }}">
                 </game-overview>
-
-                <!-- Chat messages -->
-                <chat-messages
-                    send-message-api-endpoint="{{ route('api.chat.send-message.post') }}">
-                </chat-messages>
 
             </div>
             <div id="lobby-content__right">
 
                 <!-- Online users -->
-                <chat-online-users></chat-online-users>
+                <chat-online-users
+                    title-text="@lang('lobby.online_users')"
+                    no-records-text="@lang('lobby.no_online_users')">
+                </chat-online-users>
 
             </div>
         </div>

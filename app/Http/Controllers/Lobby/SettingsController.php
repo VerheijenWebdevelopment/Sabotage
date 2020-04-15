@@ -31,7 +31,31 @@ class SettingsController extends Controller
                 "username" => old("username"),
                 "name" => old("name"),
                 "email" => old("email"),
-            ])
+            ]),
+            "strings" => collect([
+                "title" => __("settings.update_profile_title"),
+                "username" => __("settings.update_profile_username"),
+                "email" => __("settings.update_profile_email"),
+                "avatar" => __("settings.update_profile_avatar"),
+                "cancel" => __("settings.update_profile_cancel"),
+                "submit" => __("settings.update_profile_submit"),
+            ]),
+            "avatars" => collect([
+                "storage/images/users/avatars/default.png",
+                "storage/images/users/avatars/default_2.png",
+                "storage/images/users/avatars/default_3.png",
+                "storage/images/users/avatars/default_4.png",
+                "storage/images/users/avatars/default_5.png",
+                "storage/images/users/avatars/default_6.png",
+                "storage/images/users/avatars/default_7.png",
+                "storage/images/users/avatars/default_8.png",
+                "storage/images/users/avatars/default_9.png",
+                "storage/images/users/avatars/default_10.png",
+                "storage/images/users/avatars/default_11.png",
+                "storage/images/users/avatars/default_12.png",
+                "storage/images/users/avatars/default_13.png",
+                "storage/images/users/avatars/default_14.png",
+            ]),
         ]);
     }
     

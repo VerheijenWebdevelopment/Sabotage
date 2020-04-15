@@ -15,10 +15,9 @@ class User extends Authenticatable
 
     protected $fillable = [
         'slug',
-        'name',
+        'username',
         'email',
         'password',
-        'username',
         'avatar_url',
         'recovery_code',
         'is_admin',

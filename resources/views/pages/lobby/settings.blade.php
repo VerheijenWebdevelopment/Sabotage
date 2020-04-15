@@ -19,14 +19,15 @@
     <!-- Settings overview -->
     <div id="settings">
 
-
         <!-- Profile -->
         <div class="setting-wrapper">
             <a class="setting elevation-1" href="{{ route('settings.profile') }}">
                 <span class="setting-icon">
                     <i class="fas fa-user"></i>
                 </span>
-                <span class="setting-text">Profile</span>
+                <span class="setting-text">
+                    @lang("settings.overview_my_account")
+                </span>
             </a>
         </div>
 
@@ -36,7 +37,9 @@
                 <span class="setting-icon">
                     <i class="fas fa-user-edit"></i>
                 </span>
-                <span class="setting-text">Update profile</span>
+                <span class="setting-text">
+                    @lang("settings.overview_update_account")
+                </span>
             </a>
         </div>
 
@@ -46,7 +49,9 @@
                 <span class="setting-icon">
                     <i class="fas fa-key"></i>
                 </span>
-                <span class="setting-text">Change password</span>
+                <span class="setting-text">
+                    @lang("settings.overview_change_password")
+                </span>
             </a>
         </div>
 

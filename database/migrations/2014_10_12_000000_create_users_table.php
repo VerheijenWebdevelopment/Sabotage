@@ -16,13 +16,12 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('slug');
-            $table->string('name');
+            $table->string('username');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('recovery_code')->nullable();
-            $table->string('username');
-            $table->string('avatar_url')->nullable();
+            $table->string('avatar_url')->default('storage/images/users/avatars/default.png');
             $table->boolean('is_admin')->default(false);
             $table->unsignedInteger('highscore')->default(0);
             $table->unsignedInteger('games_played')->default(0);

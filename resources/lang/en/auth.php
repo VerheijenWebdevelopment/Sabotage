@@ -29,11 +29,11 @@ return [
 
     "register_title" => "Register",
     "register_username" => "Username",
-    "register_name" => "Name",
     "register_email" => "Email",
     "register_password" => "Password",
     "register_confirm_password" => "Confirm password",
     "register_username" => "Username",
+    "register_avatar" => "Profile",
     "register_submit" => "Create your account",
     "register_go_to_login" => "Already have an account? Login here",
     "registered" => "Thanks for registering :name, you have been logged in!",

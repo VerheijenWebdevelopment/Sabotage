@@ -5,21 +5,10 @@
         <div class="form-field">
             <v-text-field
                 name="username"
-                :label="usernameText"
+                :label="strings.username"
                 v-model="form.username"
                 :errors="hasErrors('username')"
                 :error-messages="getErrors('username')">
-            </v-text-field>
-        </div>
-
-        <!-- Name -->
-        <div class="form-field">
-            <v-text-field
-                name="name"
-                :label="nameText"
-                v-model="form.name"
-                :errors="hasErrors('name')"
-                :error-messages="getErrors('name')">
             </v-text-field>
         </div>
 
@@ -27,7 +16,7 @@
         <div class="form-field">
             <v-text-field
                 name="email"
-                :label="emailText"
+                :label="strings.email"
                 v-model="form.email"
                 :errors="hasErrors('email')"
                 :error-messages="getErrors('email')">
@@ -35,33 +24,29 @@
         </div>
         
         <!-- Avatar -->
-        <div class="image-field">
-            <div class="image-field__label">{{ avatarText }}</div>
-            <div class="image-field__image-wrapper">
-                <div class="image-field__image" :style="{ backgroundImage: 'url('+user.avatar_url+')' }"></diV>
-            </div>
-            <div class="image-field__input">
-                <input type="file" name="avatar">
-            </div>
-            <div class="image-field__errors" v-if="hasErrors('avatar')">
-                <div class="image-field__error" v-for="(error, ei) in getErrors('avatar')" :key="ei">
-                    {{ error }}
-                </div>
-            </div>
+        <div class="form-field">
+            <avatar-selector
+                :label="strings.avatar"
+                :avatars="avatars"
+                :base-url="baseUrl"
+                v-model="form.avatar_url">
+            </avatar-selector>
+            <input type="hidden" name="avatar" :value="form.avatar_url">
         </div>
+
 
         <!-- Form controls -->
         <div class="form-controls">
             <div class="form-controls__left">
                 <v-btn text :href="cancelHref">
                     <i class="fas fa-arrow-left"></i>
-                    {{ cancelText }}
+                    {{ strings.cancel }}
                 </v-btn>    
             </div>
             <div class="form-controls__right">
                 <v-btn depressed color="primary" type="submit">
                     <i class="fas fa-save"></i>
-                    {{ submitText }}
+                    {{ strings.submit }}
                 </v-btn>
             </div>
         </div>
@@ -75,13 +60,10 @@
             "user",
             "errors",
             "oldInput",
-            "usernameText",
-            "nameText",
-            "emailText",
-            "avatarText",
-            "cancelText",
+            "avatars",
+            "strings",
+            "baseUrl",
             "cancelHref",
-            "submitText",
         ],
         data: () => ({
             tag: "[update-profile-form]",
@@ -89,6 +71,7 @@
                 name: "",
                 email: "",
                 username: "",
+                avatar: "",
             }
         }),
         methods: {
@@ -97,25 +80,20 @@
                 console.log(this.tag+" user: ", this.user);
                 console.log(this.tag+" errors: ", this.errors);
                 console.log(this.tag+" old input: ", this.oldInput);
-                console.log(this.tag+" username text: ", this.usernameText);
-                console.log(this.tag+" name text: ", this.nameText);
-                console.log(this.tag+" email text: ", this.emailText);
-                console.log(this.tag+" avatar text: ", this.avatarText);
-                console.log(this.tag+" cancel text: ", this.cancelText);
+                console.log(this.tag+" strings: ", this.strings);
                 console.log(this.tag+" cancel href: ", this.cancelHref);
-                console.log(this.tag+" submit text: ", this.submitText);
                 this.initializeData();
             },
             initializeData() {
                 if (this.user !== undefined && this.user !== null) {
-                    this.form.name = this.user.name;
                     this.form.email = this.user.email;
                     this.form.username = this.user.username;
+                    this.form.avatar = this.user.avatar_url;
                 }
                 if (this.oldInput !== undefined && this.oldInput !== null) {
-                    if (this.oldInput.name !== null) this.form.name = this.oldInput.name;
                     if (this.oldInput.email !== null) this.form.email = this.oldInput.email;
                     if (this.oldInput.username !== null) this.form.username = this.oldInput.username;
+                    if (this.oldInput.avatar !== null) this.form.avatar = this.oldInput.avatar;
                 }
             },
             hasErrors(field) {

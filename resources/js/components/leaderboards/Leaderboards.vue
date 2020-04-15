@@ -4,9 +4,9 @@
         <!-- Users -->
         <div id="users" class="elevation-1" v-if="mutableUsers.length > 0">
             <div id="users-headers">
-                <div class="users-header">Username</div>
-                <div class="users-header">Games played</div>
-                <div class="users-header">Highscore</div>
+                <div class="users-header">Speler</div>
+                <div class="users-header">Aantal gespeelde spellen</div>
+                <div class="users-header">Goud gevonden</div>
             </div>
             <div class="user" v-for="(user, ui) in mutableUsers" :key="ui">
                 <div class="username">{{ user.username }}</div>
@@ -60,10 +60,11 @@
             background-color: #fff;
             #users-headers {
                 display: flex;
+                color: #ffffff;
                 padding: 15px 20px;
                 flex-direction: row;
                 box-sizing: border-box;
-                background-color: hsl(0, 0%, 96%);
+                background-color: hsl(0, 0%, 15%);
                 border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                 .users-header {
                     flex: 1;

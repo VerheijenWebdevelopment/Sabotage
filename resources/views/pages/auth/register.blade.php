@@ -18,14 +18,9 @@
                     <register-form
                         :errors="{{ $errors->toJson() }}"
                         :old-input="{{ $oldInput->toJson() }}"
-                        title-text="@lang('auth.register_title')"
-                        username-text="@lang('auth.register_username')"
-                        name-text="@lang('auth.register_name')"
-                        email-text="@lang('auth.register_email')"
-                        password-text="@lang('auth.register_password')"
-                        confirm-password-text="@lang('auth.register_confirm_password')"
-                        submit-text="@lang('auth.register_submit')"
-                        login-text="@lang('auth.register_go_to_login')"
+                        :avatars="{{ $avatars->toJson() }}"
+                        base-url="{{ asset('/') }}"
+                        :strings="{{ $strings->toJson() }}"
                         login-href="{{ route('login') }}">
                     </register-form>
                 

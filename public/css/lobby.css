@@ -791,14 +791,14 @@ i {
 #app .v-application--wrap #topnav-wrapper {
   width: 100%;
   flex: 0 0 80px;
-  background-color: #e6e6e6;
+  background-color: #0d0d0d;
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav {
   height: 100%;
   color: #000;
   display: flex;
-  width: 1000px;
+  width: 1200px;
   margin: 0 auto;
   align-items: center;
   flex-direction: row;
@@ -808,7 +808,7 @@ i {
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:active,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:visited,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-logo a:link {
-  color: #000;
+  color: #fff;
   text-decoration: none;
 }
 
@@ -841,23 +841,23 @@ i {
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link {
-  color: #333;
   font-size: 1em;
   font-weight: 400;
   transition: all 0.3s;
   text-decoration: none;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:active:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:visited:hover,
 #app .v-application--wrap #topnav-wrapper #topnav #topnav-links li a:link:hover {
-  color: #000;
+  color: #fff;
 }
 
 #app .v-application--wrap #content-wrapper {
   flex: 1;
-  width: 1000px;
+  width: 1200px;
   padding: 50px 0;
   box-sizing: border-box;
 }
@@ -902,7 +902,7 @@ i {
 }
 
 #leaderboards-wrapper {
-  width: 600px;
+  width: 1000px;
   margin: 0 auto;
 }
 
@@ -968,7 +968,11 @@ i {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+}
+
+#profile #profile-actions .v-btn {
+  margin: 0 15px;
 }
 
 #change-password {

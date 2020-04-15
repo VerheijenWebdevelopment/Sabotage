@@ -19,45 +19,28 @@ class Game extends Model
     protected $guarded = ["id", "created_at", "updated_at"];
     protected $fillable = [
         "game_master_id",
+        "current_round_id",
         "status",
-        "round",
-        "turn",
-        "phase",
-        "player_turn",
-        "gold_location",
-        "deck",
-        "num_cards_in_deck",
-        "roles",
-        "available_roles",
-        "players_with_selected_roles",
-        "board",
-        "reached_gold_locations",
-        "reward_deck",
-        "num_cards_reward_deck",
-        "revealed_players",
-        "saboteur_reward",
-        "winning_team",
-    ];
-    protected $hidden = [
-        "deck",
-        "roles",
-        "gold_location",
-        "reward_deck",
-        "saboteur_reward",
+        "settings",
     ];
 
     //
     // Relationships
     //
 
-    public function winners()
-    {
-        return $this->belongsToMany(Player::class, "winners", "game_id", "player_id");
-    }
-
     public function gameMaster()
     {
         return $this->belongsTo(User::class, "game_master_id", "id");
+    }
+    
+    public function rounds()
+    {
+        return $this->hasMany(Round::class);
+    }
+
+    public function currentRound()
+    {
+        return $this->belongsTo(Round::class, "current_round_id", "id");
     }
 
     public function players()
@@ -68,6 +51,11 @@ class Game extends Model
     public function messages()
     {
         return $this->hasMany(GameChatMessage::class);
+    }
+
+    public function winners()
+    {
+        return $this->belongsToMany(Player::class, "winners", "game_id", "player_id");
     }
 
     //
