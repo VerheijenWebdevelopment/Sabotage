@@ -229,6 +229,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'Users' => \App\Facades\UsersFacade::class,
+        'Lobby' => \App\Facades\LobbyFacade::class,
         'Games' => \App\Facades\GamesFacade::class,
         'Rounds' => \App\Facades\RoundsFacade::class,
         'Cards' => \App\Facades\CardsFacade::class,

@@ -417,7 +417,15 @@ i {
 
 .dialog {
   position: relative;
+  background-color: #fff;
+}
+
+.dialog.dark {
   background-color: #121212;
+}
+
+.dialog.dark .dialog-controls {
+  background-color: #0c0c0c;
 }
 
 .dialog .dialog__close-button {
@@ -505,7 +513,7 @@ i {
   padding: 25px;
   flex-direction: row;
   box-sizing: border-box;
-  background-color: #0c0c0c;
+  background-color: #f5f5f5;
 }
 
 .dialog .dialog-controls .dialog-controls__left,
@@ -1184,7 +1192,15 @@ i {
 
 .dialog {
   position: relative;
+  background-color: #fff;
+}
+
+.dialog.dark {
   background-color: #121212;
+}
+
+.dialog.dark .dialog-controls {
+  background-color: #0c0c0c;
 }
 
 .dialog .dialog__close-button {
@@ -1272,7 +1288,7 @@ i {
   padding: 25px;
   flex-direction: row;
   box-sizing: border-box;
-  background-color: #0c0c0c;
+  background-color: #f5f5f5;
 }
 
 .dialog .dialog-controls .dialog-controls__left,

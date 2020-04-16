@@ -29,8 +29,14 @@ return [
     "waiting_for_players" => "Aan het wachten tot er meer spelers zijn bijgekomen.",
     "waiting_for_gm" => "Aan het wachten tot de GM het spel begint.",
     "game_started" => "Het spel gaat beginnen!",
+    "rounds" => "rondes",
     
     "online_users" => "Online spelers",
     "no_online_users" => "Er zijn geen spelers online",
+
+    "configure_dialog_title" => "Spelregels",
+    "configure_dialog_num_rounds" => "Aantal rondes",
+    "configure_dialog_cancel" => "Annuleren",
+    "configure_dialog_submit" => "Wijzigingen opslaan!",
 
 ];

@@ -61,93 +61,18 @@ class Game extends Model
     //
     // Accessors
     //
-
-    public function getDeckAttribute($value)
+    
+    public function getSettingsAttribute($value)
     {
-        return unserialize($value);
-    }
-
-    public function getRolesAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getAvailableRolesAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getNumberOfAvailableRolesAttribute()
-    {
-        return !is_null($this->roles) && $this->roles ? count($this->roles) : 0;
-    }
-
-    public function getPlayersWithSelectedRolesAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getBoardAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getReachedGoldLocationsAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getRewardDeckAttribute($value)
-    {
-        return unserialize($value);
-    }
-
-    public function getRevealedPlayersAttribute($value)
-    {
-        return unserialize($value);
+        return json_decode(unserialize($value));
     }
     
     //
     // Mutators
     //
 
-    public function setDeckAttribute($value)
+    public function setSettingsAttribute($value)
     {
-        $this->attributes["deck"] = serialize($value);
-    }
-
-    public function setRolesAttribute($value)
-    {
-        $this->attributes["roles"] = serialize($value);
-    }
-
-    public function setAvailableRolesAttribute($value)
-    {
-        $this->attributes["available_roles"] = serialize($value);
-    }
-
-    public function setPlayersWithSelectedRolesAttribute($value)
-    {
-        $this->attributes["players_with_selected_roles"] = serialize($value);
-    }
-
-    public function setBoardAttribute($value)
-    {
-        $this->attributes["board"] = serialize($value);
-    }
-
-    public function setReachedGoldLocationsAttribute($value)
-    {
-        $this->attributes["reached_gold_locations"] = serialize($value);
-    }
-
-    public function setRewardDeckAttribute($value)
-    {
-        $this->attributes["reward_deck"] = serialize($value);
-    }
-
-    public function setRevealedPlayersAttribute($value)
-    {
-        $this->attributes["revealed_players"] = serialize($value);
+        $this->attributes["settings"] = serialize(json_encode($value));
     }
 }

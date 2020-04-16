@@ -5705,8 +5705,59 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["user", "games", "gameHref", "createApiEndpoint", "deleteApiEndpoint", "joinApiEndpoint", "leaveApiEndpoint", "startApiEndpoint", "strings"],
+  props: ["user", "games", "gameHref", "createApiEndpoint", "deleteApiEndpoint", "joinApiEndpoint", "leaveApiEndpoint", "startApiEndpoint", "updateSettingsApiEndpoint", "strings"],
   data: function data() {
     return {
       tag: "[game-overview]",
@@ -5716,7 +5767,16 @@ __webpack_require__.r(__webpack_exports__);
       deleteLoading: false,
       startLoading: false,
       leaveLoading: false,
-      joinLoading: false
+      joinLoading: false,
+      dialogs: {
+        configure: {
+          show: false,
+          loading: false,
+          form: {
+            num_rounds: 3
+          }
+        }
+      }
     };
   },
   computed: {
@@ -5742,6 +5802,7 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " join api endpoint: ", this.joinApiEndpoint);
       console.log(this.tag + " leave api endpoint: ", this.leaveApiEndpoint);
       console.log(this.tag + " start api endpoint: ", this.startApiEndpoint);
+      console.log(this.tag + " update settings api endpoint: ", this.updateSettingsApiEndpoint);
       console.log(this.tag + " strings: ", this.strings);
       this.initializeData();
       this.startListening();
@@ -5757,14 +5818,16 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    // Events
     startListening: function startListening() {
       // Start listening for events on the lobby channel
       Echo["private"]("lobby") // Game created event
-      .listen("Game\\GameCreated", this.onGameCreated) // Game deleted event
-      .listen("Game\\GameDeleted", this.onGameDeleted) // Game started event
-      .listen("Game\\GameStarted", this.onGameStarted) // Player joined game event
-      .listen("Game\\PlayerJoinedGame", this.onPlayerJoinedGame) // Player left game event
-      .listen("Game\\PlayerLeftGame", this.onPlayerLeftGame);
+      .listen("Lobby\\GameCreated", this.onGameCreated) // Game deleted event
+      .listen("Lobby\\GameDeleted", this.onGameDeleted) // Game started event
+      .listen("Lobby\\GameStarted", this.onGameStarted) // Game settings updated event
+      .listen("Lobby\\GameSettingsUpdated", this.onGameSettingsUpdated) // Player joined game event
+      .listen("Lobby\\PlayerJoinedGame", this.onPlayerJoinedGame) // Player left game event
+      .listen("Lobby\\PlayerLeftGame", this.onPlayerLeftGame);
     },
     onGameCreated: function onGameCreated(e) {
       console.log(this.tag + " [event] game created", e); // Grab the game so we can make changes to it and add the player that created
@@ -5817,6 +5880,16 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    onGameSettingsUpdated: function onGameSettingsUpdated(e) {
+      console.log(this.tag + "[event] game settings were updated: ", e); // Grab the game's index by it's ID
+
+      var index = this.findGameIndexById(e.game.id);
+
+      if (index !== false) {
+        // Update the game's settings
+        this.mutableGames[index].settings = e.settings;
+      }
+    },
     onPlayerJoinedGame: function onPlayerJoinedGame(e) {
       console.log(this.tag + " [event] player joined game", e); // Add player to game's list of players
 
@@ -5863,27 +5936,32 @@ __webpack_require__.r(__webpack_exports__);
 
       return false;
     },
-    userIsGameMaster: function userIsGameMaster(game) {
-      return game.game_master_id === this.user.id;
-    },
+    // Click handlers
     onClickCreate: function onClickCreate() {
-      console.log(this.tag + " clicked create button");
+      console.log(this.tag + " clicked create button"); // Start loading
+
       this.createLoading = true; // Make API request
 
-      this.axios.post(this.createApiEndpoint).then(function (response) {
-        console.log(this.tag + " create request succeeded", response.data);
+      this.axios.post(this.createApiEndpoint) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " create request succeeded", response.data); // Operation succeeded
 
         if (response.data.status === "success") {
-          console.log(this.tag + " create operation succeeded");
+          console.log(this.tag + " create operation succeeded"); // Update state
+
           this.mutableGames.push(response.data.game);
-          this.activeGameIndex = this.mutableGames.length - 1;
-          this.createLoading = false;
+          this.activeGameIndex = this.mutableGames.length - 1; // Stop loading
+
+          this.createLoading = false; // Operation failed
         } else {
-          console.warn(this.tag + " create operation failed: ", response.data.error);
+          console.warn(this.tag + " create operation failed: ", response.data.error); // Stop loading
+
           this.createLoading = false;
         }
-      }.bind(this))["catch"](function (error) {
-        console.warn(this.tag + " create request failed", error);
+      }.bind(this)) // Request failed
+      ["catch"](function (error) {
+        console.warn(this.tag + " create request failed", error); // Stop loading
+
         this.createLoading = false;
       }.bind(this));
     },
@@ -5909,6 +5987,37 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this))["catch"](function (error) {
         console.warn(this.tag + " delete request failed", error);
         this.deleteLoading = false;
+      }.bind(this));
+    },
+    onClickConfigure: function onClickConfigure() {
+      if (this.mutableGames[this.activeGameIndex].settings !== null) {
+        this.dialogs.configure.form.num_rounds = this.mutableGames[this.activeGameIndex].settings.num_rounds;
+      }
+
+      this.dialogs.configure.show = true;
+    },
+    onClickConfirmConfigure: function onClickConfirmConfigure() {
+      this.dialogs.configure.loading = true; // Compose the payload we're sending
+
+      var payload = new FormData();
+      payload.append("game_id", this.mutableGames[this.activeGameIndex].id);
+      payload.append("num_rounds", this.dialogs.configure.form.num_rounds); // Send request to the API to make things permanent
+
+      this.axios.post(this.updateSettingsApiEndpoint, payload) // Request succeeded
+      .then(function (response) {
+        this.dialogs.configure.loading = false;
+
+        if (response.data.status === "success") {
+          console.log(this.tag + " operation succeeded", response.data);
+          this.mutableGames[this.activeGameIndex].settings.num_rounds = this.dialogs.configure.form.num_rounds;
+          this.dialogs.configure.show = false;
+        } else {
+          console.warn(this.tag + " operation failed, error: ", response.data.error);
+        }
+      }.bind(this)) // Request failed
+      ["catch"](function (error) {
+        this.dialogs.configure.loading = false;
+        console.warn(this.tag + " request failed, error: ", error.response.data);
       }.bind(this));
     },
     onClickJoin: function onClickJoin(index) {
@@ -5993,6 +6102,10 @@ __webpack_require__.r(__webpack_exports__);
         console.warn(this.tag + " request failed", error);
         this.startLoading = false;
       }.bind(this));
+    },
+    // Checks & getters
+    userIsGameMaster: function userIsGameMaster(game) {
+      return game.game_master_id === this.user.id;
     },
     findGameIndexById: function findGameIndexById(id) {
       for (var i = 0; i < this.mutableGames.length; i++) {
@@ -8468,7 +8581,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game-overview__wrapper #my-game {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #my-game #my-game__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__icon {\n  margin: 0 10px 0 0;\n  font-size: 1.5em;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__players .player {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n}\n#game-overview__wrapper #my-game #my-game__players .player:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-icon {\n  display: flex;\n  flex: 0 0 30px;\n  margin: 0 15px 0 0;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__actions {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: flex-end;\n  background-color: #f2f2f2;\n}\n#game-overview__wrapper #my-game #my-game__actions .v-btn {\n  margin: 0 0 0 15px;\n}\n#game-overview__wrapper #game-overview {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #game-overview #game-overview__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-icon {\n  font-size: 1.5em;\n  margin: 0 15px 0 0;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right .v-btn {\n  margin: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #f2f2f2;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading {\n  flex: 1;\n  display: flex;\n  font-weight: bold;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:last-child {\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(2), #game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(3) {\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games .game:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-id {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-players {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill {\n  color: #000;\n  font-size: 0.8em;\n  padding: 3px 6px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ddd;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.open {\n  color: #fff;\n  background-color: #228900;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.ongoing {\n  color: #fff;\n  background-color: #00a6ff;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-actions {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__no-games {\n  padding: 15px 25px;\n  box-sizing: border-box;\n}", ""]);
+exports.push([module.i, "#game-overview__wrapper #my-game {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #my-game #my-game__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__icon {\n  margin: 0 10px 0 0;\n  font-size: 1.5em;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-left #my-game__title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #my-game #my-game__header #my-game__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players {\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #my-game #my-game__players .player {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.05);\n}\n#game-overview__wrapper #my-game #my-game__players .player:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-icon {\n  display: flex;\n  flex: 0 0 30px;\n  margin: 0 15px 0 0;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__players .player .player-name {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__actions {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  background-color: #f2f2f2;\n}\n#game-overview__wrapper #my-game #my-game__actions #my-game__actions-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #my-game #my-game__actions #my-game__actions-left .v-btn {\n  margin: 0 15px 0 0;\n}\n#game-overview__wrapper #my-game #my-game__actions #my-game__actions-right {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#game-overview__wrapper #my-game #my-game__actions #my-game__actions-right .v-btn {\n  margin: 0 0 0 15px;\n}\n#game-overview__wrapper #game-overview {\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 30px 0;\n  background-color: #fff;\n}\n#game-overview__wrapper #game-overview #game-overview__header {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-icon {\n  font-size: 1.5em;\n  margin: 0 15px 0 0;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-left #header-title {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__header #game-overview__header-right .v-btn {\n  margin: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #f2f2f2;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading {\n  flex: 1;\n  display: flex;\n  font-weight: bold;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:last-child {\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(2), #game-overview__wrapper #game-overview #game-overview__games #game-overview__games-headings .games-heading:nth-child(3) {\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game {\n  display: flex;\n  padding: 15px 20px;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  border-bottom: 1px solid rgba(0, 0, 0, 0.1);\n}\n#game-overview__wrapper #game-overview #game-overview__games .game:last-child {\n  border-bottom: 0;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-id {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-players {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill {\n  color: #000;\n  font-size: 0.8em;\n  padding: 3px 6px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ddd;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.open {\n  color: #fff;\n  background-color: #228900;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-status .game-status-pill.ongoing {\n  color: #fff;\n  background-color: #00a6ff;\n}\n#game-overview__wrapper #game-overview #game-overview__games .game .game-actions {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#game-overview__wrapper #game-overview #game-overview__no-games {\n  padding: 15px 25px;\n  box-sizing: border-box;\n}", ""]);
 
 // exports
 
@@ -48801,136 +48914,248 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "game-overview__wrapper" } }, [
-    _vm.hasJoinedGame
-      ? _c("div", { staticClass: "elevation-1", attrs: { id: "my-game" } }, [
-          _c("div", { attrs: { id: "my-game__header" } }, [
-            _c("div", { attrs: { id: "my-game__header-left" } }, [
-              _vm._m(0),
+  return _c(
+    "div",
+    { attrs: { id: "game-overview__wrapper" } },
+    [
+      _vm.hasJoinedGame
+        ? _c("div", { staticClass: "elevation-1", attrs: { id: "my-game" } }, [
+            _c("div", { attrs: { id: "my-game__header" } }, [
+              _c("div", { attrs: { id: "my-game__header-left" } }, [
+                _vm._m(0),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "my-game__title" } }, [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(_vm.strings.game) +
+                      " #" +
+                      _vm._s(_vm.mutableGames[_vm.activeGameIndex].id) +
+                      "\n                "
+                  )
+                ])
+              ]),
               _vm._v(" "),
-              _c("div", { attrs: { id: "my-game__title" } }, [
+              _c("div", { attrs: { id: "my-game__header-right" } }, [
+                !_vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+                  ? _c(
+                      "div",
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            attrs: {
+                              small: "",
+                              text: "",
+                              color: "red",
+                              loading: _vm.leaveLoading
+                            },
+                            on: { click: _vm.onClickLeave }
+                          },
+                          [
+                            _c("i", { staticClass: "fas fa-sign-out-alt" }),
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(_vm.strings.leave_game) +
+                                "\n                    "
+                            )
+                          ]
+                        )
+                      ],
+                      1
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+                  ? _c(
+                      "div",
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            attrs: {
+                              small: "",
+                              text: "",
+                              color: "red",
+                              loading: _vm.deleteLoading
+                            },
+                            on: { click: _vm.onClickDelete }
+                          },
+                          [
+                            _c("i", { staticClass: "fas fa-trash-alt" }),
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(_vm.strings.delete_game) +
+                                "\n                    "
+                            )
+                          ]
+                        )
+                      ],
+                      1
+                    )
+                  : _vm._e()
+              ])
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { attrs: { id: "my-game__players" } },
+              _vm._l(_vm.mutableGames[_vm.activeGameIndex].players, function(
+                player,
+                pi
+              ) {
+                return _c("div", { key: pi, staticClass: "player" }, [
+                  _vm.mutableGames[_vm.activeGameIndex].game_master_id !==
+                  player.user_id
+                    ? _c("div", { staticClass: "player-icon" }, [
+                        _c("i", { staticClass: "far fa-user" })
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.mutableGames[_vm.activeGameIndex].game_master_id ===
+                  player.user_id
+                    ? _c("div", { staticClass: "player-icon" }, [
+                        _c("i", { staticClass: "fas fa-crown" })
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "player-name" }, [
+                    _vm._v(_vm._s(player.user.username))
+                  ])
+                ])
+              }),
+              0
+            ),
+            _vm._v(" "),
+            _c("div", { attrs: { id: "my-game__actions" } }, [
+              _c("div", { attrs: { id: "my-game__actions-left" } }, [
+                _vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+                  ? _c(
+                      "div",
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            staticClass: "icon-only",
+                            attrs: { depressed: "", color: "white" },
+                            on: { click: _vm.onClickConfigure }
+                          },
+                          [_c("i", { staticClass: "fas fa-cog" })]
+                        )
+                      ],
+                      1
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                _c("div", [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(
+                        _vm.mutableGames[_vm.activeGameIndex].settings
+                          .num_rounds +
+                          " " +
+                          _vm.strings.rounds
+                      ) +
+                      " \n                "
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { attrs: { id: "my-game__actions-right" } }, [
+                _vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+                  ? _c(
+                      "div",
+                      [
+                        _c(
+                          "v-btn",
+                          {
+                            attrs: {
+                              depressed: "",
+                              color: "success",
+                              disabled: _vm.startButtonDisabled,
+                              loading: _vm.startLoading
+                            },
+                            on: { click: _vm.onClickStart }
+                          },
+                          [
+                            _c("i", { staticClass: "fas fa-gavel" }),
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(_vm.strings.start_game) +
+                                "\n                    "
+                            )
+                          ]
+                        )
+                      ],
+                      1
+                    )
+                  : _vm._e(),
+                _vm._v(" "),
+                !_vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+                  ? _c("div", [
+                      _vm.mutableGames[_vm.activeGameIndex].status === "open"
+                        ? _c("span", [
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(_vm.strings.waiting_for_gm) +
+                                "\n                    "
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _vm.mutableGames[_vm.activeGameIndex].status === "ongoing"
+                        ? _c("span", [
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(_vm.strings.game_started) +
+                                "\n                    "
+                            )
+                          ])
+                        : _vm._e()
+                    ])
+                  : _vm._e()
+              ])
+            ])
+          ])
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "elevation-1", attrs: { id: "game-overview" } },
+        [
+          _c("div", { attrs: { id: "game-overview__header" } }, [
+            _c("div", { attrs: { id: "game-overview__header-left" } }, [
+              _vm._m(1),
+              _vm._v(" "),
+              _c("div", { attrs: { id: "header-title" } }, [
                 _vm._v(
                   "\n                    " +
-                    _vm._s(_vm.strings.game) +
-                    " #" +
-                    _vm._s(_vm.mutableGames[_vm.activeGameIndex].id) +
+                    _vm._s(_vm.strings.open_outstanding_games) +
                     "\n                "
                 )
               ])
             ]),
             _vm._v(" "),
-            _c("div", { attrs: { id: "my-game__header-right" } }, [
-              !_vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
-                ? _c(
-                    "div",
-                    [
-                      _c(
-                        "v-btn",
-                        {
-                          attrs: {
-                            small: "",
-                            text: "",
-                            color: "red",
-                            loading: _vm.leaveLoading
-                          },
-                          on: { click: _vm.onClickLeave }
-                        },
-                        [
-                          _c("i", { staticClass: "fas fa-sign-out-alt" }),
-                          _vm._v(
-                            "\n                        " +
-                              _vm._s(_vm.strings.leave_game) +
-                              "\n                    "
-                          )
-                        ]
-                      )
-                    ],
-                    1
-                  )
-                : _vm._e(),
-              _vm._v(" "),
-              _vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
-                ? _c(
-                    "div",
-                    [
-                      _c(
-                        "v-btn",
-                        {
-                          attrs: {
-                            small: "",
-                            text: "",
-                            color: "red",
-                            loading: _vm.deleteLoading
-                          },
-                          on: { click: _vm.onClickDelete }
-                        },
-                        [
-                          _c("i", { staticClass: "fas fa-trash-alt" }),
-                          _vm._v(
-                            "\n                        " +
-                              _vm._s(_vm.strings.delete_game) +
-                              "\n                    "
-                          )
-                        ]
-                      )
-                    ],
-                    1
-                  )
-                : _vm._e()
-            ])
-          ]),
-          _vm._v(" "),
-          _c(
-            "div",
-            { attrs: { id: "my-game__players" } },
-            _vm._l(_vm.mutableGames[_vm.activeGameIndex].players, function(
-              player,
-              pi
-            ) {
-              return _c("div", { key: pi, staticClass: "player" }, [
-                _vm.mutableGames[_vm.activeGameIndex].game_master_id !==
-                player.user_id
-                  ? _c("div", { staticClass: "player-icon" }, [
-                      _c("i", { staticClass: "far fa-user" })
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.mutableGames[_vm.activeGameIndex].game_master_id ===
-                player.user_id
-                  ? _c("div", { staticClass: "player-icon" }, [
-                      _c("i", { staticClass: "fas fa-crown" })
-                    ])
-                  : _vm._e(),
-                _vm._v(" "),
-                _c("div", { staticClass: "player-name" }, [
-                  _vm._v(_vm._s(player.user.username))
-                ])
-              ])
-            }),
-            0
-          ),
-          _vm._v(" "),
-          _c("div", { attrs: { id: "my-game__actions" } }, [
-            _vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
+            !_vm.hasJoinedGame
               ? _c(
                   "div",
+                  { attrs: { id: "game-overview__header-right" } },
                   [
                     _c(
                       "v-btn",
                       {
                         attrs: {
+                          small: "",
                           depressed: "",
-                          color: "success",
-                          disabled: _vm.startButtonDisabled,
-                          loading: _vm.startLoading
+                          color: "primary",
+                          loading: _vm.createLoading
                         },
-                        on: { click: _vm.onClickStart }
+                        on: { click: _vm.onClickCreate }
                       },
                       [
-                        _c("i", { staticClass: "fas fa-gavel" }),
+                        _c("i", { staticClass: "fas fa-plus" }),
                         _vm._v(
                           "\n                    " +
-                            _vm._s(_vm.strings.start_game) +
+                            _vm._s(_vm.strings.create_game) +
                             "\n                "
                         )
                       ]
@@ -48938,165 +49163,235 @@ var render = function() {
                   ],
                   1
                 )
-              : _vm._e(),
-            _vm._v(" "),
-            !_vm.userIsGameMaster(_vm.mutableGames[_vm.activeGameIndex])
-              ? _c("div", [
-                  _vm.mutableGames[_vm.activeGameIndex].status === "open"
-                    ? _c("span", [
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(_vm.strings.waiting_for_gm) +
-                            "\n                "
-                        )
-                      ])
-                    : _vm._e(),
-                  _vm._v(" "),
-                  _vm.mutableGames[_vm.activeGameIndex].status === "ongoing"
-                    ? _c("span", [
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(_vm.strings.game_started) +
-                            "\n                "
-                        )
-                      ])
-                    : _vm._e()
-                ])
               : _vm._e()
-          ])
-        ])
-      : _vm._e(),
-    _vm._v(" "),
-    _c("div", { staticClass: "elevation-1", attrs: { id: "game-overview" } }, [
-      _c("div", { attrs: { id: "game-overview__header" } }, [
-        _c("div", { attrs: { id: "game-overview__header-left" } }, [
-          _vm._m(1),
+          ]),
           _vm._v(" "),
-          _c("div", { attrs: { id: "header-title" } }, [
-            _vm._v(
-              "\n                    " +
-                _vm._s(_vm.strings.open_outstanding_games) +
-                "\n                "
-            )
-          ])
-        ]),
-        _vm._v(" "),
-        !_vm.hasJoinedGame
-          ? _c(
-              "div",
-              { attrs: { id: "game-overview__header-right" } },
-              [
-                _c(
-                  "v-btn",
-                  {
-                    attrs: {
-                      small: "",
-                      depressed: "",
-                      color: "primary",
-                      loading: _vm.createLoading
-                    },
-                    on: { click: _vm.onClickCreate }
-                  },
-                  [
-                    _c("i", { staticClass: "fas fa-plus" }),
-                    _vm._v(
-                      "\n                    " +
-                        _vm._s(_vm.strings.create_game) +
-                        "\n                "
-                    )
-                  ]
-                )
-              ],
-              1
-            )
-          : _vm._e()
-      ]),
-      _vm._v(" "),
-      _vm.mutableGames.length > 0
-        ? _c(
-            "div",
-            { attrs: { id: "game-overview__games" } },
-            [
-              _c("div", { attrs: { id: "game-overview__games-headings" } }, [
-                _c("div", { staticClass: "games-heading" }, [
-                  _vm._v(_vm._s(_vm.strings.list_id))
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "games-heading" }, [
-                  _vm._v(_vm._s(_vm.strings.list_players))
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "games-heading" }, [
-                  _vm._v(_vm._s(_vm.strings.list_status))
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "games-heading" }, [
-                  _vm._v(_vm._s(_vm.strings.list_actions))
-                ])
-              ]),
-              _vm._v(" "),
-              _vm._l(_vm.mutableGames, function(game, gi) {
-                return _c("div", { key: gi, staticClass: "game" }, [
-                  _c("div", { staticClass: "game-id" }, [
-                    _vm._v(
-                      "\n                    " +
-                        _vm._s(_vm.strings.game) +
-                        " #" +
-                        _vm._s(game.id) +
-                        "\n                "
-                    )
-                  ]),
+          _vm.mutableGames.length > 0
+            ? _c(
+                "div",
+                { attrs: { id: "game-overview__games" } },
+                [
+                  _c(
+                    "div",
+                    { attrs: { id: "game-overview__games-headings" } },
+                    [
+                      _c("div", { staticClass: "games-heading" }, [
+                        _vm._v(_vm._s(_vm.strings.list_id))
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "games-heading" }, [
+                        _vm._v(_vm._s(_vm.strings.list_players))
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "games-heading" }, [
+                        _vm._v(_vm._s(_vm.strings.list_status))
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "games-heading" }, [
+                        _vm._v(_vm._s(_vm.strings.list_actions))
+                      ])
+                    ]
+                  ),
                   _vm._v(" "),
-                  _c("div", { staticClass: "game-players" }, [
-                    _vm._v(
-                      "\n                    " +
-                        _vm._s(game.players.length) +
-                        " " +
-                        _vm._s(_vm.getPlayerText(game.players.length)) +
-                        "\n                "
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "game-status" }, [
-                    _c(
-                      "div",
-                      { staticClass: "game-status-pill", class: game.status },
-                      [
+                  _vm._l(_vm.mutableGames, function(game, gi) {
+                    return _c("div", { key: gi, staticClass: "game" }, [
+                      _c("div", { staticClass: "game-id" }, [
                         _vm._v(
-                          "\n                        " +
-                            _vm._s(game.status) +
-                            "\n                    "
+                          "\n                    " +
+                            _vm._s(_vm.strings.game) +
+                            " #" +
+                            _vm._s(game.id) +
+                            "\n                "
                         )
-                      ]
-                    )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "game-players" }, [
+                        _vm._v(
+                          "\n                    " +
+                            _vm._s(game.players.length) +
+                            " " +
+                            _vm._s(_vm.getPlayerText(game.players.length)) +
+                            "\n                "
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "game-status" }, [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "game-status-pill",
+                            class: game.status
+                          },
+                          [
+                            _vm._v(
+                              "\n                        " +
+                                _vm._s(game.status) +
+                                "\n                    "
+                            )
+                          ]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "game-actions" },
+                        [
+                          _c(
+                            "v-btn",
+                            {
+                              attrs: {
+                                small: "",
+                                depressed: "",
+                                color: "success",
+                                disabled:
+                                  _vm.hasJoinedGame || game.status !== "open",
+                                loading: _vm.joinLoading
+                              },
+                              on: {
+                                click: function($event) {
+                                  return _vm.onClickJoin(gi)
+                                }
+                              }
+                            },
+                            [
+                              _c("i", { staticClass: "fas fa-sign-in-alt" }),
+                              _vm._v(
+                                "\n                        " +
+                                  _vm._s(_vm.strings.join_game) +
+                                  "\n                    "
+                              )
+                            ]
+                          )
+                        ],
+                        1
+                      )
+                    ])
+                  })
+                ],
+                2
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.mutableGames.length === 0
+            ? _c("div", { attrs: { id: "game-overview__no-games" } }, [
+                _vm._v(
+                  "\n            " +
+                    _vm._s(_vm.strings.no_open_outstanding_games) +
+                    "\n        "
+                )
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "700" },
+          model: {
+            value: _vm.dialogs.configure.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.configure, "show", $$v)
+            },
+            expression: "dialogs.configure.show"
+          }
+        },
+        [
+          _vm.dialogs.configure.index !== null
+            ? _c("div", { staticClass: "dialog" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: {
+                      click: function($event) {
+                        _vm.dialogs.configure.show = false
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("h3", { staticClass: "dialog-title" }, [
+                    _vm._v(_vm._s(_vm.strings.configure_dialog_title))
                   ]),
                   _vm._v(" "),
                   _c(
                     "div",
-                    { staticClass: "game-actions" },
+                    { staticClass: "form-field" },
+                    [
+                      _c("v-text-field", {
+                        attrs: {
+                          type: "number",
+                          min: "1",
+                          max: "10",
+                          label: _vm.strings.configure_dialog_num_rounds
+                        },
+                        model: {
+                          value: _vm.dialogs.configure.form.num_rounds,
+                          callback: function($$v) {
+                            _vm.$set(
+                              _vm.dialogs.configure.form,
+                              "num_rounds",
+                              $$v
+                            )
+                          },
+                          expression: "dialogs.configure.form.num_rounds"
+                        }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "" },
+                          on: {
+                            click: function($event) {
+                              _vm.dialogs.configure.show = false
+                            }
+                          }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        " +
+                              _vm._s(_vm.strings.configure_dialog_cancel) +
+                              "\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
                     [
                       _c(
                         "v-btn",
                         {
                           attrs: {
-                            small: "",
                             depressed: "",
                             color: "success",
-                            disabled:
-                              _vm.hasJoinedGame || game.status !== "open",
-                            loading: _vm.joinLoading
+                            loading: _vm.dialogs.configure.loading
                           },
-                          on: {
-                            click: function($event) {
-                              return _vm.onClickJoin(gi)
-                            }
-                          }
+                          on: { click: _vm.onClickConfirmConfigure }
                         },
                         [
-                          _c("i", { staticClass: "fas fa-sign-in-alt" }),
+                          _c("i", { staticClass: "fas fa-save" }),
                           _vm._v(
                             "\n                        " +
-                              _vm._s(_vm.strings.join_game) +
+                              _vm._s(_vm.strings.configure_dialog_submit) +
                               "\n                    "
                           )
                         ]
@@ -49105,23 +49400,13 @@ var render = function() {
                     1
                   )
                 ])
-              })
-            ],
-            2
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.mutableGames.length === 0
-        ? _c("div", { attrs: { id: "game-overview__no-games" } }, [
-            _vm._v(
-              "\n            " +
-                _vm._s(_vm.strings.no_open_outstanding_games) +
-                "\n        "
-            )
-          ])
-        : _vm._e()
-    ])
-  ])
+              ])
+            : _vm._e()
+        ]
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = [
   function() {

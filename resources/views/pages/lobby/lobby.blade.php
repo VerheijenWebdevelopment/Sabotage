@@ -24,11 +24,12 @@
                     :user="{{ $user->toJson() }}"
                     :games="{{ $games->toJson() }}"
                     game-href="{{ route('game') }}"
-                    create-api-endpoint="{{ route('api.games.create.post') }}"
-                    delete-api-endpoint="{{ route('api.games.delete.post') }}"
-                    join-api-endpoint="{{ route('api.games.join.post') }}"
-                    leave-api-endpoint="{{ route('api.games.leave.post') }}"
-                    start-api-endpoint="{{ route('api.games.start.post') }}"
+                    create-api-endpoint="{{ route('api.lobby.create.post') }}"
+                    delete-api-endpoint="{{ route('api.lobby.delete.post') }}"
+                    join-api-endpoint="{{ route('api.lobby.join.post') }}"
+                    leave-api-endpoint="{{ route('api.lobby.leave.post') }}"
+                    start-api-endpoint="{{ route('api.lobby.start.post') }}"
+                    update-settings-api-endpoint="{{ route('api.lobby.update-settings.post') }}"
                     :strings="{{ $strings->toJson() }}">
                 </game-overview>
 

@@ -58,12 +58,16 @@ Route::group(["prefix" => "api"], function() {
 
     Route::post("send-message", "Api\ChatController@postSendMessage")->name("api.chat.send-message.post");
     
+    Route::group(["prefix" => "lobby"], function() {
+        Route::post("create", "Api\LobbyController@postCreateGame")->name("api.lobby.create.post");
+        Route::post("delete", "Api\LobbyController@postDeleteGame")->name("api.lobby.delete.post");
+        Route::post("join", "Api\LobbyController@postJoinGame")->name("api.lobby.join.post");
+        Route::post("leave", "Api\LobbyController@postLeaveGame")->name("api.lobby.leave.post");
+        Route::post("start", "Api\LobbyController@postStartGame")->name("api.lobby.start.post");
+        Route::post("update-settings", "Api\LobbyController@postUpdateSettings")->name("api.lobby.update-settings.post");
+    });
+
     Route::group(["prefix" => "games"], function() {
-        Route::post("create", "Api\GameController@postCreateGame")->name("api.games.create.post");
-        Route::post("delete", "Api\GameController@postDeleteGame")->name("api.games.delete.post");
-        Route::post("join", "Api\GameController@postJoinGame")->name("api.games.join.post");
-        Route::post("leave", "Api\GameController@postLeaveGame")->name("api.games.leave.post");
-        Route::post("start", "Api\GameController@postStartGame")->name("api.games.start.post");
         Route::post("perform-action", "Api\GameController@postPerformAction")->name("api.games.perform-action.post");
         Route::post("send-message", "Api\GameController@postSendMessage")->name("api.games.send-message.post");
     });

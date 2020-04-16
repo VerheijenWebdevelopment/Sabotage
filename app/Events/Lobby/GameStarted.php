@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Events\Game;
+namespace App\Events\Lobby;
 
 use App\Models\User;
 use App\Models\Game;
+
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;

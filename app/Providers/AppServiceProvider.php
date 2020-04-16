@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\UserService;
+use App\Services\LobbyService;
 use App\Services\GameService;
 use App\Services\RoundService;
 use App\Services\RoleService;
@@ -40,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton("users", function() {
             return new UserService;
+        });
+
+        $this->app->singleton("lobby", function() {
+            return new LobbyService;
         });
 
         $this->app->singleton("games", function() {

@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Events\Game;
+namespace App\Events\Lobby;
 
 use App\Models\User;
-use App\Models\Game;
-use App\Models\Player;
+
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -13,24 +12,22 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class PlayerJoinedGame implements ShouldBroadcast
+class GameDeleted implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
-    public $game;
-    public $player;
+    public $game_id;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, Player $player, Game $game)
+    public function __construct(User $user, int $gameId)
     {
         $this->user = $user;
-        $this->game = $game;
-        $this->player = $player;
+        $this->game_id = $gameId;
     }
 
     /**

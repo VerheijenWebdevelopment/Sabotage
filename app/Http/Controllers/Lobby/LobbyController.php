@@ -32,6 +32,11 @@ class LobbyController extends Controller
                 "waiting_for_players" => __("lobby.waiting_for_players"),
                 "waiting_for_gm" => __("lobby.waiting_for_gm"),
                 "game_started" => __("lobby.game_started"),
+                "rounds" => __("lobby.rounds"),
+                "configure_dialog_title" => __("lobby.configure_dialog_title"),
+                "configure_dialog_num_rounds" => __("lobby.configure_dialog_num_rounds"),
+                "configure_dialog_cancel" => __("lobby.configure_dialog_cancel"),
+                "configure_dialog_submit" => __("lobby.configure_dialog_submit"),
             ])
         ]);
     }

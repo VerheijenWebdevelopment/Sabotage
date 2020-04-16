@@ -29,8 +29,14 @@ return [
     "waiting_for_players" => "Waiting for more players to join the game",
     "waiting_for_gm" => "Waiting on game master to start the game",
     "game_started" => "Game has been started!",
+    "rounds" => "rounds",
     
     "online_users" => "Online players",
     "no_online_users" => "There are no online players",
+
+    "configure_dialog_title" => "Rules",
+    "configure_dialog_num_rounds" => "Number of rounds",
+    "configure_dialog_cancel" => "Cancel",
+    "configure_dialog_submit" => "Save changes!",
 
 ];

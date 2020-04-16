@@ -17,11 +17,6 @@ use App\Models\Card;
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
 
-use App\Events\Game\GameCreated;
-use App\Events\Game\GameDeleted;
-use App\Events\Game\GameStarted;
-use App\Events\Game\PlayerLeftGame;
-use App\Events\Game\PlayerJoinedGame;
 use App\Events\Game\PlayerSelectedRole;
 use App\Events\Game\PlayerToolBlocked;
 use App\Events\Game\PlayerToolRecovered;
@@ -37,11 +32,6 @@ use App\Events\Game\PlayerIsReadyForNextRound;
 use App\Events\Game\PlayerWasAwardedGold;
 use App\Events\Game\NewRoundStarted;
 
-use App\Http\Requests\Api\Game\JoinGameRequest;
-use App\Http\Requests\Api\Game\LeaveGameRequest;
-use App\Http\Requests\Api\Game\CreateGameRequest;
-use App\Http\Requests\Api\Game\DeleteGameRequest;
-use App\Http\Requests\Api\Game\StartGameRequest;
 use App\Http\Requests\Api\Game\SendGameMessageRequest;
 
 class GameService implements ModelServiceContract
@@ -135,84 +125,23 @@ class GameService implements ModelServiceContract
     // Lobby operations
     //
 
-    public function createFromRequest(CreateGameRequest $request)
-    {
-        $game = Game::create(["game_master_id" => auth()->user()->id]);
-        
-        $player = $this->join($game);
-
-        broadcast(new GameCreated($player->user, $player, $game))->toOthers();
-        
-        return $this->findPreloaded($game->id);
-    }
-
-    public function deleteFromRequest(DeleteGameRequest $request)
-    {
-        $game = $this->find($request->game_id);
-
-        broadcast(new GameDeleted(auth()->user(), $request->game_id))->toOthers();
-        
-        $game->delete();
-    }
-
-    public function joinFromRequest(JoinGameRequest $request)
-    {
-        $game = $this->find($request->game_id);
-
-        $player = $this->join($game);
-
-        broadcast(new PlayerJoinedGame($player->user, $player, $game))->toOthers();
-        
-        return $player;
-    }
-
     public function join(Game $game, User $user = null)
     {
+        // If no user was provided grab the currently logged in user
         if (is_null($user)) $user = auth()->user();
 
+        // Determine the player's number
         $playerNumber = $game->players->count() + 1;
 
+        // Create the player
         $player = Player::create([
             "user_id" => $user->id,
             "game_id" => $game->id,
             "player_number" => $playerNumber,
         ]);
-        
+            
+        // Return the created player
         return $player;
-    }
-
-    public function leaveFromRequest(LeaveGameRequest $request)
-    {
-        $game = $this->find($request->game_id);
-
-        foreach ($game->players as $player)
-        {
-            if ($player->user_id == auth()->user()->id)
-            {
-                broadcast(new PlayerLeftGame($game, $player->id))->toOthers();
-                
-                $player->delete();
-
-                break;
-            }
-        }
-    }
-
-    public function startFromRequest(StartGameRequest $request)
-    {
-        $game = $this->find($request->game_id);
-
-        $game = $this->prepareGame($game);
-
-        if ($game->status == "open")
-        {
-            $game->status = "ongoing";
-            $game->save();
-        }
-
-        broadcast(new GameStarted(auth()->user(), $game))->toOthers();
-
-        return $game;
     }
 
     public function prepareGame(Game $game)
@@ -249,6 +178,26 @@ class GameService implements ModelServiceContract
         $game = $this->dealCardsToPlayers($game);
 
         // Return updated game
+        return $game;
+    }
+
+    //
+    // Game operations
+    //
+
+    public function setStatus(Game $game, $status)
+    {
+        $game->status = $status;
+        $game->save();
+
+        return $game;
+    }
+
+    public function setPhase(Game $game, $phase)
+    {
+        $game->phase = $phase;
+        $game->save();
+
         return $game;
     }
 
@@ -305,10 +254,6 @@ class GameService implements ModelServiceContract
                 return 4;
         }
     }
-
-    //
-    // Game operations
-    //
 
     public function sendMessageFromRequest(SendGameMessageRequest $request)
     {   

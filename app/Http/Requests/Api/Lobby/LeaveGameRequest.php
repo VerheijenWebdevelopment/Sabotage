@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\Game;
+namespace App\Http\Requests\Api\Lobby;
 
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class JoinGameRequest extends FormRequest
+class LeaveGameRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\Game;
+namespace App\Http\Requests\Api\Lobby;
 
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LeaveGameRequest extends FormRequest
+class UpdateSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,6 +26,7 @@ class LeaveGameRequest extends FormRequest
     {
         return [
             "game_id" => "required|exists:games,id",
+            "num_rounds" => "required|integer",
         ];
     }
 }

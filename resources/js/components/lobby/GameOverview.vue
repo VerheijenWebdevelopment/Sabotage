@@ -51,22 +51,35 @@
 
             <!-- Actions -->
             <div id="my-game__actions">
-                <!-- Start -->
-                <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
-                    <v-btn depressed color="success" :disabled="startButtonDisabled" @click="onClickStart" :loading="startLoading">
-                        <!-- <i class="fas fa-play"></i> -->
-                        <i class="fas fa-gavel"></i>
-                        {{ strings.start_game }}
-                    </v-btn>
+                <div id="my-game__actions-left">
+                    <!-- Configure -->
+                    <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
+                        <v-btn depressed color="white" class="icon-only" @click="onClickConfigure">
+                            <i class="fas fa-cog"></i>
+                        </v-btn>
+                    </div>
+                    <!-- Num rounds -->
+                    <div>
+                        {{ mutableGames[activeGameIndex].settings.num_rounds + " " + strings.rounds }} 
+                    </div>
                 </div>
-                <!-- Waiting for start -->
-                <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
-                    <span v-if="mutableGames[activeGameIndex].status === 'open'">
-                        {{ strings.waiting_for_gm }}
-                    </span>
-                    <span v-if="mutableGames[activeGameIndex].status === 'ongoing'">
-                        {{ strings.game_started }}
-                    </span>
+                <div id="my-game__actions-right">
+                    <!-- Start -->
+                    <div v-if="userIsGameMaster(mutableGames[activeGameIndex])">
+                        <v-btn depressed color="success" :disabled="startButtonDisabled" @click="onClickStart" :loading="startLoading">
+                            <i class="fas fa-gavel"></i>
+                            {{ strings.start_game }}
+                        </v-btn>
+                    </div>
+                    <!-- Waiting for start -->
+                    <div v-if="!userIsGameMaster(mutableGames[activeGameIndex])">
+                        <span v-if="mutableGames[activeGameIndex].status === 'open'">
+                            {{ strings.waiting_for_gm }}
+                        </span>
+                        <span v-if="mutableGames[activeGameIndex].status === 'ongoing'">
+                            {{ strings.game_started }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -132,6 +145,44 @@
 
         </div>
 
+        <!-- Configure game dialog -->
+        <v-dialog v-model="dialogs.configure.show" width="700">
+            <div class="dialog" v-if="dialogs.configure.index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="dialogs.configure.show = false">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <h3 class="dialog-title">{{ strings.configure_dialog_title }}</h3>
+                    <!-- Form -->
+                    <div class="form-field">
+                        <v-text-field
+                            type="number" min="1" max="10"
+                            :label="strings.configure_dialog_num_rounds"
+                            v-model="dialogs.configure.form.num_rounds">
+                        </v-text-field>
+                    </div>
+                </div>
+                <!-- Actions -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text @click="dialogs.configure.show = false">
+                            <i class="fas fa-arrow-left"></i>
+                            {{ strings.configure_dialog_cancel }}
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn depressed color="success" :loading="dialogs.configure.loading" @click="onClickConfirmConfigure">
+                            <i class="fas fa-save"></i>
+                            {{ strings.configure_dialog_submit }}
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
     </div>
 </template>
 
@@ -146,6 +197,7 @@
             "joinApiEndpoint",
             "leaveApiEndpoint",
             "startApiEndpoint",
+            "updateSettingsApiEndpoint",
             "strings",
         ],
         data: () => ({
@@ -157,6 +209,15 @@
             startLoading: false,
             leaveLoading: false,
             joinLoading: false,
+            dialogs: {
+                configure: {
+                    show: false,
+                    loading: false,
+                    form: {
+                        num_rounds: 3,
+                    }
+                }
+            }
         }),
         computed: {
             hasJoinedGame() {
@@ -180,6 +241,7 @@
                 console.log(this.tag+" join api endpoint: ", this.joinApiEndpoint);
                 console.log(this.tag+" leave api endpoint: ", this.leaveApiEndpoint);
                 console.log(this.tag+" start api endpoint: ", this.startApiEndpoint);
+                console.log(this.tag+" update settings api endpoint: ", this.updateSettingsApiEndpoint);
                 console.log(this.tag+" strings: ", this.strings);
                 this.initializeData();
                 this.startListening();
@@ -194,20 +256,23 @@
                     }
                 }
             },
+            // Events
             startListening() {
                 
                 // Start listening for events on the lobby channel
                 Echo.private("lobby")
                     // Game created event
-                    .listen("Game\\GameCreated", this.onGameCreated)
+                    .listen("Lobby\\GameCreated", this.onGameCreated)
                     // Game deleted event
-                    .listen("Game\\GameDeleted", this.onGameDeleted)
+                    .listen("Lobby\\GameDeleted", this.onGameDeleted)
                     // Game started event
-                    .listen("Game\\GameStarted", this.onGameStarted)
+                    .listen("Lobby\\GameStarted", this.onGameStarted)
+                    // Game settings updated event
+                    .listen("Lobby\\GameSettingsUpdated", this.onGameSettingsUpdated)
                     // Player joined game event
-                    .listen("Game\\PlayerJoinedGame", this.onPlayerJoinedGame)
+                    .listen("Lobby\\PlayerJoinedGame", this.onPlayerJoinedGame)
                     // Player left game event
-                    .listen("Game\\PlayerLeftGame", this.onPlayerLeftGame);
+                    .listen("Lobby\\PlayerLeftGame", this.onPlayerLeftGame);
 
             },
             onGameCreated(e) {
@@ -223,6 +288,7 @@
 
                 // Toast message
                 this.$toasted.show(e.user.username+" created a new game!", { duration: 3000 });
+
             },
             onGameDeleted(e) {
                 console.log(this.tag+" [event] game deleted", e);
@@ -269,6 +335,19 @@
                 }
 
             },
+            onGameSettingsUpdated(e) {
+                console.log(this.tag+"[event] game settings were updated: ", e);
+                
+                // Grab the game's index by it's ID
+                let index = this.findGameIndexById(e.game.id);
+                if (index !== false) {
+                    
+                    // Update the game's settings
+                    this.mutableGames[index].settings = e.settings;
+
+                }
+                
+            },
             onPlayerJoinedGame(e) {
                 console.log(this.tag+" [event] player joined game", e);
                 // Add player to game's list of players
@@ -308,30 +387,39 @@
                 }
                 return false;
             },
-            userIsGameMaster(game) {
-                return game.game_master_id === this.user.id;
-            },
+            // Click handlers
             onClickCreate() {
                 console.log(this.tag+" clicked create button");
 
+                // Start loading
                 this.createLoading = true;
 
                 // Make API request
                 this.axios.post(this.createApiEndpoint)
+
+                    // Request succeeded
                     .then(function(response) {
                         console.log(this.tag+" create request succeeded", response.data);
+                        // Operation succeeded
                         if (response.data.status === "success") {
                             console.log(this.tag+" create operation succeeded");
+                            // Update state
                             this.mutableGames.push(response.data.game);
                             this.activeGameIndex = this.mutableGames.length - 1;
+                            // Stop loading
                             this.createLoading = false;
+                        // Operation failed
                         } else {
                             console.warn(this.tag+" create operation failed: ", response.data.error);
+                            // Stop loading
                             this.createLoading = false;
                         }
                     }.bind(this))
+
+                    // Request failed
                     .catch(function(error) {
                         console.warn(this.tag+" create request failed", error);
+                        // Stop loading
                         this.createLoading = false;
                     }.bind(this));
 
@@ -362,6 +450,43 @@
                     .catch(function(error) {
                         console.warn(this.tag+" delete request failed", error);
                         this.deleteLoading = false;
+                    }.bind(this));
+
+            },
+            onClickConfigure() {
+                if (this.mutableGames[this.activeGameIndex].settings !== null) {
+                    this.dialogs.configure.form.num_rounds = this.mutableGames[this.activeGameIndex].settings.num_rounds;
+                }
+                this.dialogs.configure.show = true;
+            },
+            onClickConfirmConfigure() {
+
+                this.dialogs.configure.loading = true;
+
+                // Compose the payload we're sending
+                let payload = new FormData();
+                payload.append("game_id", this.mutableGames[this.activeGameIndex].id);
+                payload.append("num_rounds", this.dialogs.configure.form.num_rounds);
+
+                // Send request to the API to make things permanent
+                this.axios.post(this.updateSettingsApiEndpoint, payload)
+
+                    // Request succeeded
+                    .then(function(response) {
+                        this.dialogs.configure.loading = false;
+                        if (response.data.status === "success") {
+                            console.log(this.tag+" operation succeeded", response.data);
+                            this.mutableGames[this.activeGameIndex].settings.num_rounds = this.dialogs.configure.form.num_rounds;
+                            this.dialogs.configure.show = false;
+                        } else {
+                            console.warn(this.tag+" operation failed, error: ", response.data.error);
+                        }
+                    }.bind(this))
+
+                    // Request failed
+                    .catch(function(error) {
+                        this.dialogs.configure.loading = false;
+                        console.warn(this.tag+" request failed, error: ", error.response.data);
                     }.bind(this));
 
             },
@@ -466,6 +591,10 @@
                     }.bind(this));
 
             },
+            // Checks & getters
+            userIsGameMaster(game) {
+                return game.game_master_id === this.user.id;
+            },
             findGameIndexById(id) {
                 for (let i = 0; i < this.mutableGames.length; i++) {
                     if (this.mutableGames[i].id === id) {
@@ -557,10 +686,25 @@
                 flex-direction: row;
                 align-items: center;
                 box-sizing: border-box;
-                justify-content: flex-end;
                 background-color: hsl(0, 0%, 95%);
-                .v-btn {
-                    margin: 0 0 0 15px;
+                #my-game__actions-left {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    .v-btn {
+                        margin: 0 15px 0 0;
+                    }
+                }
+                #my-game__actions-right {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-end;
+                    .v-btn {
+                        margin: 0 0 0 15px;
+                    }
                 }
             }
         }

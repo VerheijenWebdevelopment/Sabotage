@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\Game;
+namespace App\Http\Requests\Api\Lobby;
 
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateGameRequest extends FormRequest
+class JoinGameRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +24,8 @@ class CreateGameRequest extends FormRequest
      */
     public function rules()
     {
-        return [];
+        return [
+            "game_id" => "required|exists:games,id",
+        ];
     }
 }
