@@ -3210,6 +3210,8 @@ __webpack_require__.r(__webpack_exports__);
       this.initializeHand(this.hand);
     },
     initializeHand: function initializeHand(hand) {
+      this.mutableHand = [];
+
       if (hand !== undefined && hand !== null && hand.length > 0) {
         for (var i = 0; i < hand.length; i++) {
           var card = this.getCardById(hand[i]);
@@ -3233,7 +3235,7 @@ __webpack_require__.r(__webpack_exports__);
     onRoleSelected: function onRoleSelected(e) {
       console.log(this.tag + " role selected event received: ", e); // Update the player's hand & role
 
-      this.mutableHand = e.hand;
+      this.initializeHand(e.hand);
       this.mutablePlayerRole = e.role; // Update the round
 
       this.mutableRound.players_with_selected_roles.push(this.mutablePlayer.id);
@@ -3384,6 +3386,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     onClickConfirmPlayCard: function onClickConfirmPlayCard() {
       console.log(this.tag + " clicked confirm play card");
+      this.dialogs.play_card.loading = true;
     },
     // Fold card dialog
     onClickCancelFoldCard: function onClickCancelFoldCard() {
@@ -3391,7 +3394,32 @@ __webpack_require__.r(__webpack_exports__);
       this.dialogs.fold_card.show = false;
     },
     onClickConfirmFoldCard: function onClickConfirmFoldCard() {
-      console.log(this.tag + " clicked confirm fold card button");
+      console.log(this.tag + " clicked confirm fold card button"); // Start loading
+
+      this.dialogs.fold_card.loading = true; // Send API request
+
+      this.sendPerformActionRequest("fold_card", {
+        index: this.dialogs.fold_card.index
+      }) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded: ", response.data); // Remove the played card from our hand
+
+        this.mutableHand.splice(this.dialogs.fold_card.index, 1); // Add new card to hand if we received one
+
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Stop loading
+
+        this.dialogs.fold_card.loading = false; // Hide dialog
+
+        this.dialogs.fold_card.show = false;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.warn(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.fold_card.loading = false;
+      }.bind(this));
     },
     // Fold cards dialog 
     onClickCancelFoldCards: function onClickCancelFoldCards() {
@@ -3399,7 +3427,50 @@ __webpack_require__.r(__webpack_exports__);
       this.dialogs.fold_cards.show = false;
     },
     onClickConfirmFoldCards: function onClickConfirmFoldCards() {
-      console.log(this.tag + " clicked confirm fold cards button");
+      console.log(this.tag + " clicked confirm fold cards button"); // Start loading
+
+      this.dialogs.fold_cards.loading = true; // Send API request
+
+      this.sendPerformActionRequest("fold_cards", {
+        indices: this.dialogs.fold_cards.indices
+      }) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded: ", response.data); // Remove cards from our hand
+
+        console.log("removing cards from hand", this.dialogs.fold_cards.indices);
+        var newHand = [];
+
+        for (var i = 0; i < this.mutableHand.length; i++) {
+          if (!this.dialogs.fold_cards.indices.includes(i)) {
+            newHand.push(this.mutableHand[i]);
+          }
+        }
+
+        this.mutableHand = newHand; // Add new cards to our hand if we received any
+
+        console.log("adding cards to hand", response.data.new_cards);
+
+        if (response.data.new_cards.length > 0) {
+          for (var _i = 0; _i < response.data.new_cards.length; _i++) {
+            this.mutableHand.push({
+              card: response.data.new_cards[_i],
+              selected: false
+            });
+            console.log(this.mutableHand);
+          }
+        } // Stop loading
+
+
+        this.dialogs.fold_cards.loading = false; // Hide dialog
+
+        this.dialogs.fold_cards.show = false;
+      }.bind(this)) // Request failed
+      ["catch"](function (error) {
+        console.warn(this.tag + " request failed: ", error);
+        console.log("WTF"); // Stop loading
+
+        this.dialogs.fold_cards.loading = false;
+      }.bind(this));
     },
     // Fold cards & unblock tool dialog
     onClickCancelFoldCardsUnblock: function onClickCancelFoldCardsUnblock() {
@@ -3407,7 +3478,73 @@ __webpack_require__.r(__webpack_exports__);
       this.dialogs.fold_cards_unblock.show = false;
     },
     onClickConfirmFoldCardsUnblock: function onClickConfirmFoldCardsUnblock() {
-      console.log(this.tag + " clicked confirm fold cards & unblock tool button");
+      console.log(this.tag + " clicked confirm fold cards & unblock tool button"); // Start loading
+
+      this.dialogs.fold_cards_unblock.loading = true; // Make API request
+
+      this.sendPerformActionRequest("fold_cards_unblock", {
+        indices: this.dialogs.fold_cards_unblock.indices
+      }) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded: ", response.data); // Remove cards from our hand
+
+        for (var i = 0; i < this.dialogs.fold_cards.indices.length; i++) {
+          this.mutableHand.splice(this.dialogs.fold_cards.indicices[i], 1);
+        } // Add new card to hand if we received one
+
+
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Stop loading
+
+        this.dialogs.fold_cards_unblock.loading = false; // Hide dialog
+
+        this.dialogs.fold_cards.unblock.show = false;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.warn(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.fold_cards_unblock.loading = false;
+      }.bind(this));
+    },
+    // API interaction
+    sendPerformActionRequest: function sendPerformActionRequest(action, data) {
+      return new Promise(function (resolve, reject) {
+        // Compose the payload to send to the API
+        var payload = new FormData();
+        payload.append("game_id", this.game.id);
+        payload.append("action", action);
+        payload.append("data", JSON.stringify(data)); // Send API request
+
+        this.axios.post(this.apiEndpoints.perform_action, payload) // Request succeeded
+        .then(function (response) {
+          // Operation succeeded
+          if (response.data.status === 'success') {
+            console.log(this.tag + " operation succeeded: ", response.data); // Resolve promise
+
+            resolve(response.data);
+          } // Operation failed
+          else {
+              console.warn(this.tag + " operation failed: ", response.data.error); // Toast the error message
+
+              this.$toasted.show("API operation failed: " + response.data.error, {
+                duration: 3000
+              }); // Reject promise
+
+              reject(response.data.error);
+            }
+        }.bind(this)) // Request failed
+        ["catch"](function (error) {
+          console.warn(this.tag + " request failed, error: ", error); // Toast the error
+
+          this.$toasted.show("API request failed: " + error, {
+            duration: 3000
+          }); // Reject promise
+
+          reject(error);
+        }.bind(this));
+      }.bind(this));
     },
     // Getters
     getCardById: function getCardById(id) {

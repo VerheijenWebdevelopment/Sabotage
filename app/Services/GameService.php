@@ -11,10 +11,10 @@ use Exception;
 use GameMessages;
 
 use App\Models\User;
-use App\Models\Game;
-use App\Models\GameChatMessage;
-use App\Models\Player;
 use App\Models\Card;
+use App\Models\Game;
+use App\Models\Player;
+use App\Models\GameChatMessage;
 
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
@@ -235,7 +235,38 @@ class GameService implements ModelServiceContract
                 // Perform the operation; returns a new card from the deck to give to the user
                 $new_card = $this->performFoldCard($game, $player, $data["index"]);
                 
-                // Return the new card
+                // Return the new card as output
+                $output["new_card"] = $new_card;
+
+            break;
+
+            // Player folded multiple cards
+            case "fold_cards":
+
+                // Validate data
+                if (is_null($data)) throw new Exception("Missing required data");
+                if (!array_key_exists("indices", $data)) throw new Exception("Missing selected card indices");
+
+                // Perform the operation
+                $new_cards = $this->performFoldCards($game, $player, $data["indices"]);
+
+                // Return the new cards as output
+                $output["new_cards"] = $new_cards;
+
+            break;
+
+            // Player folded 2 cards and want to unblock a tool            
+            case "fold_cards_unblock":
+
+                // Validate data
+                if (is_null($data)) throw new Exception("Missing required data");
+                if (!array_key_exists("indices", $data)) throw new Exception("Missing selected card indices");
+                if (!array_key_exists("tool", $data)) throw new Exception("Missing tool to unblock");
+
+                // Perform the operation
+                $new_card = $this->performFoldCardsAndUnblock($game, $player, $data["indices"], $data["tool"]);
+
+                // Return the new card as output
                 $output["new_card"] = $new_card;
 
             break;
@@ -348,6 +379,23 @@ class GameService implements ModelServiceContract
 
         // Return (preloaded version of) the drawn card
         return $card ? Cards::preload($card) : false;
+    }
+
+    private function performFoldCards(Game $game, Player $player, array $indices)
+    {
+        // Remove the cards from the player's hand
+        $player = Players::removeCardsFromHand($indices, $player);
+
+        // Draw new cards
+        $cards = $this->drawCards($game, $player, count($indices));
+
+        // Return drawn cards
+        return $cards;
+    }
+
+    private function performFoldCardsAndUnblock(Game $game, Player $player, array $indices, string $tool)
+    {
+
     }
 
     private function performPlayCard(Game $game, Player $player, array $data)
@@ -693,12 +741,16 @@ class GameService implements ModelServiceContract
         ];
     }
 
-    private function drawCard(Game $game, Player $player = null, $amount = 1)
+    private function drawCard(Game $game, Player $player = null)
     {
+        // Grab current player if none was provided
         if (is_null($player)) $player = Players::getActivePlayer();
 
+        // Grab fresh instance of the player
+        $player = Player::find($player->id);
+
         // Grab the deck and check if there are still cards on it
-        $deck = $game->deck;
+        $deck = $game->currentRound->deck;
         if (count($deck) > 0) 
         {
             // Grab the top card and remove it from the deck at the same time
@@ -707,22 +759,39 @@ class GameService implements ModelServiceContract
             // Add the card to the user's hand
             $card = Cards::find($card_id);
             Players::addCardToHand($card, $player);
+            
+            // Update the current round's deck
+            $game->currentRound->deck = $deck;
+            $game->currentRound->num_cards_in_deck = count($deck);
+            $game->currentRound->save();
 
-            // Save the new deck
-            $game->deck = $deck;
-
-            // Save the new number of cards in the deck
-            $game->num_cards_in_deck = count($deck);
-
-            // Save changes to the game
-            $game->save();
-
-            // Return the drawn card
+            // Return the draw card
             return $card;
         }
 
-        // Return false if we could not grab card from the deck
+        // If we failed to draw any cards
         return false;
+    }
+
+    private function drawCards(Game $game, Player $player, $amount)
+    {
+        $out = [];
+
+        $originalHand = $player->hand;
+
+        // Loop for the amount of cards we're supposed to draw
+        for ($i = 0; $i < $amount; $i++)
+        {
+            // Attempt to draw a card & add it to the output if we succeed
+            $card = $this->drawCard($game, $player);
+            if ($card)
+            {
+                $out[] = Cards::preload($card);
+            }
+        }
+
+        // Return drawn cards
+        return $out;
     }
 
     private function endTurn(Game $game, Player $player = null)

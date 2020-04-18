@@ -110,6 +110,33 @@ class PlayerService implements ModelServiceContract
         $cleanPlayer->hand = array_values($hand);
         $cleanPlayer->save();
 
+        // Return the updated player
+        return $cleanPlayer;
+    }
+
+    public function removeCardsFromHand(array $indices, Player $player = null)
+    {
+        // If no player was provided grab the currently active player
+        if (is_null($player)) $player = $this->getActivePlayer(false);
+
+        // Clean player
+        $cleanPlayer = Player::find($player->id);
+        
+        // Remove the cards from the player's hand
+        $hand = $player->hand;
+        foreach ($indices as $index)
+        {
+            if (array_key_exists($index, $hand))
+            {
+                unset($hand[$index]);
+            }
+        }
+
+        // Save changes
+        $cleanPlayer->hand = array_values($hand);
+        $cleanPlayer->save();
+
+        // Return the updated player
         return $cleanPlayer;
     }
 
