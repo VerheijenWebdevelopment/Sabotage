@@ -2841,6 +2841,87 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -2852,7 +2933,12 @@ __webpack_require__.r(__webpack_exports__);
       mutablePlayer: null,
       mutablePlayerRole: null,
       mutablePlayers: [],
-      mutableHand: []
+      mutableHand: [],
+      dialogs: {
+        my_role: {
+          show: false
+        }
+      }
     };
   },
   computed: {
@@ -2978,6 +3064,11 @@ __webpack_require__.r(__webpack_exports__);
     },
     onGameEnded: function onGameEnded(e) {
       console.log(this.tag + "[event] received event game ended:", e);
+    },
+    // UI event handlers
+    onClickMyRoleCard: function onClickMyRoleCard() {
+      console.log(this.tag + " clicked my role card");
+      this.dialogs.my_role.show = true;
     },
     // Getters
     getCardById: function getCardById(id) {
@@ -8893,7 +8984,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}", ""]);
+exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1.1em;\n  font-weight: 500;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}", ""]);
 
 // exports
 
@@ -8969,7 +9060,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game-role-selection {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  padding: 100px;\n  align-items: center;\n  flex-direction: column;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-role-selection #role-selection__awaiting-turn, #game-role-selection #role-selection__select-role, #game-role-selection #role-selection__role-selected {\n  width: 100%;\n}\n#game-role-selection #role-selection__title {\n  text-align: center;\n}\n#game-role-selection #role-selection__instructions {\n  text-align: center;\n  margin: 0 0 75px 0;\n}\n#game-role-selection #role-cards {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game-role-selection #role-cards .role-card__wrapper {\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  border-radius: 3px;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: #cccccc;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover {\n  cursor: pointer;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover .role-card__icon {\n  -webkit-animation: rotation 0.2s infinite linear;\n          animation: rotation 0.2s infinite linear;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card .role-card__icon {\n  width: 50px;\n}\n#game-role-selection #available-roles {\n  margin: 50px 0 0 0;\n}\n#game-role-selection #available-roles #available-roles__title {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .available-role__amount {\n  margin: 0 0 0 5px;\n}\n#game-role-selection #loading {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #loading #loading-icon {\n  font-size: 3em;\n}\n#game-role-selection #role-card__wrapper {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-role-selection #role-card__wrapper #role-card {\n  width: 195px;\n  height: 300px;\n  display: flex;\n  border-radius: 3px;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  color: #262626;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext {\n  font-size: 0.8em;\n  text-transform: uppercase;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext .green-text {\n  color: #2db200;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext .blue-text {\n  color: #0093e2;\n}\n#game-role-selection #role-card__wrapper #role-description {\n  width: 500px;\n  text-align: center;\n  margin: 50px auto 0 auto;\n}\n#game-role-selection #role-selection__waiting {\n  margin-top: 50px;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.5);\n}\n@-webkit-keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}\n@keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}", ""]);
+exports.push([module.i, "#game-role-selection {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  padding: 100px;\n  align-items: center;\n  flex-direction: column;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-role-selection #role-selection__awaiting-turn, #game-role-selection #role-selection__select-role, #game-role-selection #role-selection__role-selected {\n  width: 100%;\n}\n#game-role-selection #role-selection__title {\n  text-align: center;\n}\n#game-role-selection #role-selection__instructions {\n  text-align: center;\n  margin: 0 0 75px 0;\n}\n#game-role-selection #role-cards {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game-role-selection #role-cards .role-card__wrapper {\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  border-radius: 3px;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: #cccccc;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover {\n  cursor: pointer;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover .role-card__icon {\n  -webkit-animation: rotation 0.2s infinite linear;\n          animation: rotation 0.2s infinite linear;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card .role-card__icon {\n  width: 50px;\n}\n#game-role-selection #available-roles {\n  margin: 50px 0 0 0;\n}\n#game-role-selection #available-roles #available-roles__title {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .available-role__amount {\n  margin: 0 0 0 5px;\n}\n#game-role-selection #loading {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #loading #loading-icon {\n  font-size: 3em;\n}\n#game-role-selection #role-card__wrapper {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-role-selection #role-card__wrapper #role-card {\n  width: 195px;\n  height: 300px;\n  display: flex;\n  border-radius: 3px;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  color: #262626;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext {\n  font-size: 0.8em;\n  text-transform: uppercase;\n}\n#game-role-selection #role-card__wrapper #role-description {\n  width: 500px;\n  text-align: center;\n  margin: 50px auto 0 auto;\n}\n#game-role-selection #role-selection__waiting {\n  margin-top: 50px;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.5);\n}\n@-webkit-keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}\n@keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}", ""]);
 
 // exports
 
@@ -47220,95 +47311,303 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "game__wrapper" } }, [
-    _vm.mutableGame !== null && _vm.mutableRound !== null
-      ? _c("div", { attrs: { id: "game" } }, [
-          _c("div", { attrs: { id: "game-content" } }, [
-            _vm.mutableRound.phase === "role_selection"
-              ? _c(
-                  "div",
-                  { attrs: { id: "role-selection-ui" } },
-                  [
-                    _c("game-role-selection", {
-                      attrs: {
-                        roles: _vm.roles,
-                        game: _vm.mutableGame,
-                        round: _vm.mutableRound,
-                        player: _vm.mutablePlayer,
-                        "player-role": _vm.mutablePlayerRole,
-                        "player-at-play": _vm.playerAtPlay,
-                        icons: _vm.icons,
-                        "api-endpoints": _vm.apiEndpoints
-                      }
-                    })
-                  ],
-                  1
-                )
-              : _vm._e(),
+  return _c(
+    "div",
+    { attrs: { id: "game__wrapper" } },
+    [
+      _vm.mutableGame !== null && _vm.mutableRound !== null
+        ? _c("div", { attrs: { id: "game" } }, [
+            _c("div", { attrs: { id: "game-content" } }, [
+              _vm.mutableRound.phase === "role_selection"
+                ? _c(
+                    "div",
+                    { attrs: { id: "role-selection-ui" } },
+                    [
+                      _c("game-role-selection", {
+                        attrs: {
+                          roles: _vm.roles,
+                          game: _vm.mutableGame,
+                          round: _vm.mutableRound,
+                          player: _vm.mutablePlayer,
+                          "player-role": _vm.mutablePlayerRole,
+                          "player-at-play": _vm.playerAtPlay,
+                          icons: _vm.icons,
+                          "api-endpoints": _vm.apiEndpoints
+                        }
+                      })
+                    ],
+                    1
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mutableRound.phase === "main"
+                ? _c("div", { attrs: { id: "game-ui" } }, [
+                    _c("div", { attrs: { id: "game-ui__board" } }, [
+                      _vm._v("\n                    board\n                ")
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { attrs: { id: "game-ui__action-bar" } }, [
+                      _c("div", { attrs: { id: "action-bar__my-role" } }, [
+                        _c("h3", { staticClass: "action-bar__title" }, [
+                          _vm._v("Mijn rol")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          {
+                            attrs: { id: "my-role-card" },
+                            on: { click: _vm.onClickMyRoleCard }
+                          },
+                          [
+                            _c(
+                              "div",
+                              { attrs: { id: "my-role-card__title" } },
+                              [_vm._v(_vm._s(_vm.mutablePlayerRole.label))]
+                            ),
+                            _vm._v(" "),
+                            _vm.mutablePlayerRole.name === "blue_digger"
+                              ? _c(
+                                  "div",
+                                  {
+                                    staticClass: "blue-text",
+                                    attrs: { id: "my-role-card__subtitle" }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                Blauwe team\n                            "
+                                    )
+                                  ]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.mutablePlayerRole.name === "green_digger"
+                              ? _c(
+                                  "div",
+                                  {
+                                    staticClass: "green-text",
+                                    attrs: { id: "my-role-card__subtitle" }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                Groene team\n                            "
+                                    )
+                                  ]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm._m(0)
+                          ]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { attrs: { id: "action-bar__my-hand" } }, [
+                        _c("h3", { staticClass: "action-bar__title" }, [
+                          _vm._v("Mijn hand")
+                        ]),
+                        _vm._v(" "),
+                        _vm.mutableHand.length > 0
+                          ? _c(
+                              "div",
+                              { attrs: { id: "my-hand__cards" } },
+                              _vm._l(_vm.mutableHand, function(card, ci) {
+                                return _c(
+                                  "div",
+                                  { key: ci, staticClass: "my-hand__card" },
+                                  [
+                                    _c("div", {
+                                      staticClass: "my-hand__card-image",
+                                      style: {
+                                        backgroundImage:
+                                          "url(" + card.image_url + ")"
+                                      },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.onClickHandCard(ci)
+                                        }
+                                      }
+                                    })
+                                  ]
+                                )
+                              }),
+                              0
+                            )
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.mutableHand.length === 0
+                          ? _c("div", { attrs: { id: "my-hand__no-cards" } }, [
+                              _vm._v(
+                                "\n                            Je hand is momenteel leeg\n                        "
+                              )
+                            ])
+                          : _vm._e()
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { attrs: { id: "action-bar__deck" } }, [
+                        _c("h3", { staticClass: "action-bar__title" }, [
+                          _vm._v("Het deck")
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { attrs: { id: "deck" } }, [
+                          _c("div", { attrs: { id: "deck__num-cards" } }, [
+                            _vm._v(_vm._s(_vm.mutableRound.num_cards_in_deck))
+                          ]),
+                          _vm._v(" "),
+                          _vm.mutableRound.num_cards_in_deck === 1
+                            ? _c("div", { attrs: { id: "deck__text" } }, [
+                                _vm._v("Kaart")
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.mutableRound.num_cards_in_deck > 1
+                            ? _c("div", { attrs: { id: "deck__text" } }, [
+                                _vm._v("Kaarten")
+                              ])
+                            : _vm._e()
+                        ])
+                      ])
+                    ])
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mutableRound.phase === "rewards"
+                ? _c("div", { attrs: { id: "round-over-ui" } }, [
+                    _vm._v("\n                End of round\n            ")
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.mutableRound.phase === "endgame"
+                ? _c("div", { attrs: { id: "game-over-ui" } }, [
+                    _vm._v("\n                End of game\n            ")
+                  ])
+                : _vm._e()
+            ]),
             _vm._v(" "),
-            _vm.mutableRound.phase === "main"
-              ? _c("div", { attrs: { id: "game-ui" } }, [
-                  _vm._v("\n                Main game\n            ")
-                ])
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.mutableRound.phase === "rewards"
-              ? _c("div", { attrs: { id: "round-over-ui" } }, [
-                  _vm._v("\n                End of round\n            ")
-                ])
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.mutableRound.phase === "endgame"
-              ? _c("div", { attrs: { id: "game-over-ui" } }, [
-                  _vm._v("\n                End of game\n            ")
-                ])
-              : _vm._e()
-          ]),
-          _vm._v(" "),
-          _c("div", { attrs: { id: "game-sidebar" } }, [
-            _c(
-              "div",
-              { attrs: { id: "game-sidebar__players" } },
-              [
-                _c("game-players", {
-                  attrs: {
-                    game: _vm.game,
-                    icons: _vm.icons,
-                    player: _vm.player,
-                    "player-at-play": _vm.playerAtPlay
-                  },
-                  model: {
-                    value: _vm.mutablePlayers,
-                    callback: function($$v) {
-                      _vm.mutablePlayers = $$v
+            _c("div", { attrs: { id: "game-sidebar" } }, [
+              _c(
+                "div",
+                { attrs: { id: "game-sidebar__players" } },
+                [
+                  _c("game-players", {
+                    attrs: {
+                      game: _vm.game,
+                      icons: _vm.icons,
+                      player: _vm.player,
+                      "player-at-play": _vm.playerAtPlay
                     },
-                    expression: "mutablePlayers"
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { attrs: { id: "game-sidebar__chat" } },
-              [
-                _c("game-chat", {
-                  attrs: {
-                    game: _vm.game,
-                    player: _vm.player,
-                    "send-message-api-endpoint": _vm.apiEndpoints.send_message
-                  }
-                })
-              ],
-              1
-            )
+                    model: {
+                      value: _vm.mutablePlayers,
+                      callback: function($$v) {
+                        _vm.mutablePlayers = $$v
+                      },
+                      expression: "mutablePlayers"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "div",
+                { attrs: { id: "game-sidebar__chat" } },
+                [
+                  _c("game-chat", {
+                    attrs: {
+                      game: _vm.game,
+                      player: _vm.player,
+                      "send-message-api-endpoint": _vm.apiEndpoints.send_message
+                    }
+                  })
+                ],
+                1
+              )
+            ])
           ])
-        ])
-      : _vm._e()
-  ])
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "500" },
+          model: {
+            value: _vm.dialogs.my_role.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.my_role, "show", $$v)
+            },
+            expression: "dialogs.my_role.show"
+          }
+        },
+        [
+          _vm.mutablePlayerRole
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: {
+                      click: function($event) {
+                        _vm.dialogs.my_role.show = false
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("h3", { staticClass: "dialog-title" }, [
+                    _vm._v("Mijn rol")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text nm" }, [
+                    _c("div", { attrs: { id: "my-role-dialog" } }, [
+                      _c("div", { attrs: { id: "my-role-dialog__card" } }),
+                      _vm._v(" "),
+                      _c("div", { attrs: { id: "my-role-dialog__text" } }, [
+                        _c("div", { attrs: { id: "my-role-dialog__name" } }, [
+                          _vm._v(
+                            "\n                                " +
+                              _vm._s(_vm.mutablePlayerRole.label) +
+                              "\n                                "
+                          ),
+                          _vm.mutablePlayerRole.name === "blue_digger"
+                            ? _c("span", { staticClass: "blue-text" }, [
+                                _vm._v("Blauwe team")
+                              ])
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.mutablePlayerRole.name === "green_digger"
+                            ? _c("span", { staticClass: "blue-text" }, [
+                                _vm._v("Groene team")
+                              ])
+                            : _vm._e()
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { attrs: { id: "my-role-dialog__description" } },
+                          [_vm._v(_vm._s(_vm.mutablePlayerRole.description))]
+                        )
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            : _vm._e()
+        ]
+      )
+    ],
+    1
+  )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { attrs: { id: "my-role-card__icon" } }, [
+      _c("i", { staticClass: "fas fa-info-circle" })
+    ])
+  }
+]
 render._withStripped = true
 
 

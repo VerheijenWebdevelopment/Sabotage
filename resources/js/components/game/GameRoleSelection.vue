@@ -279,12 +279,6 @@
                 #role-name-subtext {
                     font-size: .8em;
                     text-transform: uppercase;
-                    .green-text {
-                        color: #2db200;
-                    }
-                    .blue-text {
-                        color: #0093e2;
-                    }
                 }
             }
             #role-description {

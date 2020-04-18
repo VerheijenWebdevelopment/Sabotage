@@ -99,6 +99,14 @@ i {
   color: #404040;
 }
 
+.green-text {
+  color: #2db200;
+}
+
+.blue-text {
+  color: #0093e2;
+}
+
 .content-title {
   font-size: 2em;
   font-weight: 500;
@@ -872,6 +880,14 @@ i {
 .italic.small {
   font-size: 0.8em;
   color: #404040;
+}
+
+.green-text {
+  color: #2db200;
+}
+
+.blue-text {
+  color: #0093e2;
 }
 
 .content-title {
