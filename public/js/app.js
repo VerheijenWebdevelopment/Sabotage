@@ -2776,6 +2776,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _event_bus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../event-bus.js */ "./resources/js/event-bus.js");
 //
 //
 //
@@ -2807,6 +2808,40 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
   data: function data() {
@@ -2829,6 +2864,9 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
+    },
+    itsMyTurn: function itsMyTurn() {
+      return this.playerAtPlay.id === this.player.id;
     }
   },
   methods: {
@@ -2844,6 +2882,7 @@ __webpack_require__.r(__webpack_exports__);
       // console.log(this.tag+" icons: ", this.icons);
       // console.log(this.tag+" api endpoints: ", this.apiEndpoints);
       this.initializeData();
+      this.startListening();
     },
     initializeData: function initializeData() {
       // Make all the received data mutable
@@ -2867,6 +2906,78 @@ __webpack_require__.r(__webpack_exports__);
           }
         }
       }
+    },
+    startListening: function startListening() {
+      // Role selection component events
+      _event_bus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on("role_selected", this.onRoleSelected); // Game channel events
+
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound).listen('Game\\NewRoundStarted', this.onNewRoundStarted).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+    },
+    // Event handlers
+    onRoleSelected: function onRoleSelected(e) {
+      console.log(this.tag + " role selected event received: ", e); // Update the player's hand & role
+
+      this.mutableHand = e.hand;
+      this.mutablePlayerRole = e.role; // Update the round
+
+      this.mutableRound.players_with_selected_roles.push(this.mutablePlayer.id);
+      this.mutableRound.num_cards_in_role_deck -= 1; // Switch to the main phase when all players have selected their role
+
+      if (this.mutableRound.players_with_selected_roles.length === this.mutablePlayers.length) {
+        setTimeout(function () {
+          this.mutableRound.phase = "main";
+        }.bind(this), 2000);
+      }
+    },
+    onPlayerSelectedRole: function onPlayerSelectedRole(e) {
+      console.log(this.tag + "[event] received event player selected role:", e); // Add player's ID to the list of players who have selected a role
+
+      this.mutableRound.players_with_selected_roles.push(e.player.id);
+      this.mutableRound.num_cards_in_role_deck -= 1; // Switch to the main phase when all players have selected their roles
+
+      if (this.mutableRound.players_with_selected_roles.length === this.mutablePlayers.length) {
+        setTimeout(function () {
+          this.mutableRound.phase = "main";
+        }.bind(this), 2000);
+      }
+    },
+    onPlayerToolBlocked: function onPlayerToolBlocked(e) {
+      console.log(this.tag + "[event] received event player tool blocked:", e);
+    },
+    onPlayerToolRecovered: function onPlayerToolRecovered(e) {
+      console.log(this.tag + "[event] received event player tool recovered:", e);
+    },
+    onPlayerCheckedGoldLocation: function onPlayerCheckedGoldLocation(e) {
+      console.log(this.tag + "[event] received event player checked gold location:", e);
+    },
+    onGoldLocationRevealed: function onGoldLocationRevealed(e) {
+      console.log(this.tag + "[event] received event gold location revealed:", e);
+    },
+    onPlayerPlacedTunnel: function onPlayerPlacedTunnel(e) {
+      console.log(this.tag + "[event] received event player placed tunnel:", e);
+    },
+    onPlayerCollapsedTunnel: function onPlayerCollapsedTunnel(e) {
+      console.log(this.tag + "[event] received event player collapsed tunnel:", e);
+    },
+    onPlayerWasAwardedGold: function onPlayerWasAwardedGold(e) {
+      console.log(this.tag + "[event] received event player was awarded gold:", e);
+    },
+    onTurnEnded: function onTurnEnded(e) {
+      console.log(this.tag + "[event] received event turn ended:", e);
+      this.mutableRound.players_turn = e.game.current_round.players_turn;
+      this.mutableRound.num_cards_in_deck = e.game.current_round.num_cards_in_deck;
+    },
+    onRoundEnded: function onRoundEnded(e) {
+      console.log(this.tag + "[event] received event round ended:", e);
+    },
+    onPlayerReadyForNextRound: function onPlayerReadyForNextRound(e) {
+      console.log(this.tag + "[event] received event player ready for next round:", e);
+    },
+    onNewRoundStarted: function onNewRoundStarted(e) {
+      console.log(this.tag + "[event] received event new round started:", e);
+    },
+    onGameEnded: function onGameEnded(e) {
+      console.log(this.tag + "[event] received event game ended:", e);
     },
     // Getters
     getCardById: function getCardById(id) {
@@ -3241,7 +3352,8 @@ __webpack_require__.r(__webpack_exports__);
       this.startListening();
     },
     startListening: function startListening() {
-      // Join the game's chat presence channel
+      console.log(this.tag + " starting to listen for events", this.game); // Join the game's chat presence channel
+
       Echo.join("game-chat." + this.game.id).here(this.onJoin).joining(this.onUserJoined).leaving(this.onUserLeft);
     },
     onJoin: function onJoin(players) {
@@ -3273,6 +3385,165 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
+    }
+  },
+  mounted: function mounted() {
+    this.initialize();
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _event_bus_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../event-bus.js */ "./resources/js/event-bus.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ["game", "round", "roles", "player", "playerRole", "playerAtPlay", "icons", "apiEndpoints"],
+  data: function data() {
+    return {
+      tag: "[game-role-selection]",
+      selectedIndex: null,
+      loading: false
+    };
+  },
+  computed: {
+    itsMyTurn: function itsMyTurn() {
+      return this.playerAtPlay.id === this.player.id;
+    }
+  },
+  watch: {},
+  methods: {
+    initialize: function initialize() {
+      console.log(this.tag + " initializing");
+      console.log(this.tag + " game: ", this.game);
+      console.log(this.tag + " round: ", this.round);
+      console.log(this.tag + " roles: ", this.roles);
+      console.log(this.tag + " player: ", this.player);
+      console.log(this.tag + " player role: ", this.playerRole);
+      console.log(this.tag + " player at play: ", this.playerAtPlay);
+      console.log(this.tag + " icons: ", this.icons);
+      console.log(this.tag + " api endpoints: ", this.apiEndpoints);
+    },
+    getRoleLabelById: function getRoleLabelById(id) {
+      for (var i = 0; i < this.roles.length; i++) {
+        if (this.roles[i].id === id) {
+          return this.roles[i].label;
+        }
+      }
+
+      return "Unknown role";
+    },
+    onClickRoleCard: function onClickRoleCard(index) {
+      // Flag that we're doing stuff
+      this.loading = true; // Compose API request payload
+
+      var payload = new FormData();
+      payload.append("game_id", this.game.id);
+      payload.append("action", "selected_role_card");
+      payload.append("data", JSON.stringify({
+        index: index
+      })); // Send API request
+
+      this.axios.post(this.apiEndpoints.perform_action, payload).then(function (response) {
+        console.log(this.tag + " request succeeded, response: ", response.data);
+        this.loading = false;
+        _event_bus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit("role_selected", {
+          role: response.data.data.role,
+          hand: response.data.data.hand
+        });
+      }.bind(this))["catch"](function (error) {
+        console.warn(this.tag + " request failed, error:", error, error.response.data);
+        this.loading = false;
+      }.bind(this));
     }
   },
   mounted: function mounted() {
@@ -8622,7 +8893,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}", ""]);
+exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}", ""]);
 
 // exports
 
@@ -8679,7 +8950,26 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game-players {\n  display: flex;\n  padding: 30px;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-players .game-player {\n  display: flex;\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 20px 0;\n  position: relative;\n  align-items: center;\n  flex-direction: row;\n  background-color: #050505;\n}\n#game-players .game-player:last-child {\n  margin: 0;\n}\n#game-players .game-player.active {\n  border-bottom: 2px solid #ffd900;\n}\n#game-players .game-player .game-player__online-indicator {\n  top: 6px;\n  right: 6px;\n  width: 6px;\n  height: 6px;\n  position: absolute;\n  border-radius: 3px;\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__online-indicator.online {\n  background-color: #1ac000;\n}\n#game-players .game-player .game-player__avatar {\n  height: 60px;\n  flex: 0 0 60px;\n  position: relative;\n  background-color: #333;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__avatar .avatar-prison-overlay {\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n  justify-content: space-evenly;\n}\n#game-players .game-player .game-player__avatar .avatar-prison-overlay .prison-bar {\n  height: 100%;\n  flex: 0 0 4px;\n  background-color: #000;\n}\n#game-players .game-player .game-player__text {\n  flex: 1;\n  margin: 0 0 0 15px;\n}\n#game-players .game-player .game-player__text .game-player__number {\n  font-size: 0.7em;\n  color: rgba(255, 255, 255, 0.25);\n}\n#game-players .game-player .game-player__text .game-player__username {\n  font-size: 0.9em;\n  font-weight: 500;\n  line-height: 1em;\n  margin-bottom: 10px;\n}\n#game-players .game-player .game-player__text .game-player__score {\n  font-size: 0.8em;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-players .game-player .game-player__text .game-player__flags {\n  display: flex;\n  margin: 5px 0 0 0;\n  flex-direction: row;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag {\n  height: 20px;\n  display: flex;\n  flex: 0 0 20px;\n  border-radius: 2px;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n  margin: 0 10px 0 0;\n  background-color: #0d0d0d;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag:last-child {\n  margin: 0;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.light .flag-icon {\n  margin-bottom: 2px;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.available {\n  background-color: #0e6600;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.unavailable, #game-players .game-player .game-player__text .game-player__flags .flag.prison {\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.prison .flag-icon {\n  width: 16px;\n  margin-bottom: 2px;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.thiefery {\n  background-color: #0081d1;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag .flag-icon {\n  width: 20px;\n  height: 20px;\n  margin: 5px 0px 0 0;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__score {\n  display: flex;\n  margin: 0 25px;\n  align-items: center;\n  justify-content: center;\n}\n#game-players .game-player .game-player__score .score {\n  display: flex;\n  align-items: center;\n  flex-direction: row;\n}\n#game-players .game-player .game-player__score .score .score-icon {\n  width: 40px;\n  height: 40px;\n  margin: 7px 0 0 0;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__score .score .score-text {\n  display: flex;\n  flex-direction: row;\n}", ""]);
+exports.push([module.i, "#game-players {\n  display: flex;\n  padding: 30px;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-players .game-player {\n  display: flex;\n  overflow: hidden;\n  border-radius: 3px;\n  margin: 0 0 20px 0;\n  position: relative;\n  align-items: center;\n  flex-direction: row;\n  background-color: #050505;\n}\n#game-players .game-player:last-child {\n  margin: 0;\n}\n#game-players .game-player.active {\n  border-bottom: 2px solid #ffd900;\n}\n#game-players .game-player .game-player__online-indicator {\n  bottom: 6px;\n  right: 6px;\n  width: 6px;\n  height: 6px;\n  z-index: 5;\n  position: absolute;\n  border-radius: 3px;\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__online-indicator.online {\n  background-color: #1ac000;\n}\n#game-players .game-player .game-player__avatar {\n  height: 60px;\n  flex: 0 0 60px;\n  position: relative;\n  background-color: #333;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__avatar .avatar-prison-overlay {\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n  justify-content: space-evenly;\n}\n#game-players .game-player .game-player__avatar .avatar-prison-overlay .prison-bar {\n  height: 100%;\n  flex: 0 0 4px;\n  background-color: #000;\n}\n#game-players .game-player .game-player__text {\n  flex: 1;\n  margin: 0 0 0 15px;\n}\n#game-players .game-player .game-player__text .game-player__number {\n  font-size: 0.7em;\n  color: rgba(255, 255, 255, 0.25);\n}\n#game-players .game-player .game-player__text .game-player__username {\n  font-size: 0.9em;\n  font-weight: 500;\n  line-height: 1em;\n  margin-bottom: 10px;\n}\n#game-players .game-player .game-player__text .game-player__score {\n  font-size: 0.8em;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-players .game-player .game-player__text .game-player__flags {\n  display: flex;\n  margin: 5px 0 0 0;\n  flex-direction: row;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag {\n  height: 20px;\n  display: flex;\n  flex: 0 0 20px;\n  border-radius: 2px;\n  align-items: center;\n  box-sizing: border-box;\n  justify-content: center;\n  margin: 0 10px 0 0;\n  background-color: #0d0d0d;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag:last-child {\n  margin: 0;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.light .flag-icon {\n  margin-bottom: 2px;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.available {\n  background-color: #0e6600;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.unavailable, #game-players .game-player .game-player__text .game-player__flags .flag.prison {\n  background-color: #a80000;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.prison .flag-icon {\n  width: 16px;\n  margin-bottom: 2px;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag.thiefery {\n  background-color: #0081d1;\n}\n#game-players .game-player .game-player__text .game-player__flags .flag .flag-icon {\n  width: 20px;\n  height: 20px;\n  margin: 5px 0px 0 0;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__score {\n  display: flex;\n  margin: 0 25px;\n  align-items: center;\n  justify-content: center;\n}\n#game-players .game-player .game-player__score .score {\n  display: flex;\n  align-items: center;\n  flex-direction: row;\n}\n#game-players .game-player .game-player__score .score .score-icon {\n  width: 40px;\n  height: 40px;\n  margin: 7px 0 0 0;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-players .game-player .game-player__score .score .score-text {\n  display: flex;\n  flex-direction: row;\n}", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&":
+/*!********************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss& ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "#game-role-selection {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  padding: 100px;\n  align-items: center;\n  flex-direction: column;\n  box-sizing: border-box;\n  justify-content: center;\n}\n#game-role-selection #role-selection__awaiting-turn, #game-role-selection #role-selection__select-role, #game-role-selection #role-selection__role-selected {\n  width: 100%;\n}\n#game-role-selection #role-selection__title {\n  text-align: center;\n}\n#game-role-selection #role-selection__instructions {\n  text-align: center;\n  margin: 0 0 75px 0;\n}\n#game-role-selection #role-cards {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game-role-selection #role-cards .role-card__wrapper {\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  border-radius: 3px;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: #cccccc;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover {\n  cursor: pointer;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card:hover .role-card__icon {\n  -webkit-animation: rotation 0.2s infinite linear;\n          animation: rotation 0.2s infinite linear;\n}\n#game-role-selection #role-cards .role-card__wrapper .role-card .role-card__icon {\n  width: 50px;\n}\n#game-role-selection #available-roles {\n  margin: 50px 0 0 0;\n}\n#game-role-selection #available-roles #available-roles__title {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game-role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game-role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .available-role__amount {\n  margin: 0 0 0 5px;\n}\n#game-role-selection #loading {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-role-selection #loading #loading-icon {\n  font-size: 3em;\n}\n#game-role-selection #role-card__wrapper {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-role-selection #role-card__wrapper #role-card {\n  width: 195px;\n  height: 300px;\n  display: flex;\n  border-radius: 3px;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  color: #262626;\n  background-color: #f2f2f2;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name {\n  font-size: 1.2em;\n  font-weight: 500;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext {\n  font-size: 0.8em;\n  text-transform: uppercase;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext .green-text {\n  color: #2db200;\n}\n#game-role-selection #role-card__wrapper #role-card #role-name-subtext .blue-text {\n  color: #0093e2;\n}\n#game-role-selection #role-card__wrapper #role-description {\n  width: 500px;\n  text-align: center;\n  margin: 50px auto 0 auto;\n}\n#game-role-selection #role-selection__waiting {\n  margin-top: 50px;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.5);\n}\n@-webkit-keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}\n@keyframes rotation {\nfrom {\n    transform: rotate(0deg);\n}\nto {\n    transform: rotate(359deg);\n}\n}", ""]);
 
 // exports
 
@@ -8698,7 +8988,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #role-selection {\n  flex: 1;\n  padding: 30px;\n  box-sizing: border-box;\n}\n#game #game-content #role-selection #role-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-assigned .role-card {\n  margin: 15px 0 25px 0;\n}\n#game #game-content #role-selection #role-not-assigned {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection h1 {\n  text-align: center;\n}\n#game #game-content #role-selection #role-selection__text {\n  margin: 0 0 30px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #available-roles {\n  margin: 0 0 30px 0;\n}\n#game #game-content #role-selection #available-roles h3 {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n  color: rgba(255, 255, 255, 0.5);\n}\n#game #game-content #role-selection #available-roles #available-roles__list {\n  display: flex;\n  margin: 0 0 30px 0;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper {\n  margin: 0 15px 0 0;\n  display: inline-block;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper:last-child {\n  margin: 0;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role {\n  flex: 0;\n  display: flex;\n  font-size: 0.9em;\n  padding: 3px 8px;\n  border-radius: 3px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#game #game-content #role-selection #available-roles #available-roles__list .available-role__wrapper .available-role .role-amount {\n  margin: 0 0 0 5px;\n}\n#game #game-content #role-selection #role-cards {\n  width: 100%;\n}\n#game #game-content #role-selection #role-cards h2 {\n  margin: 0 0 10px 0;\n  text-align: center;\n}\n#game #game-content #role-selection #role-cards h3 {\n  font-size: 1em;\n  text-align: center;\n  color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-cards #role-cards__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #role-selection #role-cards #role-cards__list .role-card__wrapper {\n  flex: 0 0 160px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card {\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-content #role-card__selected-card #selected-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__loading {\n  font-size: 2em;\n}\n#game #game-content #role-selection #role-card__selected #role-card__selected-text #selected-text__title {\n  margin: 10px 0 0 0;\n}\n#game #game-content #game-ui {\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game #game-content #game-ui #board-area {\n  flex: 1;\n  position: relative;\n}\n#game #game-content #game-ui #board-area #game-info {\n  top: 20px;\n  left: 25px;\n  z-index: 10;\n  position: absolute;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__current-round {\n  font-size: 2em;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #my-turn {\n  font-weight: 500;\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #game-info #game-info__player-turn #not-my-turn span {\n  color: #ffd900;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper {\n  left: 0;\n  top: 30px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #board-area #action-mode__wrapper #action-mode {\n  padding: 10px 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #333;\n}\n#game #game-content #game-ui #board-area #game-board__wrapper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n}\n#game #game-content #game-ui #action-area {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game #game-content #game-ui #action-area #my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #my-role #my-role__card #my-role__card-text {\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  padding: 15px 0;\n  text-align: center;\n  position: absolute;\n  box-sizing: border-box;\n}\n#game #game-content #game-ui #action-area #my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game #game-content #game-ui #action-area #my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game #game-content #game-ui #action-area #deck #deck__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  margin: 0 0 15px 0;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #deck #deck__card {\n  width: 130px;\n  height: 200px;\n  color: #000000;\n  border-radius: 3px;\n  position: relative;\n  background-color: #f2f2f2;\n}\n#game #game-content #game-ui #action-area #deck #deck__card #deck__card-text {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  font-size: 2em;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #game-ui #action-area #my-actions {\n  flex: 0 0 300px;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__title {\n  font-weight: 500;\n  font-size: 1.2em;\n  text-align: right;\n  margin: 0 0 15px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list {\n  width: 100%;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action {\n  margin: 0 0 15px 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__list .action:last-child {\n  margin: 0;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__too-many-cards {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__select-card {\n  text-align: right;\n}\n#game #game-content #game-ui #action-area #my-actions #my-actions__wait {\n  text-align: right;\n}\n#game #game-content #rewards-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  padding: 100px;\n  align-items: center;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #rewards-ui #rewards-ui__title {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__subtitle {\n  font-size: 0.9em;\n  text-align: center;\n  text-transform: uppercase;\n}\n#game #game-content #rewards-ui #rewards-ui__instructions {\n  margin: 0 auto;\n  color: #000000;\n  padding: 8px 15px;\n  border-radius: 3px;\n  margin: 0 0 40px 0;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards__title {\n  font-size: 1.7em;\n  font-weight: 500;\n  margin: 0 0 20px 0;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__loading {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper {\n  flex: 0 0 130px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #000000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.8);\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card:hover {\n  cursor: pointer;\n  background-color: #ffffff;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-cards__wrapper #rewards-ui__reward-cards .reward-card__wrapper .reward-card .reward-card__number {\n  font-size: 1.5em;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card {\n  margin: 50px 0 0 0;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card #reward-card__title {\n  font-size: 1.3em;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__reward-card #reward-card__subtitle {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players {\n  width: 100%;\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 50px -15px -30px -15px;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper {\n  flex: 0 0 250px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player {\n  width: 100%;\n  padding: 20px;\n  color: #000000;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #ffffff;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player.winner {\n  margin: -5px;\n  border: 5px solid #00a100;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-username {\n  text-align: center;\n  font-size: 1.2em;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-avatar {\n  width: 100px;\n  height: 100px;\n  margin: 15px auto;\n  border-radius: 50px;\n  background-color: #f2f2f2;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-role__wrapper {\n  margin: 2px 0;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-role__wrapper .player-role {\n  color: #fff;\n  font-size: 0.7em;\n  padding: 2px 5px;\n  text-align: center;\n  border-radius: 3px;\n  display: inline-block;\n  box-sizing: border-box;\n  background-color: #333;\n  text-transform: uppercase;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-reward {\n  margin: 20px 0;\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-reward .gold {\n  color: #db9600;\n  font-weight: 500;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready {\n  text-align: center;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready .ready {\n  color: #39b410;\n}\n#game #game-content #rewards-ui #rewards-ui__players .player-wrapper .player .player-ready .not-ready {\n  color: #b20404;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up {\n  margin: 50px 0 0 0;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up #ready-up__text {\n  text-align: center;\n  margin: 0 0 15px 0;\n}\n#game #game-content #rewards-ui #rewards-ui__ready-up #ready-up__action {\n  text-align: center;\n}\n#game #game-content #game-over-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game #game-content #game-over-ui #winners #winners-title {\n  font-size: 1.5em;\n  font-weight: 500;\n  text-align: center;\n  margin: 50px 0 10px 0;\n  text-transform: uppercase;\n}\n#game #game-content #game-over-ui #winners #winners-list {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper {\n  flex: 0 0 200px;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner {\n  width: 250px;\n  height: 100px;\n  padding: 25px;\n  display: flex;\n  color: #000000;\n  border-radius: 3px;\n  align-items: center;\n  flex-direction: column;\n  box-sizing: border-box;\n  justify-content: center;\n  background-color: #fff;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner .winner-title {\n  font-size: 1.1em;\n  font-weight: 500;\n  text-align: center;\n}\n#game #game-content #game-over-ui #winners #winners-list .winner-wrapper .winner .winner-score {\n  text-align: center;\n  color: #ffd900;\n}\n#game #game-sidebar {\n  display: flex;\n  flex: 0 0 350px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game #game-sidebar #game-players__wrapper {\n  flex: 1;\n}\n#game #game-sidebar #game-chat__wrapper {\n  flex: 0 0 300px;\n}\n.role-card {\n  width: 130px;\n  display: flex;\n  padding: 15px;\n  height: 200px;\n  color: #000;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover {\n  cursor: pointer;\n  background-color: white;\n}\n.role-card:hover.no-hover {\n  cursor: default;\n  background-color: rgba(255, 255, 255, 0.75);\n}\n.role-card:hover .role-card__select {\n  opacity: 1;\n}\n.role-card .role-card__title {\n  left: 0;\n  top: 15px;\n  width: 100%;\n  position: absolute;\n  text-align: center;\n}\n.role-card .role-card__number {\n  font-size: 1.7em;\n  font-weight: 500;\n}\n.role-card .role-card__select {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-weight: 500;\n  text-align: center;\n  position: absolute;\n  transition: all 0.3s;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin: 0 auto 15px auto;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .tooltip-wrapper {\n  padding: 0 15px 0 0;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  overflow: hidden;\n  position: relative;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  top: 0;\n  left: 0;\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  position: absolute;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
+exports.push([module.i, "/**\n#game {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: row;\n    #game-content {\n        flex: 1;\n        height: 100%;\n        display: flex;\n        flex-direction: column;\n        #role-selection {\n            flex: 1;\n            padding: 30px;\n            box-sizing: border-box;\n            #role-assigned {\n                width: 100%;\n                height: 100%;\n                display: flex;\n                align-items: center;\n                flex-direction: column;\n                justify-content: center;\n                .role-card {\n                    margin: 15px 0 25px 0;\n                }\n            }\n            #role-not-assigned {\n                width: 100%;\n                height: 100%;\n                display: flex;\n                align-items: center;\n                flex-direction: column;\n                justify-content: center;\n            }\n            h1 {\n                text-align: center;\n            }\n            #role-selection__text {\n                margin: 0 0 30px 0;\n                text-align: center;\n            }\n            #available-roles {\n                margin: 0 0 30px 0;\n                h3 {\n                    font-size: .9em;\n                    text-align: center;\n                    text-transform: uppercase;\n                    color: rgba(255, 255, 255, 0.5);\n                }\n                #available-roles__list {\n                    display: flex;\n                    margin: 0 0 30px 0;\n                    flex-direction: row;\n                    justify-content: center;\n                    .available-role__wrapper {\n                        margin: 0 15px 0 0;\n                        display: inline-block;\n                        &:last-child {\n                            margin: 0;\n                        }\n                        .available-role {\n                            flex: 0;\n                            display: flex;\n                            font-size: .9em;\n                            padding: 3px 8px;\n                            border-radius: 3px;\n                            flex-direction: row;\n                            box-sizing: border-box;\n                            background-color: hsl(0, 0%, 5%);\n                            .role-name {}\n                            .role-amount {\n                                margin: 0 0 0 5px;\n                            }\n                        }\n                    }\n                }\n            }\n            #role-cards {\n                width: 100%;\n                h2 {\n                    margin: 0 0 10px 0;\n                    text-align: center;\n                }\n                h3 {\n                    font-size: 1em;\n                    text-align: center;\n                    color: rgba(255, 255, 255, 0.75);\n                }\n                #role-cards__list {\n                    display: flex;\n                    flex-wrap: wrap;\n                    flex-direction: row;\n                    justify-content: center;\n                    margin: 0 -15px -30px -15px;\n                    .role-card__wrapper {\n                        flex: 0 0 160px;\n                        box-sizing: border-box;\n                        padding: 0 15px 30px 15px;\n\n                    }\n                }\n            }\n            #role-card__selected {\n                #role-card__selected-content {\n                    display: flex;\n                    flex-direction: row;\n                    justify-content: center;\n                    #role-card__selected-card {\n                        display: flex;\n                        padding: 15px;\n                        height: 200px;\n                        color: #000;\n                        flex: 0 0 130px;\n                        margin: 0 30px 0 0;\n                        border-radius: 3px;\n                        position: relative;\n                        align-items: center;\n                        transition: all .3s;\n                        box-sizing: border-box;\n                        flex-direction: column;\n                        justify-content: center;\n                        background-color: rgba(255, 255, 255, 0.75);\n                        #selected-card__title {\n                            left: 0;\n                            top: 15px;\n                            width: 100%;\n                            position: absolute;\n                            text-align: center;\n                        }\n                        #selected-card__number {\n                            font-size: 1.7em;\n                            font-weight: 500;\n                        }\n                    }\n                }\n                #role-card__selected-text {\n                    display: flex;\n                    align-items: center;\n                    flex-direction: column;\n                    justify-content: center;\n                    #selected-text__loading {\n                        font-size: 2em;\n                    }\n                    #selected-text__title {\n                        margin: 10px 0 0 0;\n                    }\n                }\n            }\n        }\n        #game-ui {\n            height: 100%;\n            display: flex;\n            flex-direction: column;\n            #board-area {\n                flex: 1;\n                position: relative;\n                #game-info {\n                    top: 20px;\n                    left: 25px;\n                    z-index: 10;\n                    position: absolute;\n                    #game-info__current-round {\n                        font-size: 2em;\n                    }\n                    #game-info__player-turn {\n                        #my-turn {\n                            font-weight: 500;\n                            color: #ffd900;\n                        }\n                        #not-my-turn {\n                            span {\n                                color: #ffd900;\n                                // text-decoration: underline;\n                            }\n                        }\n                    }\n                }\n                #action-mode__wrapper {\n                    left: 0;\n                    top: 30px;\n                    z-index: 10;\n                    width: 100%;\n                    display: flex;\n                    position: absolute;\n                    flex-direction: row;\n                    justify-content: center;\n                    #action-mode {\n                        padding: 10px 15px;\n                        border-radius: 3px;\n                        box-sizing: border-box;\n                        background-color: #333;\n                    }\n                }\n                #game-board__wrapper {\n                    width: 100%;\n                    height: 100%;\n                    position: relative;\n                }\n            }\n            #action-area {\n                display: flex;\n                padding: 30px;\n                flex: 0 0 250px;\n                flex-direction: row;\n                box-sizing: border-box;\n                background-color: hsl(0, 0%, 2%);\n                #my-role {\n                    flex: 0 0 130px;\n                    margin: 0 30px 0 0;\n                    #my-role__title {\n                        font-weight: 500;\n                        font-size: 1.2em;\n                        margin: 0 0 15px 0;\n                        text-align: center;\n                        text-transform: uppercase;\n                    }\n                    #my-role__card {\n                        width: 130px;\n                        height: 200px;\n                        color: #000000;\n                        border-radius: 3px;\n                        position: relative;\n                        background-color: hsl(0, 0%, 95%);\n                        #my-role__card-text {\n                            left: 0;\n                            bottom: 0;\n                            width: 100%;\n                            padding: 15px 0;\n                            text-align: center;\n                            position: absolute;\n                            box-sizing: border-box;\n                        }\n                    }\n                }\n                #my-hand {\n                    flex: 1;\n                    display: flex;\n                    margin: 0 30px 0 0;\n                    flex-direction: column;\n                    justify-content: center;\n                    #my-hand__title {\n                        font-weight: 500;\n                        font-size: 1.2em;\n                        margin: 0 0 15px 0;\n                        text-align: center;\n                        text-transform: uppercase;\n                    }\n                    #my-hand__no-cards {\n                        display: flex;\n                        flex-direction: row;\n                        align-items: center;\n                        justify-content: center;\n                    }\n                    #my-hand__cards {\n                        display: flex;\n                        flex-direction: row;\n                        justify-content: center;\n                        .my-hand__card {\n                            margin: 0 15px 0 0;\n                            &:hover {\n                                cursor: pointer;\n                            }\n                            &:last-child {\n                                margin: 0;\n                            }\n                            &.selected {\n                                .my-hand__card-image {\n                                    border: 2px solid #ffd900;\n                                }\n                            }\n                            .my-hand__card-image {\n                                width: 130px;\n                                height: 200px;\n                                border-radius: 3px;\n                                background-size: contain;\n                                background-repeat: no-repeat;\n                                background-position: center center;\n                            }\n                        }\n                    }\n                }\n                #deck {\n                    #deck__title {\n                        font-weight: 500;\n                        font-size: 1.2em;\n                        margin: 0 0 15px 0;\n                        text-align: center;\n                        text-transform: uppercase;\n                    }\n                    #deck__card {\n                        width: 130px;\n                        height: 200px;\n                        color: #000000;\n                        border-radius: 3px;\n                        position: relative;\n                        background-color: hsl(0, 0%, 95%);\n                        #deck__card-text {\n                            width: 100%;\n                            height: 100%;\n                            display: flex;\n                            font-size: 2em;\n                            flex-direction: row;\n                            align-items: center;\n                            justify-content: center;\n                        }\n                    }\n                }\n                #my-actions {\n                    flex: 0 0 300px;\n                    #my-actions__title {\n                        font-weight: 500;\n                        font-size: 1.2em;\n                        text-align: right;\n                        margin: 0 0 15px 0;\n                        text-transform: uppercase;\n                    }\n                    #my-actions__list {\n                        width: 100%;\n                        .action {\n                            margin: 0 0 15px 0;\n                            &:last-child {\n                                margin: 0;\n                            }\n                        }\n                    }\n                    #my-actions__too-many-cards {\n                        text-align: right;\n                    }\n                    #my-actions__select-card {\n                        text-align: right;\n                    }\n                    #my-actions__wait {\n                        text-align: right;\n                    }\n                }\n            }\n        }\n        #rewards-ui {\n            width: 100%;\n            height: 100%;\n            display: flex;\n            padding: 100px;\n            align-items: center;\n            box-sizing: border-box;\n            flex-direction: column;\n            justify-content: center;\n            #rewards-ui__title {\n                text-align: center;\n            }\n            #rewards-ui__subtitle {\n                font-size: .9em;\n                text-align: center;\n                text-transform: uppercase;\n            }\n            #rewards-ui__instructions {\n                margin: 0 auto;\n                color: #000000;\n                padding: 8px 15px;\n                border-radius: 3px;\n                margin: 0 0 40px 0;\n                box-sizing: border-box;\n                background-color: rgba(255, 255, 255, 0.75);\n            }\n            #rewards-ui__reward-cards__wrapper {\n                #rewards-ui__reward-cards__title {\n                    font-size: 1.7em;\n                    font-weight: 500;\n                    margin: 0 0 20px 0;\n                    text-align: center;\n                }\n                #rewards-ui__loading {\n                    text-align: center;\n                }\n                #rewards-ui__reward-cards {\n                    display: flex;\n                    flex-wrap: wrap;\n                    flex-direction: row;\n                    justify-content: center;\n                    margin: 0 -15px -30px -15px;\n                    .reward-card__wrapper {\n                        flex: 0 0 130px;\n                        box-sizing: border-box;\n                        padding: 0 15px 30px 15px;\n                        .reward-card {\n                            width: 130px;\n                            height: 200px;\n                            display: flex;\n                            color: #000000;\n                            border-radius: 3px;\n                            transition: all .3s;\n                            align-items: center;\n                            flex-direction: column;\n                            justify-content: center;\n                            background-color: rgba(255, 255, 255, 0.8);\n                            &:hover {\n                                cursor: pointer;\n                                background-color: #ffffff;\n                            }\n                            .reward-card__title {\n\n                            }\n                            .reward-card__number {\n                                font-size: 1.5em;\n                            }\n                        }\n                    }\n                }\n            }\n            #rewards-ui__reward-card {\n                margin: 50px 0 0 0;\n                #reward-card__title {\n                    font-size: 1.3em;\n                    text-align: center;\n                }\n                #reward-card__subtitle {\n                    text-align: center;\n                }\n            }\n            #rewards-ui__players {\n                width: 100%;\n                display: flex;\n                flex-wrap: wrap;\n                flex-direction: row;\n                justify-content: center;\n                margin: 50px -15px -30px -15px;\n                .player-wrapper {\n                    flex: 0 0 250px;\n                    box-sizing: border-box;\n                    padding: 0 15px 30px 15px;\n                    .player {\n                        width: 100%;\n                        padding: 20px;\n                        color: #000000;\n                        border-radius: 3px;\n                        box-sizing: border-box;\n                        background-color: #ffffff;\n                        &.winner {\n                            margin: -5px;\n                            border: 5px solid #00a100;\n                        }\n                        .player-username {\n                            text-align: center;\n                            font-size: 1.2em;\n                        }\n                        .player-avatar {\n                            width: 100px;\n                            height: 100px;\n                            margin: 15px auto;\n                            border-radius: 50px;\n                            background-color: hsl(0, 0%, 95%);\n                        }\n                        .player-role__wrapper {\n                            margin: 2px 0;\n                            display: flex;\n                            flex-direction: row;\n                            align-items: center;\n                            justify-content: center;\n                            .player-role {\n                                color: #fff;\n                                font-size: .7em;\n                                padding: 2px 5px;\n                                text-align: center;\n                                border-radius: 3px;\n                                display: inline-block;\n                                box-sizing: border-box;\n                                background-color: #333;\n                                text-transform: uppercase;\n                            }\n                        }\n                        .player-reward {\n                            margin: 20px 0;\n                            text-align: center;\n                            .gold {\n                                color: #db9600;\n                                font-weight: 500;\n                            }\n                        }\n                        .player-ready {\n                            text-align: center;\n                            .ready {\n                                color: #39b410;\n                            }\n                            .not-ready {\n                                color: #b20404;\n                            }\n                        }\n                    }\n                }\n            }\n            #rewards-ui__ready-up {\n                margin: 50px 0 0 0;\n                #ready-up__text {\n                    text-align: center;\n                    margin: 0 0 15px 0;\n                }\n                #ready-up__action {\n                    text-align: center;\n                }\n            }\n        }\n        #game-over-ui {\n            width: 100%;\n            height: 100%;\n            display: flex;\n            align-items: center;\n            flex-direction: column;\n            justify-content: center;\n            #winners {\n                #winners-title {\n                    font-size: 1.5em;\n                    font-weight: 500;\n                    text-align: center;\n                    margin: 50px 0 10px 0;\n                    text-transform: uppercase;\n                }\n                #winners-list {\n                    display: flex;\n                    flex-direction: row;\n                    align-items: center;\n                    justify-content: center;\n                    margin: 0 -15px -30px -15px;\n                    .winner-wrapper {\n                        flex: 0 0 200px;\n                        box-sizing: border-box;\n                        padding: 0 15px 30px 15px;\n                        .winner {\n                            width: 250px;\n                            height: 100px;\n                            padding: 25px;\n                            display: flex;\n                            color: #000000;\n                            border-radius: 3px;\n                            align-items: center;\n                            flex-direction: column;\n                            box-sizing: border-box;\n                            justify-content: center;\n                            background-color: #fff;\n                            .winner-title {\n                                font-size: 1.1em;\n                                font-weight: 500;\n                                text-align: center;\n                            }   \n                            .winner-score {\n                                text-align: center;\n                                color: #ffd900;\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n    #game-sidebar {\n        display: flex;\n        flex: 0 0 350px;\n        flex-direction: column;\n        background-color: hsl(0, 0%, 5%);\n        #game-players__wrapper {\n            flex: 1;\n        }\n        #game-chat__wrapper {\n            flex: 0 0 300px;\n        }\n    }\n}\n.role-card {\n    width: 130px;\n    display: flex;\n    padding: 15px;\n    height: 200px;\n    color: #000;\n    border-radius: 3px;\n    position: relative;\n    align-items: center;\n    transition: all .3s;\n    box-sizing: border-box;\n    flex-direction: column;\n    justify-content: center;\n    background-color: rgba(255, 255, 255, 0.75);\n    &:hover {\n        &.no-hover {\n            cursor: default;\n            background-color: rgba(255, 255, 255, 0.75);\n        }\n        cursor: pointer;\n        background-color: rgba(255, 255, 255, 1);\n        .role-card__select {\n            opacity: 1;\n        }\n    }\n    .role-card__title {\n        left: 0;\n        top: 15px;\n        width: 100%;\n        position: absolute;\n        text-align: center;\n    }\n    .role-card__number {\n        font-size: 1.7em;\n        font-weight: 500;\n    }\n    .role-card__select {\n        left: 0;\n        opacity: 0;\n        width: 100%;\n        bottom: 15px;\n        font-weight: 500;\n        text-align: center;\n        position: absolute;\n        transition: all .3s;\n    }\n}\n.card {\n    width:130px;\n    height: 200px;\n    overflow: hidden;\n    border-radius: 3px;\n    background-size: contain;\n    background-repeat: no-repeat;\n    background-position: center center;\n    &.mb-15 {\n        margin: 0 auto 15px auto;\n    }\n}\n.card-info {\n    display: flex;\n    flex-direction: row;\n    .card-info__card {\n        height: 200px;\n        flex: 0 0 130px;\n        border-radius: 3px;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center center;\n        transition: all .3s;\n        &.inverted {\n            transform: rotate(180deg);\n        }\n    }\n    .card-info__content {\n        flex: 1;\n        display: flex;\n        margin: 0 0 0 30px;\n        flex-direction: column;\n        .card-info__description {\n            flex: 1;\n            .card-info__description-label {\n                font-size: .9em;\n                margin: 0 0 5px 0;\n                color: rgba(255, 255, 255, 0.45);\n            }\n            .card-info__description-text {\n\n            }\n        }\n        .card-info__actions {\n            .card-info__actions-text {\n\n            }\n            .card-info__actions-buttons {\n                display: flex;\n                flex-direction: row;\n                align-items: center;\n                .v-btn {\n                    margin: 0 15px 0 0;\n                    &:last-child {\n                        margin: 0;\n                    }\n                }\n                .tooltip-wrapper {\n                    padding: 0 15px 0 0;\n                }\n            }\n        }\n    }\n}\n.select-player {\n    width: 100%;\n    .select-player__title {\n        margin: 0 0 10px 0;\n    }\n    .select-player__list {\n        display: flex;\n        flex-wrap: wrap;\n        flex-direction: row;\n        margin: 0 -15px -30px -15px;\n        .select-player__list-item {\n            flex: 0 0 50%;\n            box-sizing: border-box;\n            padding: 0 15px 30px 15px;\n            .player-option {\n                padding: 15px;\n                color: #000;\n                border-radius: 3px;\n                transition: all .3s;\n                box-sizing: border-box;\n                background-color: rgba(255, 255, 255, .25);\n                &:hover {\n                    cursor: pointer;\n                    background-color: rgba(255, 255, 255, .5);\n                }\n                &.selected {\n                    background-color: rgba(255, 255, 255, 1);\n                    &:hover {\n                        background-color: rgba(255, 255, 255, 1);\n                    }\n                }\n            }\n        }\n    }\n}\n.select-tool {\n    width: 100%;\n    margin: 15px 0 0 0;\n    .select-tool__title {\n        margin: 0 0 10px 0;\n    }\n    .select-tool__list {\n        display: flex;\n        flex-wrap: wrap;\n        flex-direction: row;\n        margin: 0 -15px -30px -15px;\n        .select-tool__list-item {\n            flex: 0 0 50%;\n            box-sizing: border-box;\n            padding: 0 15px 30px 15px;\n            .tool-option {\n                padding: 15px;\n                color: #000;\n                border-radius: 3px;\n                transition: all .3s;\n                box-sizing: border-box;\n                text-transform: capitalize;\n                background-color: rgba(255, 255, 255, .25);\n                &:hover {\n                    cursor: pointer;\n                    background-color: rgba(255, 255, 255, .5);\n                }\n                &.selected {\n                    background-color: rgba(255, 255, 255, 1);\n                    &:hover {\n                        background-color: rgba(255, 255, 255, 1);\n                    }\n                }\n            }\n        }\n    }\n}\n#place-tunnel {\n    display: flex;\n    flex-direction: row;\n    #place-tunnel__preview {\n        margin: 0 30px 0 0;\n        #preview {\n            width: 195px;\n            height: 300px;\n            border: 1px dashed rgba(255, 255, 255, .1);\n            .preview-row {\n                display: flex;\n                flex-direction: row;\n                border-bottom: 1px dashed rgba(255, 255, 255, .1);\n                &:last-child {\n                    border-bottom: 0;\n                }\n                .preview-col {\n                    height: 100px;\n                    flex: 0 0 65px;\n                    overflow: hidden;\n                    position: relative;\n                    border-right: 1px dashed rgba(255, 255, 255, .1);\n                    &:last-child {\n                        border-right: 0;\n                    }\n                    .preview-card {\n                        top: 0;\n                        left: 0;\n                        width: 65px;\n                        height: 100px;\n                        border-radius: 3px;\n                        position: absolute;\n                        background-size: contain;\n                        background-repeat: no-repeat;\n                        background-position: center center;\n                        &.inverted {\n                            transform: rotate(180deg);\n                        }\n                    }\n                }\n            }\n        }\n    }\n    #place-tunnel__text {\n        flex: 1;\n        display: flex;\n        flex-direction: row;\n        align-items: center;\n    }\n}\n#reveal-gold-location {\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    #reveal-gold-location__image {\n        width: 150px;\n        height: 150px;\n        margin: 0 auto 15px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center center;\n    }\n    #reveal-gold-location__text {\n        text-align: center;\n    }\n}\n**/", ""]);
 
 // exports
 
@@ -45258,6 +45548,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameRoleSelection.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/OldGame.vue?vue&type=style&index=0&lang=scss&":
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--9-2!./node_modules/sass-loader/dist/cjs.js??ref--9-3!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/OldGame.vue?vue&type=style&index=0&lang=scss& ***!
@@ -46901,49 +47221,91 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { attrs: { id: "game__wrapper" } }, [
-    _c("div", { attrs: { id: "game" } }, [
-      _c("div", { attrs: { id: "game-content" } }),
-      _vm._v(" "),
-      _c("div", { attrs: { id: "game-sidebar" } }, [
-        _c(
-          "div",
-          { attrs: { id: "game-sidebar__players" } },
-          [
-            _c("game-players", {
-              attrs: {
-                icons: _vm.icons,
-                game: _vm.mutableGame,
-                player: _vm.mutablePlayer,
-                "player-at-play": _vm.playerAtPlay
-              },
-              model: {
-                value: _vm.mutablePlayers,
-                callback: function($$v) {
-                  _vm.mutablePlayers = $$v
-                },
-                expression: "mutablePlayers"
-              }
-            })
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          { attrs: { id: "game-sidebar__chat" } },
-          [
-            _c("game-chat", {
-              attrs: {
-                game: _vm.game,
-                player: _vm.player,
-                "send-message-api-endpoint": _vm.apiEndpoints.send_message
-              }
-            })
-          ],
-          1
-        )
-      ])
-    ])
+    _vm.mutableGame !== null && _vm.mutableRound !== null
+      ? _c("div", { attrs: { id: "game" } }, [
+          _c("div", { attrs: { id: "game-content" } }, [
+            _vm.mutableRound.phase === "role_selection"
+              ? _c(
+                  "div",
+                  { attrs: { id: "role-selection-ui" } },
+                  [
+                    _c("game-role-selection", {
+                      attrs: {
+                        roles: _vm.roles,
+                        game: _vm.mutableGame,
+                        round: _vm.mutableRound,
+                        player: _vm.mutablePlayer,
+                        "player-role": _vm.mutablePlayerRole,
+                        "player-at-play": _vm.playerAtPlay,
+                        icons: _vm.icons,
+                        "api-endpoints": _vm.apiEndpoints
+                      }
+                    })
+                  ],
+                  1
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.mutableRound.phase === "main"
+              ? _c("div", { attrs: { id: "game-ui" } }, [
+                  _vm._v("\n                Main game\n            ")
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.mutableRound.phase === "rewards"
+              ? _c("div", { attrs: { id: "round-over-ui" } }, [
+                  _vm._v("\n                End of round\n            ")
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.mutableRound.phase === "endgame"
+              ? _c("div", { attrs: { id: "game-over-ui" } }, [
+                  _vm._v("\n                End of game\n            ")
+                ])
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "game-sidebar" } }, [
+            _c(
+              "div",
+              { attrs: { id: "game-sidebar__players" } },
+              [
+                _c("game-players", {
+                  attrs: {
+                    game: _vm.game,
+                    icons: _vm.icons,
+                    player: _vm.player,
+                    "player-at-play": _vm.playerAtPlay
+                  },
+                  model: {
+                    value: _vm.mutablePlayers,
+                    callback: function($$v) {
+                      _vm.mutablePlayers = $$v
+                    },
+                    expression: "mutablePlayers"
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { attrs: { id: "game-sidebar__chat" } },
+              [
+                _c("game-chat", {
+                  attrs: {
+                    game: _vm.game,
+                    player: _vm.player,
+                    "send-message-api-endpoint": _vm.apiEndpoints.send_message
+                  }
+                })
+              ],
+              1
+            )
+          ])
+        ])
+      : _vm._e()
   ])
 }
 var staticRenderFns = []
@@ -47276,6 +47638,177 @@ var render = function() {
   )
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72&":
+/*!*************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72& ***!
+  \*************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { attrs: { id: "game-role-selection" } }, [
+    !_vm.itsMyTurn && _vm.playerRole === null
+      ? _c("div", { attrs: { id: "role-selection__awaiting-turn" } }, [
+          _c("h1", { attrs: { id: "role-selection__title" } }, [
+            _vm._v("Rollen Kiezen")
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "role-selection__instructions" } }, [
+            _vm._v("Wachten op je beurt.")
+          ])
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.itsMyTurn && _vm.playerRole === null
+      ? _c("div", { attrs: { id: "role-selection__select-role" } }, [
+          _c("h1", { attrs: { id: "role-selection__title" } }, [
+            _vm._v("Rollen Kiezen")
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "role-selection__instructions" } }, [
+            _vm._v("Selecteer een kaart om jouw rol toegewezen te krijgen.")
+          ]),
+          _vm._v(" "),
+          !_vm.loading
+            ? _c(
+                "div",
+                { attrs: { id: "role-cards" } },
+                _vm._l(_vm.round.num_cards_in_role_deck, function(n, ni) {
+                  return _c(
+                    "div",
+                    { key: ni, staticClass: "role-card__wrapper" },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass: "role-card",
+                          on: {
+                            click: function($event) {
+                              return _vm.onClickRoleCard(ni)
+                            }
+                          }
+                        },
+                        [
+                          _c("img", {
+                            staticClass: "role-card__icon",
+                            attrs: { src: _vm.icons.questions }
+                          })
+                        ]
+                      )
+                    ]
+                  )
+                }),
+                0
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          !_vm.loading
+            ? _c("div", { attrs: { id: "available-roles" } }, [
+                _c("h2", { attrs: { id: "available-roles__title" } }, [
+                  _vm._v("Beschikbare rollen")
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { attrs: { id: "available-roles__list" } },
+                  _vm._l(_vm.round.available_roles, function(roleData, ri) {
+                    return _c(
+                      "div",
+                      { key: ri, staticClass: "available-role__wrapper" },
+                      [
+                        _c("div", { staticClass: "available-role" }, [
+                          _c("div", { staticClass: "available-role__name" }, [
+                            _vm._v(
+                              _vm._s(_vm.getRoleLabelById(roleData.role_id))
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "available-role__amount" }, [
+                            _vm._v("x " + _vm._s(roleData.count))
+                          ])
+                        ])
+                      ]
+                    )
+                  }),
+                  0
+                )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.loading
+            ? _c("div", { attrs: { id: "loading" } }, [_vm._m(0)])
+            : _vm._e()
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.playerRole !== null
+      ? _c("div", { attrs: { id: "role-selection__role-selected" } }, [
+          _c("h1", { attrs: { id: "role-selection__title" } }, [
+            _vm._v("Rol gekozen!")
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "role-selection__instructions" } }, [
+            _vm._v("Jij bent uitverkoren om de volgende rol te vervullen")
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "role-card__wrapper" } }, [
+            _c("div", { attrs: { id: "role-card" } }, [
+              _c("div", { attrs: { id: "role-name" } }, [
+                _vm._v(_vm._s(_vm.playerRole.label))
+              ]),
+              _vm._v(" "),
+              _vm.playerRole.name === "blue_digger"
+                ? _c("div", { attrs: { id: "role-name-subtext" } }, [
+                    _c("span", { staticClass: "blue-text" }, [
+                      _vm._v("Team blauw")
+                    ])
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _vm.playerRole.name === "green_digger"
+                ? _c("div", { attrs: { id: "role-name-subtext" } }, [
+                    _c("span", { staticClass: "green-text" }, [
+                      _vm._v("Team groen")
+                    ])
+                  ])
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("div", { attrs: { id: "role-description" } }, [
+              _vm._v(_vm._s(_vm.playerRole.description))
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { attrs: { id: "role-selection__waiting" } }, [
+            _vm._v("Zodra iedereen een rol heeft gekozen begint het spel.")
+          ])
+        ])
+      : _vm._e()
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { attrs: { id: "loading-icon" } }, [
+      _c("i", { staticClass: "fas fa-spinner fa-spin" })
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -103688,6 +104221,7 @@ var map = {
 	"./components/game/GameBoard.vue": "./resources/js/components/game/GameBoard.vue",
 	"./components/game/GameChat.vue": "./resources/js/components/game/GameChat.vue",
 	"./components/game/GamePlayers.vue": "./resources/js/components/game/GamePlayers.vue",
+	"./components/game/GameRoleSelection.vue": "./resources/js/components/game/GameRoleSelection.vue",
 	"./components/game/OldGame.vue": "./resources/js/components/game/OldGame.vue",
 	"./components/leaderboards/Leaderboards.vue": "./resources/js/components/leaderboards/Leaderboards.vue",
 	"./components/lobby/GameOverview.vue": "./resources/js/components/lobby/GameOverview.vue",
@@ -104817,6 +105351,93 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/game/GameRoleSelection.vue":
+/*!************************************************************!*\
+  !*** ./resources/js/components/game/GameRoleSelection.vue ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./GameRoleSelection.vue?vue&type=template&id=068a8a72& */ "./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72&");
+/* harmony import */ var _GameRoleSelection_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./GameRoleSelection.vue?vue&type=script&lang=js& */ "./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./GameRoleSelection.vue?vue&type=style&index=0&lang=scss& */ "./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _GameRoleSelection_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/game/GameRoleSelection.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameRoleSelection.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&":
+/*!**********************************************************************************************!*\
+  !*** ./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss& ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader!../../../../node_modules/css-loader!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--9-2!../../../../node_modules/sass-loader/dist/cjs.js??ref--9-3!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameRoleSelection.vue?vue&type=style&index=0&lang=scss& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/sass-loader/dist/cjs.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=style&index=0&lang=scss&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_9_2_node_modules_sass_loader_dist_cjs_js_ref_9_3_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72& ***!
+  \*******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./GameRoleSelection.vue?vue&type=template&id=068a8a72& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/game/GameRoleSelection.vue?vue&type=template&id=068a8a72&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_GameRoleSelection_vue_vue_type_template_id_068a8a72___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/game/OldGame.vue":
 /*!**************************************************!*\
   !*** ./resources/js/components/game/OldGame.vue ***!
@@ -105249,6 +105870,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UpdateProfileForm_vue_vue_type_template_id_503ed103___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/event-bus.js":
+/*!***********************************!*\
+  !*** ./resources/js/event-bus.js ***!
+  \***********************************/
+/*! exports provided: EventBus */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EventBus", function() { return EventBus; });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
+
+var EventBus = new vue__WEBPACK_IMPORTED_MODULE_0___default.a();
 
 /***/ }),
 

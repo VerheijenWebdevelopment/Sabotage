@@ -16,6 +16,8 @@ class Round extends Model
         "players_turn",
         "deck",
         "num_cards_in_deck",
+        "role_deck",
+        "num_cards_in_role_deck",
         "available_roles",
         "players_with_selected_roles",
         "board",
@@ -48,6 +50,11 @@ class Round extends Model
     //
 
     public function getDeckAttribute($value)
+    {
+        return json_decode(unserialize($value));
+    }
+
+    public function getRoleDeckAttribute($value)
     {
         return json_decode(unserialize($value));
     }
@@ -94,6 +101,11 @@ class Round extends Model
     public function setDeckAttribute($value)
     {
         $this->attributes["deck"] = serialize(json_encode($value));
+    }
+
+    public function setRoleDeckAttribute($value)
+    {
+        $this->attributes["role_deck"] = serialize(json_encode($value));
     }
 
     public function setAvailableRolesAttribute($value)

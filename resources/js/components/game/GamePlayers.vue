@@ -84,6 +84,7 @@
                 this.startListening();
             },
             startListening() {
+                console.log(this.tag+" starting to listen for events", this.game);
                 // Join the game's chat presence channel
                 Echo.join("game-chat."+this.game.id)
                     .here(this.onJoin)
@@ -152,10 +153,11 @@
                 border-bottom: 2px solid #ffd900;
             }
             .game-player__online-indicator {
-                top: 6px;
+                bottom: 6px;
                 right: 6px;
                 width: 6px;
                 height: 6px;
+                z-index: 5;
                 position: absolute;
                 border-radius: 3px;
                 background-color: #a80000;

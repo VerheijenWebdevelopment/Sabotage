@@ -39,7 +39,7 @@ class RoleService implements ModelServiceContract
         return false;
     }
 
-    public function generateRoles()
+    public function generateRoleDeck()
     {
         // Grab all available roles
         $saboteur = $this->findByName("saboteur");
@@ -54,7 +54,6 @@ class RoleService implements ModelServiceContract
             $saboteur->id,
             $saboteur->id,
             $saboteur->id,
-            $saboteur->id,
             $blue_digger->id,
             $blue_digger->id,
             $blue_digger->id,
@@ -65,6 +64,7 @@ class RoleService implements ModelServiceContract
             $green_digger->id,
             $chef->id,
             $profiteer->id,
+            $geologist->id,
             $geologist->id,
         ];
 

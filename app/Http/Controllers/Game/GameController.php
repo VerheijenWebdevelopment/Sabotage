@@ -42,6 +42,7 @@ class GameController extends Controller
                 "coal" => asset("storage/images/icons/coal.svg"),
                 "prison" => asset("storage/images/icons/prison.svg"),
                 "thief" => asset("storage/images/icons/thief.svg"),
+                "questions" => asset("storage/images/icons/questions.svg"),
             ]),
         ]);
     }

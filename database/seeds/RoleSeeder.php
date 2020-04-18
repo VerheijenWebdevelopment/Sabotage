@@ -43,7 +43,7 @@ class RoleSeeder extends Seeder
         $profiteer = Role::create([
             "name" => "profiteer",
             "label" => "Profiteur",
-            "description" => "De profiteur wint in alle gevallen, maar krijgt 2 goudstukken minder dan de andere winnaars. Als jij als profiteur alleen wint krijgt je 3 goudstukken.",
+            "description" => "De profiteur wint in alle gevallen, maar krijgt 2 goudstukken minder dan de andere winnaars. Als jij als profiteur alleen wint krijg je 3 goudstukken.",
         ]);
 
         $geologist = Role::create([

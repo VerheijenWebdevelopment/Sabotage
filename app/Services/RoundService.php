@@ -45,6 +45,9 @@ class RoundService implements ModelServiceContract
         // Generate a deck of cards
         $deck = Cards::generateDeck($game);
 
+        // Generate a deck of role cards
+        $roleDeck = Roles::generateRoleDeck();
+
         // Create the new round
         $round = Round::create([
             "game_id" => $game->id,
@@ -54,7 +57,9 @@ class RoundService implements ModelServiceContract
             "players_turn" => 1,
             "deck" => $deck,
             "num_cards_in_deck" => count($deck),
-            "available_roles" => Roles::generateRoles(),
+            "role_deck" => $roleDeck,
+            "num_cards_in_role_deck" => count($roleDeck),
+            "available_roles" => Roles::countGeneratedRoles($roleDeck),
             "players_with_selected_roles" => [],
             "board" => Board::generateBoard($game),
             "gold_location" => rand(1, 3),

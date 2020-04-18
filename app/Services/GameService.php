@@ -125,6 +125,26 @@ class GameService implements ModelServiceContract
     }
 
     //
+    // Setters
+    //
+
+    public function setStatus(Game $game, $status)
+    {
+        $game->status = $status;
+        $game->save();
+
+        return $game;
+    }
+
+    public function setPhase(Game $game, $phase)
+    {
+        $game->phase = $phase;
+        $game->save();
+
+        return $game;
+    }
+
+    //
     // Lobby operations
     //
 
@@ -166,22 +186,6 @@ class GameService implements ModelServiceContract
     //
     // Game operations
     //
-
-    public function setStatus(Game $game, $status)
-    {
-        $game->status = $status;
-        $game->save();
-
-        return $game;
-    }
-
-    public function setPhase(Game $game, $phase)
-    {
-        $game->phase = $phase;
-        $game->save();
-
-        return $game;
-    }
 
     public function performAction(Game $game, Player $player, string $action, string $data = null)
     {
@@ -300,7 +304,7 @@ class GameService implements ModelServiceContract
     private function performRoleCardSelected(Game $game, Player $player, int $cardIndex)
     {
         // Grab the role that's associated with the card
-        $role = Roles::find($game->roles[$cardIndex]);
+        $role = Roles::find($game->currentRound->role_deck[$cardIndex]);
         if (!$role) throw new Exception("Failed to retrieve the role associated to card with index ".$cardIndex);
 
         // Assign the player it's role & save changes
@@ -309,23 +313,23 @@ class GameService implements ModelServiceContract
         $cleanPlayer->save();
 
         // Remove the option from the list of roles & make sure the values are re-indexed
-        $roles = $game->roles;
-        unset($roles[$cardIndex]);
-        $newRoles = array_values($roles);
+        $roleDeck = $game->currentRound->role_deck;
+        unset($roleDeck[$cardIndex]);
+        $newRoleDeck = array_values($roleDeck);
         
-        // Update the game's pool of available roles
-        $game->roles = $newRoles;
+        // Update the round's deck of available role cards
+        $game->currentRound->role_deck = $newRoleDeck;
 
         // Update the game's list of players that have selected a role
-        $newPlayersWithSelectedRoles = $game->players_with_selected_roles;
+        $newPlayersWithSelectedRoles = $game->currentRound->players_with_selected_roles;
         $newPlayersWithSelectedRoles[] = $player->id;
-        $game->players_with_selected_roles = $newPlayersWithSelectedRoles;
+        $game->currentRound->players_with_selected_roles = $newPlayersWithSelectedRoles;
 
-        // If the role selection phase has been completed, enter the game's main phase
-        if (count($newPlayersWithSelectedRoles) == $game->players->count()) $game->phase = "main";
+        // If the role selection phase has been completed, enter the round's main phase
+        if (count($newPlayersWithSelectedRoles) == $game->players->count()) $game->currentRound->phase = "main";
 
         // Save changes made to the game's state
-        $game->save();
+        $game->currentRound->save();
 
         // Broadcast event to inform all clients
         broadcast(new PlayerSelectedRole($game, $player))->toOthers();
@@ -733,9 +737,9 @@ class GameService implements ModelServiceContract
         $newPlayerNumber = $this->determineNextPlayerToHaveTurn($game);
 
         // Update the game
-        $game->player_turn = $newPlayerNumber;
-        $game->turn++;
-        $game->save();
+        $game->currentRound->players_turn = $newPlayerNumber;
+        $game->currentRound->turn_number++;
+        $game->currentRound->save();
 
         // Broadcast event to inform all clients
         broadcast(new TurnEnded($game));
@@ -744,10 +748,10 @@ class GameService implements ModelServiceContract
     private function determineNextPlayerToHaveTurn(Game $game)
     {
         // If we're in the game phase
-        if ($game->phase == "role_selection" || $game->phase == "main")
+        if ($game->currentRound->phase == "role_selection" || $game->currentRound->phase == "main")
         {
             // Simply go clockwise; so + 1
-            $newPlayerNumber = $game->player_turn + 1;
+            $newPlayerNumber = $game->currentRound->players_turn + 1;
 
             // If we've reached a ghost; go back to player one
             if ($newPlayerNumber > $game->players->count()) $newPlayerNumber = 1;
@@ -756,14 +760,14 @@ class GameService implements ModelServiceContract
             return $newPlayerNumber;
         }
         // If we're in the rewards phase and the winning team are the goldiggers (otherwise rewards are instant and there are no turns)
-        else if ($game->phase == "rewards" && $game->winning_team == "golddiggers")
+        else if ($game->currentRound->phase == "rewards" && $game->currentRound->winning_team == "golddiggers")
         {
             // Generate an array of players keyed by their player number for easy peasy access
             $players = [];
             foreach ($game->players as $player) $players[$player->player_number] = $player;
 
             // No we go counter clockwise and we only give the turn to golddiggers; she taaaake my mooooney
-            return $this->findNextGoldDigger($game->player_turn, $players);
+            return $this->findNextGoldDigger($game->currentRound->players_turn, $players);
         }
 
         // If we're in another phase; i'm pretty sure we're fucked bigtime; let's just return the first player
@@ -807,14 +811,14 @@ class GameService implements ModelServiceContract
             // If the player that finished the board (current player) is a golddigger; give them the turn
             if ($player->role->name == "digger")
             {
-                $game->player_turn = $player->player_number;
+                $game->players_turn = $player->player_number;
             }
             // If the player that finished had another role; first golddigger we find gets the turn
             else
             {
                 foreach ($game->players as $player) {
                     if ($player->role->name == "digger") {
-                        $game->player_turn = $player->player_number;
+                        $game->players_turn = $player->player_number;
                         break;
                     }
                 }
@@ -949,6 +953,8 @@ class GameService implements ModelServiceContract
             $player->cart_available = true;
             $player->light_available = true;
             $player->pickaxe_available = true;
+            $player->in_jail = false;
+            $player->thief_activated = false;
             $player->hand = [];
             $player->save();
         }
@@ -958,7 +964,7 @@ class GameService implements ModelServiceContract
 
         // Up the round count by one
         $game->round = $game->round + 1;
-        $game->player_turn = 1;
+        $game->players_turn = 1;
         $game->save();
 
         // Broadcast event to all players
@@ -1057,10 +1063,10 @@ class GameService implements ModelServiceContract
         $game = Game::find($game->id);
 
         // If we're in the game phase
-        if ($game->phase == "main")
+        if ($game->currentRound->phase == "main")
         {
             // Round ends when there are no cards left in the deck & player's hands or the gold has been found
-            return (count($game->deck) == 0 && $this->playersOutOfCards($game)) || array_key_exists($game->gold_location, $game->reached_gold_locations);
+            return (count($game->currentRound->deck) == 0 && $this->playersOutOfCards($game)) || array_key_exists($game->currentRound->gold_location, $game->currentRound->reached_gold_locations);
         }
         
         // Return false
@@ -1069,6 +1075,6 @@ class GameService implements ModelServiceContract
 
     public function gameEnded(Game $game)
     {
-        return $game->round == 3;
+        return $game->currentRound->round_number == 3;
     }
 }

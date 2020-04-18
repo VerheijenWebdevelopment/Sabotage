@@ -22,6 +22,8 @@ class CreateRoundsTable extends Migration
             $table->unsignedInteger('players_turn');
             $table->text('deck');
             $table->unsignedInteger('num_cards_in_deck')->default(0);
+            $table->text('role_deck')->nullable();
+            $table->unsignedInteger('num_cards_in_role_deck')->default(0);
             $table->text('available_roles')->nullable();
             $table->text('players_with_selected_roles')->nullable();
             $table->text('board')->nullable();
