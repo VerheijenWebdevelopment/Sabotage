@@ -24,6 +24,8 @@ class CreatePlayersTable extends Migration
             $table->boolean('cart_available')->default(true);
             $table->boolean('light_available')->default(true);
             $table->boolean('pickaxe_available')->default(true);
+            $table->boolean('in_jail')->default(false);
+            $table->boolean('thief_activated')->default(false);
             $table->timestamps();
         });
     }

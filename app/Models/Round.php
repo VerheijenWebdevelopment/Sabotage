@@ -17,19 +17,21 @@ class Round extends Model
         "deck",
         "num_cards_in_deck",
         "available_roles",
-        "role_deck",
         "players_with_selected_roles",
         "board",
         "gold_location",
         "reached_gold_locations",
         "winning_teams",
         "revealed_players",
-        "rewards",
+        "current",
     ];
     protected $hidden = [
         "deck",
         "role_deck",
         "gold_location",
+    ];
+    protected $casts = [
+        "current" => "boolean",
     ];
 
     //
@@ -47,47 +49,42 @@ class Round extends Model
 
     public function getDeckAttribute($value)
     {
-        $this->attributes["deck"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getAvailableRolesAttribute($value)
     {
-        $this->attributes["available_roles"] = unserialize($value);
-    }
-
-    public function getRoleDeckAttribute($value)
-    {
-        $this->attributes["role_deck"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getPlayersWithSelectedRolesAttribute($value)
     {
-        $this->attributes["players_with_selected_roles"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getBoardAttribute($value)
     {
-        $this->attributes["board"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getReachedGoldLocationsAttribute($value)
     {
-        $this->attributes["reached_gold_locations"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getWinningTeamsAttribute($value)
     {
-        $this->attributes["winning_teams"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getRevealedPlayersAttribute($value)
     {
-        $this->attributes["revealed_players"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     public function getRewardsAttribute($value)
     {
-        $this->attributes["rewards"] = unserialize($value);
+        return json_decode(unserialize($value));
     }
 
     //
@@ -96,46 +93,41 @@ class Round extends Model
 
     public function setDeckAttribute($value)
     {
-        $this->attributes["deck"] = serialize($value);
+        $this->attributes["deck"] = serialize(json_encode($value));
     }
 
     public function setAvailableRolesAttribute($value)
     {
-        $this->attributes["available_roles"] = serialize($value);
-    }
-
-    public function setRoleDeckAttribute($value)
-    {
-        $this->attributes["role_deck"] = serialize($value);
+        $this->attributes["available_roles"] = serialize(json_encode($value));
     }
 
     public function setPlayersWithSelectedRolesAttribute($value)
     {
-        $this->attributes["players_with_selected_roles"] = serialize($value);
+        $this->attributes["players_with_selected_roles"] = serialize(json_encode($value));
     }
 
     public function setBoardAttribute($value)
     {
-        $this->attributes["board"] = serialize($value);
+        $this->attributes["board"] = serialize(json_encode($value));
     }
 
     public function setReachedGoldLocationsAttribute($value)
     {
-        $this->attributes["reached_gold_locations"] = serialize($value);
+        $this->attributes["reached_gold_locations"] = serialize(json_encode($value));
     }
 
     public function setWinningTeamsAttribute($value)
     {
-        $this->attributes["winning_teams"] = serialize($value);
+        $this->attributes["winning_teams"] = serialize(json_encode($value));
     }
 
     public function setRevealedPlayersAttribute($value)
     {
-        $this->attributes["revealed_players"] = serialize($value);
+        $this->attributes["revealed_players"] = serialize(json_encode($value));
     }
 
     public function setRewardsAttribute($value)
     {
-        $this->attributes["rewards"] = serialize($value);
+        $this->attributes["rewards"] = serialize(json_encode($value));
     }
 }

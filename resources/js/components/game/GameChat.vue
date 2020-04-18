@@ -2,9 +2,9 @@
     <div id="game-chat">
 
         <!-- Messages -->
-        <div id="game-chat__messages">
+        <div id="game-chat__messages" ref="container">
             <div class="game-chat__message" v-for="(message, mi) in mutableMessages" :key="mi" :class="{ system: message.author === 'system' }">
-                <div class="message-author">
+                <div class="message-author" v-if="message.author !== 'system'">
                     <div class="message-author__pill">{{ message.author }}</div>
                 </div>
                 <div class="message-text">{{ message.message }}</div>
@@ -13,7 +13,7 @@
         
         <!-- Form -->
         <div id="game-chat__form">
-            <input type="text" id="game-chat__input" placeholder="..." v-model="form.message" @keypress.enter="onPressEnter">
+            <input type="text" id="game-chat__input" placeholder="..." maxlength="255" v-model="form.message" @keypress.enter="onPressEnter">
         </div>
 
     </div>
@@ -35,25 +35,25 @@
         }),
         methods: {
             initialize() {
-                console.log(this.tag+" initializing");
-                console.log(this.tag+" game: ", this.game);
-                console.log(this.tag+" player: ", this.player);
-                console.log(this.tag+" send message api endpoint: ", this.sendMessageApiEndpoint);
+                // console.log(this.tag+" initializing");
+                // console.log(this.tag+" game: ", this.game);
+                // console.log(this.tag+" player: ", this.player);
+                // console.log(this.tag+" send message api endpoint: ", this.sendMessageApiEndpoint);
                 this.initializeData();
                 this.startListening();
             },
             initializeData() {
-                this.mutableMessages.push({
-                    author: "system",
-                    message: "Welcome to the game!"
-                });
+                if (this.game !== undefined && this.game !== null && this.game.messages !== undefined && this.game.messages !== null && this.game.messages.length > 0) {
+                    for (let i = 0; i < this.game.messages.length; i++) {
+                        this.mutableMessages.push(this.game.messages[i]);
+                    }
+                }
             },
             startListening() {
                 Echo.private("game."+this.game.id)
                     .listen("Game\\GameMessageSent", this.onMessageReceived);
             },
             onMessageReceived(e) {
-                console.log(this.tag+" received message", e);
                 let username = this.getUsernameByPlayerId(e.message.player_id);
                 this.mutableMessages.push({
                     author: username,
@@ -61,7 +61,6 @@
                 });
             },
             onPressEnter() {
-                console.log(this.tag+" pressed enter");
 
                 // If something was typed in the input
                 if (this.form.message !== "") {
@@ -113,10 +112,17 @@
                 }
                 return "Unknown";
             },
+            scrollToBottom() {
+                let container = this.$refs.container;
+                container.scrollTop = container.scrollHeight;
+            },
         },
         mounted() {
             this.initialize();
-        }
+        },
+        updated() {
+            this.scrollToBottom();
+        },
     }
 </script>
 
@@ -126,12 +132,14 @@
         display: flex;
         flex-direction: column;
         #game-chat__messages {
-            flex: 1;
             padding: 30px;
+            flex: 0 0 200px;
+            overflow-y: scroll;
             box-sizing: border-box;
             .game-chat__message {
                 display: flex;
-                margin: 0 0 15px 0;
+                font-size: .8em;
+                margin: 0 0 5px 0;
                 flex-direction: row;
                 &:last-child {
                     margin: 0;
@@ -139,14 +147,14 @@
                 .message-author {
                     display: flex;
                     margin: 0 8px 0 0;
-                    flex-direction: row;
-                    align-items: center;
+                    flex-direction: column;
+                    justify-content: flex-start;
                     .message-author__pill {
                         font-size: .8em;
                         border-radius: 3px;
                         box-sizing: border-box;
                         background-color: #333;
-                        padding: 2px 5px 3px 5px;
+                        padding: 1px 5px 2px 5px;
                     }
                 }
                 .message-text {

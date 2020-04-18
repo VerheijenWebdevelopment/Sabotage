@@ -39,61 +39,37 @@ class RoleService implements ModelServiceContract
         return false;
     }
 
-    public function generateRoles(Game $game)
+    public function generateRoles()
     {
-        $out = [];
-
-        // Grab the available roles
+        // Grab all available roles
         $saboteur = $this->findByName("saboteur");
-        $digger = $this->findByName("digger");
+        $blue_digger = $this->findByName("blue_digger");
+        $green_digger = $this->findByName("green_digger");
+        $chef = $this->findByName("chef");
+        $profiteer = $this->findByName("profiteer");
+        $geologist = $this->findByName("geologist");
 
-        // Switch between number of players & determine number of each roles to generate
-        switch ($game->players->count())
-        {
-            case 2:
-                $num_diggers = 1;
-                $num_saboteurs = 1;
-            case 3:
-                $num_diggers = 3;
-                $num_saboteurs = 1;
-                break;
-            case 4:
-                $num_diggers = 4;
-                $num_saboteurs = 1;
-                break;
-            case 5:
-                $num_diggers = 4;
-                $num_saboteurs = 2;
-                break;
-            case 6:
-                $num_diggers = 5;
-                $num_saboteurs = 2;
-                break;
-            case 7:
-                $num_diggers = 5;
-                $num_saboteurs = 3;
-                break;
-            case 8:
-                $num_diggers = 6;
-                $num_saboteurs = 3;
-                break;
-            case 9:
-                $num_diggers = 7;
-                $num_saboteurs = 3;
-                break;
-            case 10:
-                $num_diggers = 7;
-                $num_saboteurs = 4;
-                break;
-            default:
-                return [];
-        }
+        // Compose the "deck" of possible roles
+        $out = [
+            $saboteur->id,
+            $saboteur->id,
+            $saboteur->id,
+            $saboteur->id,
+            $blue_digger->id,
+            $blue_digger->id,
+            $blue_digger->id,
+            $blue_digger->id,
+            $green_digger->id,
+            $green_digger->id,
+            $green_digger->id,
+            $green_digger->id,
+            $chef->id,
+            $profiteer->id,
+            $geologist->id,
+        ];
 
-        // Generate the pool of roles
-        for ($i = 0; $i < $num_diggers; $i++) $out[] = $digger->id;
-        for ($i = 0; $i < $num_saboteurs; $i++) $out[] = $saboteur->id;
-
-        // Shuffle the pool so the roles are randomly divided
+        // Shuffle the deck a few times to make the order random
+        shuffle($out);
         shuffle($out);
 
         // Return the generated pool of role id's
@@ -102,12 +78,19 @@ class RoleService implements ModelServiceContract
 
     public function countGeneratedRoles(array $roleIds)
     {
+        // Array we're outputting
         $out = [];
 
+        // Count the total number of roles that are available
         $total = 0;
+
+        // Loop through all of the roles
         foreach ($this->getAll() as $role)
         {
+            // Count the number of times this role is available
             $count = 0;
+
+            // Process all of the role id's (representing role cards) in the deck
             foreach ($roleIds as $roleId)
             {
                 if ($role->id == $roleId)
@@ -116,12 +99,14 @@ class RoleService implements ModelServiceContract
                     $total++;
                 }
             }
+            // Add the entry for this role
             $out[] = [
                 "role_id" => $role->id,
                 "count" => $count,
             ];
         }
 
+        // Return the output
         return $out;
     }
 }

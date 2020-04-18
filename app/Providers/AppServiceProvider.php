@@ -11,6 +11,7 @@ use App\Services\CardService;
 use App\Services\BoardService;
 use App\Services\PlayerService;
 use App\Services\UploaderService;
+use App\Services\GameMessageService;
 
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -49,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton("games", function() {
             return new GameService;
+        });
+
+        $this->app->singleton("game-messages", function() {
+            return new GameMessageService;
         });
 
         $this->app->singleton("rounds", function() {

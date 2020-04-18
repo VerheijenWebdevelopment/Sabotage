@@ -1,43 +1,60 @@
 <template>
     <div id="game-players">
+
         <!-- Player -->
         <div class="game-player" v-for="(p, pi) in value" :key="pi" :class="{ you: p.id === player.id, active: p.id === playerAtPlay.id }">
+            
             <!-- Online indicator -->
             <div class="game-player__online-indicator" :class="{ online: isOnline(p) }"></div>
+            
             <!-- Avatar -->
-            <div class="game-player__avatar">
+            <div class="game-player__avatar" :style="{ backgroundImage: 'url('+p.user.avatar_url+')' }">
+                <div class="avatar-prison-overlay" v-if="p.in_jail">
+                    <div class="prison-bar"></div>
+                    <div class="prison-bar"></div>
+                    <div class="prison-bar"></div>
+                    <div class="prison-bar"></div>
+                    <div class="prison-bar"></div>
+                </div>
             </div>
+            
             <!-- Text -->
             <div class="game-player__text">
-                <!-- Player # -->
-                <!-- <div class="game-player__number">Player {{ p.player_number }}</div> -->
                 <!-- Username -->
                 <div class="game-player__username">{{ p.user.username }}</div>
-                <!-- Tools -->
-                <div class="game-player__tools">
+                <!-- Flags -->
+                <div class="game-player__flags">
                     <!-- Pickaxe -->
-                    <div class="tool pickaxe" :class="{ available: p.pickaxe_available, unavailable: !p.pickaxe_available }">
-                        <img class="tool-icon" :src="pickaxeIconUrl">
+                    <div class="flag pickaxe" :class="{ available: p.pickaxe_available, unavailable: !p.pickaxe_available }">
+                        <img class="flag-icon" :src="icons.pickaxe">
                     </div>
                     <!-- Light -->
-                    <div class="tool light" :class="{ available: p.light_available, unavailable: !p.light_available }">
-                        <img class="tool-icon" :src="lightIconUrl">
+                    <div class="flag light" :class="{ available: p.light_available, unavailable: !p.light_available }">
+                        <img class="flag-icon" :src="icons.light">
                     </div>
                     <!-- Cart -->
-                    <div class="tool cart" :class="{ available: p.cart_available, unavailable: !p.cart_available }">
-                        <img class="tool-icon" :src="cartIconUrl">
+                    <div class="flag cart" :class="{ available: p.cart_available, unavailable: !p.cart_available }">
+                        <img class="flag-icon" :src="icons.cart">
+                    </div>
+                    <!-- In prison -->
+                    <div class="flag prison" v-if="p.in_jail">
+                        <img class="flag-icon" :src="icons.prison">
+                    </div>
+                    <!-- Thief -->
+                    <div class="flag thiefery" v-if="p.thief_activated">
+                        <img class="flag-icon" :src="icons.thief">
                     </div>
                 </div>
             </div>
+
             <!-- Score -->
             <div class="game-player__score">
                 <div class="score">
-                    <div class="score-icon" :style="{ backgroundImage: 'url('+goldIconUrl+')' }"></div>
-                    <div class="score-text">
-                        {{ p.score }}
-                    </div>
+                    <div class="score-icon" :style="{ backgroundImage: 'url('+icons.gold+')' }"></div>
+                    <div class="score-text">{{ p.score }}</div>
                 </div>
             </div>
+
         </div>
 
     </div>
@@ -47,13 +64,10 @@
     export default {
         props: [
             "game",
+            "icons",
             "player",
             "playerAtPlay",
             "value",
-            "cartIconUrl",
-            "lightIconUrl",
-            "pickaxeIconUrl",
-            "goldIconUrl",
         ],
         data: () => ({
             tag: "[game-players]",
@@ -65,35 +79,28 @@
                 console.log(this.tag+" game: ", this.game);
                 console.log(this.tag+" player: ", this.player);
                 console.log(this.tag+" player at play: ", this.playerAtPlay);
+                console.log(this.tag+" icons: ", this.icons);
                 console.log(this.tag+" value: ", this.value);
-                console.log(this.tag+" cart icon url: ", this.cartIconUrl);
-                console.log(this.tag+" light icon url: ", this.lightIconUrl);
-                console.log(this.tag+" pickaxe icon url: ", this.pickaxeIconUrl);
-                console.log(this.tag+" gold icon url: ", this.goldIconUrl);
                 this.startListening();
             },
             startListening() {
-                // Join the Game's channel
+                // Join the game's chat presence channel
                 Echo.join("game-chat."+this.game.id)
-                    // When we join the channel
                     .here(this.onJoin)
-                    // When player joins the channel
                     .joining(this.onUserJoined)
-                    // When player leaves the channel
                     .leaving(this.onUserLeft);
             },
             onJoin(players) {
-                console.log(this.tag+" joined the game channel", players);
-                for (let i = 0; i < players.length; i++) {
-                    this.onlinePlayers.push(players[i].id);
-                }
+                console.log("JOINED", players);
+                // Load all online players when we succesfully join the channel
+                for (let i = 0; i < players.length; i++) this.onlinePlayers.push(players[i].id);
             },
             onUserJoined(player) {
-                console.log(this.tag+" user joined the game channel", player);
+                // Add player to list of online players when they join the channel
                 this.onlinePlayers.push(player.id);
             },
             onUserLeft(player) {
-                console.log(this.tag+" user left the game channel", player);
+                // Remove the player from list of online players when they leave the channel
                 for (let i = 0; i < this.onlinePlayers.length; i++) {
                     if (this.onlinePlayers[i] === player.id) {
                         this.onlinePlayers.splice(i, 1);
@@ -102,6 +109,7 @@
                 }
             },
             isOnline(player) {
+                // Check if the given player is online or not
                 for (let i = 0; i < this.onlinePlayers.length; i++) {
                     if (this.onlinePlayers[i] === player.id) {
                         return true;
@@ -125,13 +133,12 @@
         justify-content: center;
         .game-player {
             display: flex;
-            padding: 10px;
+            overflow: hidden;
             border-radius: 3px;
-            margin: 0 0 15px 0;
+            margin: 0 0 20px 0;
             position: relative;
             align-items: center;
             flex-direction: row;
-            box-sizing: border-box;
             background-color: hsl(0, 0%, 2%);
             &:last-child {
                 margin: 0;
@@ -145,9 +152,9 @@
                 border-bottom: 2px solid #ffd900;
             }
             .game-player__online-indicator {
-                left: 6px;
+                top: 6px;
+                right: 6px;
                 width: 6px;
-                bottom: 6px;
                 height: 6px;
                 position: absolute;
                 border-radius: 3px;
@@ -157,14 +164,27 @@
                 }
             }
             .game-player__avatar {
-                height: 40px;
-                flex: 0 0 40px;
+                height: 60px;
+                flex: 0 0 60px;
                 position: relative;
-                border-radius: 20px;
-                // border: 2px solid #000;
                 background-color: #333;
+                background-size: contain;
                 background-repeat: no-repeat;
                 background-position: center center;
+                .avatar-prison-overlay {
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-evenly;
+                    .prison-bar {
+                        height: 100%;
+                        flex: 0 0 4px;
+                        background-color: #000;
+                    }
+                }
             }
             .game-player__text {
                 flex: 1;
@@ -174,18 +194,20 @@
                     color: rgba(255, 255, 255, 0.25);
                 }
                 .game-player__username {
-                    font-size: 1em;
+                    font-size: .9em;
                     font-weight: 500;
+                    line-height: 1em;
+                    margin-bottom: 10px;
                 }
                 .game-player__score {
                     font-size: .8em;
                     color: rgba(255, 255, 255, 0.5);
                 }
-                .game-player__tools {
+                .game-player__flags {
                     display: flex;
                     margin: 5px 0 0 0;
                     flex-direction: row;
-                    .tool {
+                    .flag {
                         height: 20px;
                         display: flex;
                         flex: 0 0 20px;
@@ -202,11 +224,9 @@
 
                         }
                         &.light {
-                            .tool-icon {
-                                width: 16px;
-                                height: 16px;
-                                margin: 4px 2px 0 0;
-                            }
+                            .flag-icon {
+                                margin-bottom: 2px;
+                            }   
                         }
                         &.cart {
 
@@ -214,10 +234,19 @@
                         &.available {
                             background-color: #0e6600;
                         }
-                        &.unavailable {
+                        &.unavailable, &.prison {
                             background-color: #a80000;
                         }
-                        .tool-icon {
+                        &.prison {
+                            .flag-icon {
+                                width: 16px;
+                                margin-bottom: 2px;
+                            }
+                        }
+                        &.thiefery {
+                            background-color: #0081d1;
+                        }
+                        .flag-icon {
                             width: 20px;
                             height: 20px;
                             margin: 5px 0px 0 0;
@@ -230,7 +259,7 @@
             }
             .game-player__score {
                 display: flex;
-                margin: 0 0 0 15px;
+                margin: 0 25px;
                 align-items: center;
                 justify-content: center;
                 .score {

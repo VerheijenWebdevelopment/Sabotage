@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Games;
 use Players;
 use Exception;
+use GameMessages;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Game\PerformActionRequest;
@@ -45,8 +46,19 @@ class GameController extends Controller
 
     public function postSendMessage(SendGameMessageRequest $request)
     {
-        Games::sendMessageFromRequest($request);
-        
-        return response()->json(["status" => "success"]);
+        // Grab the active game for the logged in user making this request
+        $game = Games::find($request->game_id);
+
+        // Grab the player of the logged in user making this request
+        $player = Players::getActivePlayer();
+
+        // Send the message
+        $message = GameMessages::sendMessage($request->message, $game, $player);
+
+        // Return success + the created message
+        return response()->json([
+            "status" => "success",
+            "message" => $message,
+        ]);
     }
 }

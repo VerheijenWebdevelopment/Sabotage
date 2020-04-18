@@ -2,7 +2,7 @@
 
 namespace App\Events\Game;
 
-use App\Models\GameChatMessage;
+use App\Models\GameMessage;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
@@ -23,7 +23,7 @@ class GameMessageSent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(GameChatMessage $message)
+    public function __construct(GameMessage $message)
     {
         $this->message = $message;
     }

@@ -231,6 +231,7 @@ return [
         'Users' => \App\Facades\UsersFacade::class,
         'Lobby' => \App\Facades\LobbyFacade::class,
         'Games' => \App\Facades\GamesFacade::class,
+        'GameMessages' => \App\Facades\GameMessagesFacade::class,
         'Rounds' => \App\Facades\RoundsFacade::class,
         'Cards' => \App\Facades\CardsFacade::class,
         'Roles' => \App\Facades\RolesFacade::class,

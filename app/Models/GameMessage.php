@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class GameChatMessage extends Model
+class GameMessage extends Model
 {
-    protected $table = "game_chat_messages";
+    protected $table = "game_messages";
     protected $guarded = ["id", "created_at", "updated_at"];
     protected $fillable = [
         "game_id",

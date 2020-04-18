@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api\Game;
+namespace App\Http\Requests\Api\Lobby;
 
 use Auth;
 use Illuminate\Foundation\Http\FormRequest;

@@ -18,6 +18,8 @@ class Player extends Model
         "cart_available",
         "light_available",
         "pickaxe_available",
+        "in_jail",
+        "thief_activated",
     ];
     protected $hidden = [
         "role",
@@ -27,6 +29,8 @@ class Player extends Model
         "cart_available",
         "light_available",
         "pickaxe_available",
+        "in_jail",
+        "thief_activated",
     ];
 
     //

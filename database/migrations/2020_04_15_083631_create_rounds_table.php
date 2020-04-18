@@ -23,14 +23,12 @@ class CreateRoundsTable extends Migration
             $table->text('deck');
             $table->unsignedInteger('num_cards_in_deck')->default(0);
             $table->text('available_roles')->nullable();
-            $table->text('role_deck')->nullable();
             $table->text('players_with_selected_roles')->nullable();
             $table->text('board')->nullable();
             $table->unsignedInteger('gold_location');
             $table->text('reached_gold_locations')->nullable();
             $table->text('winning_teams')->nullable();
             $table->text('revealed_players')->nullable();
-            $table->text('rewards')->nullable();
             $table->boolean('current')->default(true);
             $table->timestamps();
         });

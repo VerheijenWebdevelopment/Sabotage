@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Games;
+use GameMessages;
 use App\Models\Game;
 use App\Events\Lobby\GameCreated;
 use App\Events\Lobby\GameDeleted;
@@ -98,7 +99,10 @@ class LobbyService
         $game = Games::prepareGame($game);
 
         // Update game's status
-        $game = Games::setStatus("ongoing");
+        $game = Games::setStatus($game, "ongoing");
+
+        // Send a welcome (system) message to all players
+        GameMessages::sendSystemMessage("Het spel is begonnen! Dat is niet mijn tunnel vriend.", $game, false);
 
         // Inform all other users the game has started
         broadcast(new GameStarted(auth()->user(), $game))->toOthers();

@@ -17,8 +17,10 @@ class LobbyController extends Controller
 {
     public function postCreateGame(CreateGameRequest $request)
     {
+        // Create the game
         $game = Lobby::createFromRequest($request);
 
+        // Return success + the created game
         return response()->json([
             "status" => "success",
             "game" => Games::preload($game)
@@ -27,15 +29,19 @@ class LobbyController extends Controller
 
     public function postDeleteGame(DeleteGameRequest $request)
     {
+        // Delete the game
         Lobby::deleteFromRequest($request);
 
+        // Return success
         return response()->json(["status" => "success"]);
     }
 
     public function postJoinGame(JoinGameRequest $request)
     {
+        // Join the game
         $player = Lobby::joinFromRequest($request);
 
+        // Return success
         return response()->json([
             "status" => "success",
             "player" => Players::preload($player),
@@ -44,15 +50,19 @@ class LobbyController extends Controller
 
     public function postLeaveGame(LeaveGameRequest $request)
     {
+        // Leave the game
         Lobby::leaveFromRequest($request);
 
+        // Return success
         return response()->json(["status" => "success"]);
     }
 
     public function postStartGame(StartGameRequest $request)
     {
+        // Start the game
         $game = Lobby::startFromRequest($request);
 
+        // Return success + the created game
         return response()->json([
             "status" => "success",
             "game_id" => $game->id,
@@ -61,8 +71,10 @@ class LobbyController extends Controller
 
     public function postUpdateSettings(UpdateSettingsRequest $request)
     {
+        // Update the game's settings
         $game = Lobby::updateSettingsFromRequest($request);
 
+        // Return success
         return response()->json(["status" => "success"]);
     }
 }

@@ -5,8 +5,10 @@ namespace App\Services;
 use Cards;
 use Roles;
 use Board;
+use Rounds;
 use Players;
 use Exception;
+use GameMessages;
 
 use App\Models\User;
 use App\Models\Game;
@@ -26,7 +28,6 @@ use App\Events\Game\PlayerCollapsedTunnel;
 use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
-use App\Events\Game\GameMessageSent;
 use App\Events\Game\GoldLocationRevealed;
 use App\Events\Game\PlayerIsReadyForNextRound;
 use App\Events\Game\PlayerWasAwardedGold;
@@ -51,6 +52,8 @@ class GameService implements ModelServiceContract
     {
         $instance->players = Players::getAllForGame($instance);
         $instance->num_available_roles = $instance->numberOfAvailableRoles;
+        $instance->round = Rounds::findPreloaded($instance->current_round_id);
+        $instance->messages = GameMessages::getAllForGame($instance);
 
         return $instance;
     }
@@ -146,36 +149,15 @@ class GameService implements ModelServiceContract
 
     public function prepareGame(Game $game)
     {
-        // Set phase 
-        $game->phase = "role_selection";
+        // Create the (next) round of the game we'll be going to play in
+        $round = Rounds::createNewRound($game);
 
-        // Compose the deck (TODO: based on settings)
-        $game->deck = Cards::generateDeck($game);
-        $game->num_cards_in_deck = count($game->deck);
-
-        // Compose the available roles
-        $game->roles = Roles::generateRoles($game);
-        $game->available_roles = Roles::countGeneratedRoles($game->roles);
-        $game->players_with_selected_roles = [];        
-        
-        // Generate a game board
-        $game->board = Board::generateBoard($game);
-        $game->reached_gold_locations = [];
-
-        // Randomly determine the location of the gold
-        $game->gold_location = rand(1, 3);
-
-        // (Re)set reward related properties to null
-        $game->reward_deck = [];
-        $game->revealed_players = [];
-        $game->saboteur_reward = null;
-        $game->winning_team = null;
-
-        // Save changes to the game
+        // Set the round as the game's current round
+        $game->current_round_id = $round->id;
         $game->save();
-
+        
         // Deal the player's their cards
-        $game = $this->dealCardsToPlayers($game);
+        $round = Rounds::dealCardsToPlayers($round);
 
         // Return updated game
         return $game;
@@ -199,77 +181,6 @@ class GameService implements ModelServiceContract
         $game->save();
 
         return $game;
-    }
-
-    private function dealCardsToPlayers(Game $game)
-    {
-        // Determine the amount of cards to deal to each player
-        $cardsPerPlayer = $this->determineCardsPerPlayer($game);
-
-        // Grab the game's deck (so we can modify it)
-        $deck = $game->deck;
-
-        // Loop through the amount of cards to deal to each player
-        for ($i = 0; $i < $cardsPerPlayer; $i++)
-        {
-            // Loop through all of the game's players
-            foreach ($game->players as $player)
-            {
-                // Grab a card from the top of the deck and remove it at the same time
-                $card_id = array_shift($deck);
-
-                // Add the card to the player's hand
-                $newHand = $player->hand;
-                $newHand[] = $card_id;
-                $player->hand = $newHand;
-                $player->save();
-            }
-        }
-
-        // Save the new deck on the game
-        $game->deck = $deck;
-        $game->num_cards_in_deck = count($game->deck);
-        $game->save();
-
-        // Return the updated game
-        return $game;
-    }
-
-    private function determineCardsPerPlayer(Game $game)
-    {
-        switch ($game->players->count())
-        {
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                return 6;
-            case 6:
-            case 7:
-                return 5;
-            case 8:
-            case 9:
-            case 10:
-            default:
-                return 4;
-        }
-    }
-
-    public function sendMessageFromRequest(SendGameMessageRequest $request)
-    {   
-        $game = $this->find($request->game_id);
-
-        $player = Players::getActivePlayer();
-
-        $message = GameChatMessage::create([
-            "game_id" => $request->game_id,
-            "player_id" => $player->id,
-            "message" => $request->message
-        ]);
-
-        broadcast(new GameMessageSent($message))->toOthers();
-
-        return $message;
     }
 
     public function performAction(Game $game, Player $player, string $action, string $data = null)
