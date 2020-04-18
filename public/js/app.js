@@ -2922,6 +2922,154 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -2937,11 +3085,33 @@ __webpack_require__.r(__webpack_exports__);
       dialogs: {
         my_role: {
           show: false
+        },
+        play_card: {
+          show: false,
+          index: null,
+          loading: false
+        },
+        fold_card: {
+          show: false,
+          index: null,
+          loading: false
+        },
+        fold_cards: {
+          show: false,
+          indices: [],
+          loading: false
+        },
+        fold_cards_unblock: {
+          show: false,
+          indices: [],
+          tool: null,
+          loading: false
         }
       }
     };
   },
   computed: {
+    // Turns
     playerAtPlay: function playerAtPlay() {
       for (var i = 0; i < this.mutablePlayers.length; i++) {
         if (this.mutablePlayers[i].player_number == this.mutableRound.players_turn) {
@@ -2953,7 +3123,61 @@ __webpack_require__.r(__webpack_exports__);
     },
     itsMyTurn: function itsMyTurn() {
       return this.playerAtPlay.id === this.player.id;
-    }
+    },
+    // Hand
+    selectedHandCards: function selectedHandCards() {
+      var out = [];
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          out.push(this.mutableHand[i]);
+        }
+      }
+
+      return out;
+    },
+    selectedHandCard: function selectedHandCard() {
+      var cards = this.selectedHandCards;
+
+      if (cards.length > 0) {
+        return cards[0];
+      }
+
+      return false;
+    },
+    numSelectedHandCards: function numSelectedHandCards() {
+      return this.selectedHandCards.length;
+    },
+    showCardActions: function showCardActions() {
+      return this.numSelectedHandCards > 0 && this.numSelectedHandCards < 4;
+    },
+    // Play card dialog
+    playCardDialogCard: function playCardDialogCard() {
+      if (this.dialogs.play_card.index !== null) {
+        return this.mutableHand[this.dialogs.play_card.index].card;
+      }
+
+      return false;
+    },
+    // Fold card dialog
+    foldCardDialogCard: function foldCardDialogCard() {
+      if (this.dialogs.fold_card.index !== null) {
+        return this.mutableHand[this.dialogs.fold_card.index].card;
+      }
+
+      return false;
+    },
+    // Fold cards dialog
+    foldCardsDialogCards: function foldCardsDialogCards() {
+      var out = [];
+
+      for (var i = 0; i < this.dialogs.fold_cards.indices.length; i++) {
+        out.push(this.mutableHand[this.dialogs.fold_cards.indices[i]].card);
+      }
+
+      return out;
+    } // Fold cards & unblock dialog
+
   },
   methods: {
     initialize: function initialize() {
@@ -2983,12 +3207,18 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      if (this.hand !== undefined && this.hand !== null && this.hand.length > 0) {
-        for (var _i = 0; _i < this.hand.length; _i++) {
-          var card = this.getCardById(this.hand[_i]);
+      this.initializeHand(this.hand);
+    },
+    initializeHand: function initializeHand(hand) {
+      if (hand !== undefined && hand !== null && hand.length > 0) {
+        for (var i = 0; i < hand.length; i++) {
+          var card = this.getCardById(hand[i]);
 
           if (card) {
-            this.mutableHand.push(card);
+            this.mutableHand.push({
+              selected: false,
+              card: card
+            });
           }
         }
       }
@@ -3070,6 +3300,115 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + " clicked my role card");
       this.dialogs.my_role.show = true;
     },
+    onClickHandCard: function onClickHandCard(index) {
+      console.log(this.tag + " clicked hand card: ", index);
+      this.mutableHand[index].selected = !this.mutableHand[index].selected;
+    },
+    onClickBoardTile: function onClickBoardTile(e) {
+      console.log(this.tag + " clicked board tile: ", e);
+    },
+    // Hand actions
+    onClickPlayCard: function onClickPlayCard() {
+      console.log(this.tag + " clicked play card button"); // Find & save selected card's index
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.dialogs.play_card.index = i;
+          break;
+        }
+      } // Show dialog
+
+
+      this.dialogs.play_card.show = true; // Deselect cards in our hand
+
+      this.deselectHandCards();
+    },
+    onClickFoldCard: function onClickFoldCard() {
+      console.log(this.tag + " clicked fold card button"); // Find & save selected card's index
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.dialogs.fold_card.index = i;
+          break;
+        }
+      } // Show dialog
+
+
+      this.dialogs.fold_card.show = true; // Deselect cards in our hand
+
+      this.deselectHandCards();
+    },
+    onClickFoldCards: function onClickFoldCards() {
+      console.log(this.tag + " clicked fold cards button"); // Find & save selected cards' indices
+
+      this.dialogs.fold_cards.indices = [];
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.dialogs.fold_cards.indices.push(i);
+        }
+      } // Show dialog
+
+
+      this.dialogs.fold_cards.show = true; // Deselect cards in our hand
+
+      this.deselectHandCards();
+    },
+    onClickFoldCardsUnblock: function onClickFoldCardsUnblock() {
+      console.log(this.tag + " clicked fold cards & unblock tool button"); // Find & save selected cards' indices
+
+      this.dialogs.fold_cards_unblock.indices = [];
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.dialogs.fold_cards_unblock.indices.push(i);
+        }
+      } // Show dialog
+
+
+      this.dialogs.fold_cards_unblock.show = true; // Deselect cards in our hand
+
+      this.deselectHandCards();
+    },
+    deselectHandCards: function deselectHandCards() {
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.mutableHand[i].selected = false;
+        }
+      }
+    },
+    // Play card dialog
+    onClickCancelPlayCard: function onClickCancelPlayCard() {
+      console.log(this.tag + " clicked fold card");
+      this.dialogs.play_card.show = false;
+    },
+    onClickConfirmPlayCard: function onClickConfirmPlayCard() {
+      console.log(this.tag + " clicked confirm play card");
+    },
+    // Fold card dialog
+    onClickCancelFoldCard: function onClickCancelFoldCard() {
+      console.log(this.tag + " clicked cancel fold card button");
+      this.dialogs.fold_card.show = false;
+    },
+    onClickConfirmFoldCard: function onClickConfirmFoldCard() {
+      console.log(this.tag + " clicked confirm fold card button");
+    },
+    // Fold cards dialog 
+    onClickCancelFoldCards: function onClickCancelFoldCards() {
+      console.log(this.tag + " clicked cancel fold cards button");
+      this.dialogs.fold_cards.show = false;
+    },
+    onClickConfirmFoldCards: function onClickConfirmFoldCards() {
+      console.log(this.tag + " clicked confirm fold cards button");
+    },
+    // Fold cards & unblock tool dialog
+    onClickCancelFoldCardsUnblock: function onClickCancelFoldCardsUnblock() {
+      console.log(this.tag + " clicked cancel fold cards & unblock tool button");
+      this.dialogs.fold_cards_unblock.show = false;
+    },
+    onClickConfirmFoldCardsUnblock: function onClickConfirmFoldCardsUnblock() {
+      console.log(this.tag + " clicked confirm fold cards & unblock tool button");
+    },
     // Getters
     getCardById: function getCardById(id) {
       for (var i = 0; i < this.cards.length; i++) {
@@ -3114,6 +3453,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["value", "cards"],
   data: function data() {
@@ -3125,8 +3484,17 @@ __webpack_require__.r(__webpack_exports__);
       viewportX: 0,
       viewportY: 0,
       x: 0,
-      y: 0
+      y: 0,
+      zoom: 1
     };
+  },
+  computed: {
+    zoomOutDisabled: function zoomOutDisabled() {
+      return this.zoom === 0;
+    },
+    zoomInDisabled: function zoomInDisabled() {
+      return this.zoom === 2;
+    }
   },
   methods: {
     initialize: function initialize() {
@@ -3216,6 +3584,14 @@ __webpack_require__.r(__webpack_exports__);
         rowIndex: rowIndex,
         columnIndex: columnIndex
       });
+    },
+    onClickZoomIn: function onClickZoomIn() {
+      this.zoom += 1;
+      this.centerBoard();
+    },
+    onClickZoomOut: function onClickZoomOut() {
+      this.zoom -= 1;
+      this.centerBoard();
     }
   },
   mounted: function mounted() {
@@ -8984,7 +9360,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  display: flex;\n  padding: 30px;\n  flex: 0 0 250px;\n  flex-direction: row;\n  box-sizing: border-box;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1.1em;\n  font-weight: 500;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}", ""]);
+exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  z-index: 100;\n  display: flex;\n  flex: 0 0 250px;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n  padding: 20px 30px 30px 30px;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1em;\n  font-weight: 600;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-size: 1.5em;\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #card-actions__wrapper {\n  left: 0;\n  width: 100%;\n  z-index: 10;\n  bottom: 221px;\n  display: flex;\n  position: absolute;\n  transition: all 0.3s;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #card-actions__wrapper.visible {\n  bottom: 279px;\n}\n#game-ui #card-actions__wrapper #card-actions {\n  display: flex;\n  margin: 0 auto;\n  padding: 15px 10px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  background-color: #0d0d0d;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action {\n  margin: 0 7px;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action .v-btn {\n  margin: 0;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin-bottom: 15px;\n}\n.card.ma {\n  margin-left: auto;\n  margin-right: auto;\n}\n.cards {\n  display: flex;\n  margin-bottom: 15px;\n  flex-direction: row;\n  justify-content: center;\n}\n.cards .card {\n  margin: 0 15px;\n}", ""]);
 
 // exports
 
@@ -9003,7 +9379,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game-board {\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  position: absolute;\n}\n#game-board #game-board__inner {\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n  position: relative;\n}\n#game-board #game-board__inner #board {\n  top: 0;\n  left: 0;\n  width: 100%;\n  position: absolute;\n}\n#game-board #game-board__inner #board .board-row {\n  display: flex;\n  flex-direction: row;\n  border-left: 1px dashed rgba(255, 255, 255, 0.1);\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row:first-child {\n  border-top: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row .board-cell {\n  height: 200px;\n  flex: 0 0 130px;\n  position: relative;\n  overflow: hidden;\n  box-sizing: border-box;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row .board-cell .coordinates {\n  top: 15px;\n  left: 15px;\n  z-index: 15;\n  font-size: 0.8em;\n  position: absolute;\n  color: rgba(255, 255, 255, 0.15);\n}\n#game-board #game-board__inner #board .board-row .board-cell .card {\n  top: 0;\n  left: 0;\n  position: absolute;\n}\n#game-board #game-board__inner #board .board-row .board-cell .card .card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-board #game-board__inner #board .board-row .board-cell .card .card-image.inverted {\n  transform: rotate(180deg);\n}", ""]);
+exports.push([module.i, "#game-board {\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  position: absolute;\n}\n#game-board #game-board__inner {\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n  position: relative;\n}\n#game-board #game-board__inner #board {\n  top: 0;\n  left: 0;\n  width: 100%;\n  position: absolute;\n}\n#game-board #game-board__inner #board.zoom-out .board-row .board-cell {\n  height: 100px;\n  flex: 0 0 65px;\n}\n#game-board #game-board__inner #board.zoom-out .board-row .board-cell .card .card-image {\n  width: 65px;\n  height: 100px;\n}\n#game-board #game-board__inner #board.zoom-in .board-row .board-cell {\n  height: 400px;\n  flex: 0 0 260px;\n}\n#game-board #game-board__inner #board.zoom-in .board-row .board-cell .card .card-image {\n  width: 260px;\n  height: 400px;\n}\n#game-board #game-board__inner #board .board-row {\n  display: flex;\n  flex-direction: row;\n  border-left: 1px dashed rgba(255, 255, 255, 0.1);\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row:first-child {\n  border-top: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row .board-cell {\n  height: 200px;\n  flex: 0 0 130px;\n  position: relative;\n  overflow: hidden;\n  box-sizing: border-box;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#game-board #game-board__inner #board .board-row .board-cell .coordinates {\n  top: 15px;\n  left: 15px;\n  z-index: 5;\n  font-size: 0.8em;\n  position: absolute;\n  color: rgba(255, 255, 255, 0.15);\n}\n#game-board #game-board__inner #board .board-row .board-cell .card {\n  top: 0;\n  left: 0;\n  position: absolute;\n}\n#game-board #game-board__inner #board .board-row .board-cell .card .card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#game-board #game-board__inner #board .board-row .board-cell .card .card-image.inverted {\n  transform: rotate(180deg);\n}\n#game-board #game-board__inner #board-controls {\n  right: 25px;\n  bottom: 300px;\n  position: absolute;\n}\n#game-board #game-board__inner #board-controls .v-btn {\n  padding: 0 9px;\n  margin: 0 0 0 7px;\n}", ""]);
 
 // exports
 
@@ -47342,9 +47718,24 @@ var render = function() {
               _vm._v(" "),
               _vm.mutableRound.phase === "main"
                 ? _c("div", { attrs: { id: "game-ui" } }, [
-                    _c("div", { attrs: { id: "game-ui__board" } }, [
-                      _vm._v("\n                    board\n                ")
-                    ]),
+                    _c(
+                      "div",
+                      { attrs: { id: "game-ui__board" } },
+                      [
+                        _c("game-board", {
+                          attrs: { cards: _vm.cards },
+                          on: { "clicked-tile": _vm.onClickBoardTile },
+                          model: {
+                            value: _vm.mutableRound.board,
+                            callback: function($$v) {
+                              _vm.$set(_vm.mutableRound, "board", $$v)
+                            },
+                            expression: "mutableRound.board"
+                          }
+                        })
+                      ],
+                      1
+                    ),
                     _vm._v(" "),
                     _c("div", { attrs: { id: "game-ui__action-bar" } }, [
                       _c("div", { attrs: { id: "action-bar__my-role" } }, [
@@ -47409,16 +47800,20 @@ var render = function() {
                           ? _c(
                               "div",
                               { attrs: { id: "my-hand__cards" } },
-                              _vm._l(_vm.mutableHand, function(card, ci) {
+                              _vm._l(_vm.mutableHand, function(data, ci) {
                                 return _c(
                                   "div",
-                                  { key: ci, staticClass: "my-hand__card" },
+                                  {
+                                    key: ci,
+                                    staticClass: "my-hand__card",
+                                    class: { selected: data.selected }
+                                  },
                                   [
                                     _c("div", {
                                       staticClass: "my-hand__card-image",
                                       style: {
                                         backgroundImage:
-                                          "url(" + card.image_url + ")"
+                                          "url(" + data.card.image_url + ")"
                                       },
                                       on: {
                                         click: function($event) {
@@ -47465,7 +47860,128 @@ var render = function() {
                             : _vm._e()
                         ])
                       ])
-                    ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        class: { visible: _vm.showCardActions },
+                        attrs: { id: "card-actions__wrapper" }
+                      },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "elevation-1",
+                            attrs: { id: "card-actions" }
+                          },
+                          [
+                            _vm.numSelectedHandCards === 1
+                              ? _c(
+                                  "div",
+                                  { staticClass: "card-action" },
+                                  [
+                                    _c(
+                                      "v-btn",
+                                      {
+                                        attrs: { small: "", dark: "" },
+                                        on: { click: _vm.onClickPlayCard }
+                                      },
+                                      [
+                                        _c("i", {
+                                          staticClass:
+                                            "fas fa-long-arrow-alt-up"
+                                        }),
+                                        _vm._v(
+                                          "\n                                Speel kaart\n                            "
+                                        )
+                                      ]
+                                    )
+                                  ],
+                                  1
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.numSelectedHandCards === 1
+                              ? _c(
+                                  "div",
+                                  { staticClass: "card-action" },
+                                  [
+                                    _c(
+                                      "v-btn",
+                                      {
+                                        attrs: { small: "", dark: "" },
+                                        on: { click: _vm.onClickFoldCard }
+                                      },
+                                      [
+                                        _c("i", {
+                                          staticClass: "far fa-times-circle"
+                                        }),
+                                        _vm._v(
+                                          "\n                                Kaart afleggen\n                            "
+                                        )
+                                      ]
+                                    )
+                                  ],
+                                  1
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.numSelectedHandCards > 1
+                              ? _c(
+                                  "div",
+                                  { staticClass: "card-action" },
+                                  [
+                                    _c(
+                                      "v-btn",
+                                      {
+                                        attrs: { small: "", dark: "" },
+                                        on: { click: _vm.onClickFoldCards }
+                                      },
+                                      [
+                                        _c("i", {
+                                          staticClass: "far fa-times-circle"
+                                        }),
+                                        _vm._v(
+                                          "\n                                Kaarten afleggen\n                            "
+                                        )
+                                      ]
+                                    )
+                                  ],
+                                  1
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.numSelectedHandCards === 2
+                              ? _c(
+                                  "div",
+                                  { staticClass: "card-action" },
+                                  [
+                                    _c(
+                                      "v-btn",
+                                      {
+                                        attrs: { small: "", dark: "" },
+                                        on: {
+                                          click: _vm.onClickFoldCardsUnblock
+                                        }
+                                      },
+                                      [
+                                        _c("i", {
+                                          staticClass: "far fa-times-circle"
+                                        }),
+                                        _vm._v(
+                                          "\n                                Kaarten afleggen & deblokkeren\n                            "
+                                        )
+                                      ]
+                                    )
+                                  ],
+                                  1
+                                )
+                              : _vm._e()
+                          ]
+                        )
+                      ]
+                    )
                   ])
                 : _vm._e(),
               _vm._v(" "),
@@ -47593,7 +48109,323 @@ var render = function() {
               ])
             : _vm._e()
         ]
-      )
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.play_card.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.play_card, "show", $$v)
+            },
+            expression: "dialogs.play_card.show"
+          }
+        },
+        [
+          _vm.dialogs.play_card.index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelPlayCard }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Kaart spelen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text centered" }, [
+                    _c("div", {
+                      staticClass: "card mb-15 ma",
+                      style: {
+                        backgroundImage:
+                          "url(" + _vm.playCardDialogCard.image_url + ")"
+                      }
+                    }),
+                    _vm._v(
+                      "\n                    Weet je zeker dat je deze kaart wilt afleggen?"
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    Nadat je de kaart aflegt trek je een nieuwe kaart en is je beurt voorbij.\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelPlayCard }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            color: "red",
+                            loading: _vm.dialogs.play_card.loading
+                          },
+                          on: { click: _vm.onClickConfirmPlayCard }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Speel kaart\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.fold_card.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.fold_card, "show", $$v)
+            },
+            expression: "dialogs.fold_card.show"
+          }
+        },
+        [
+          _vm.dialogs.fold_card.index !== null &&
+          _vm.foldCardDialogCard !== undefined
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelFoldCard }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Kaart afleggen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text centered" }, [
+                    _c("div", {
+                      staticClass: "card mb-15 ma",
+                      style: {
+                        backgroundImage:
+                          "url(" + _vm.foldCardDialogCard.image_url + ")"
+                      }
+                    }),
+                    _vm._v(
+                      "\n                    Weet je zeker dat je deze kaart wilt afleggen?"
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    Nadat je de kaart aflegt trek je een nieuwe kaart en is je beurt voorbij.\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelFoldCard }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            color: "red",
+                            loading: _vm.dialogs.fold_card.loading
+                          },
+                          on: { click: _vm.onClickConfirmFoldCard }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-recycle" }),
+                          _vm._v(
+                            "\n                        Kaart afleggen\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "700" },
+          model: {
+            value: _vm.dialogs.fold_cards.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.fold_cards, "show", $$v)
+            },
+            expression: "dialogs.fold_cards.show"
+          }
+        },
+        [
+          _vm.dialogs.fold_cards.indices.length > 0 &&
+          _vm.foldCardsDialogCards.length > 0
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelFoldCards }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Kaarten afleggen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text centered" }, [
+                    _c(
+                      "div",
+                      { staticClass: "cards" },
+                      _vm._l(_vm.foldCardsDialogCards, function(card, ci) {
+                        return _c("div", {
+                          key: ci,
+                          staticClass: "card mb-15",
+                          style: {
+                            backgroundImage: "url(" + card.image_url + ")"
+                          }
+                        })
+                      }),
+                      0
+                    ),
+                    _vm._v(
+                      "\n                    Weet je zeker dat je deze kaarten wilt afleggen?"
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    Nadat je de kaarten aflegt trek je dezelfde hoeveelheid nieuwe kaarten en is je beurt voorbij.\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelFoldCards }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            color: "red",
+                            loading: _vm.dialogs.fold_cards.loading
+                          },
+                          on: { click: _vm.onClickConfirmFoldCards }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-recycle" }),
+                          _vm._v(
+                            "\n                        Kaarten afleggen\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.fold_cards_unblock.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.fold_cards_unblock, "show", $$v)
+          },
+          expression: "dialogs.fold_cards_unblock.show"
+        }
+      })
     ],
     1
   )
@@ -47634,12 +48466,13 @@ var render = function() {
       _c(
         "div",
         {
+          class: { "zoom-out": _vm.zoom === 0, "zoom-in": _vm.zoom === 2 },
           style: { top: _vm.viewportY + "px", left: _vm.viewportX + "px" },
           attrs: { id: "board" },
           on: {
             mousedown: _vm.onMouseDown,
-            mouseup: _vm.onMouseUp,
-            mousemove: _vm.onMouseMove
+            mousemove: _vm.onMouseMove,
+            mouseup: _vm.onMouseUp
           }
         },
         _vm._l(_vm.value, function(row, ri) {
@@ -47682,6 +48515,33 @@ var render = function() {
           )
         }),
         0
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { attrs: { id: "board-controls" } },
+        [
+          _c(
+            "v-btn",
+            {
+              staticClass: "icon-only",
+              attrs: { dark: "", small: "", disabled: _vm.zoomOutDisabled },
+              on: { click: _vm.onClickZoomOut }
+            },
+            [_c("i", { staticClass: "fas fa-minus" })]
+          ),
+          _vm._v(" "),
+          _c(
+            "v-btn",
+            {
+              staticClass: "icon-only",
+              attrs: { dark: "", small: "", disabled: _vm.zoomInDisabled },
+              on: { click: _vm.onClickZoomIn }
+            },
+            [_c("i", { staticClass: "fas fa-plus" })]
+          )
+        ],
+        1
       )
     ])
   ])

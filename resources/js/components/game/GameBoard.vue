@@ -1,7 +1,14 @@
 <template>
     <div id="game-board">
         <div id="game-board__inner">
-            <div id="board" :style="{ top: viewportY+'px', left: viewportX+'px' }" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove">
+
+            <!-- Board -->
+            <div id="board" 
+                :class="{ 'zoom-out': zoom === 0, 'zoom-in': zoom === 2 }"
+                :style="{ top: viewportY+'px', left: viewportX+'px' }" 
+                @mousedown="onMouseDown" 
+                @mousemove="onMouseMove"
+                @mouseup="onMouseUp">
                 <div class="board-row" v-for="(row, ri) in value" :key="ri">
                     <div class="board-cell" v-for="(card, ci) in row" :key="ci" @click="onClickTile(ri, ci)">
                         <div class="coordinates">{{ ci+","+ri }}</div>
@@ -11,6 +18,19 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Controls -->
+            <div id="board-controls">
+                <!-- Zoom out -->
+                <v-btn dark small class="icon-only" :disabled="zoomOutDisabled" @click="onClickZoomOut">
+                    <i class="fas fa-minus"></i>
+                </v-btn>
+                <!-- Zoom in -->
+                <v-btn dark small class="icon-only" :disabled="zoomInDisabled" @click="onClickZoomIn">
+                    <i class="fas fa-plus"></i>
+                </v-btn>
+            </div>
+
         </div>
     </div>
 </template>
@@ -30,7 +50,16 @@
             viewportY: 0,
             x: 0,
             y: 0,
+            zoom: 1,
         }),
+        computed: {
+            zoomOutDisabled() {
+                return this.zoom === 0;
+            },
+            zoomInDisabled() {
+                return this.zoom === 2;
+            },
+        },
         methods: {
             initialize() {
                 console.log(this.tag+" initializing");
@@ -122,10 +151,18 @@
                     columnIndex: columnIndex
                 });
             },
+            onClickZoomIn() {
+                this.zoom += 1;
+                this.centerBoard();
+            },
+            onClickZoomOut() {
+                this.zoom -= 1;
+                this.centerBoard();
+            },
         },
         mounted() {
             this.initialize();
-        }
+        },
     }
 </script>
 
@@ -146,6 +183,34 @@
                 left: 0;
                 width: 100%;
                 position: absolute;
+                &.zoom-out {
+                    .board-row {
+                        .board-cell {
+                            height: 100px;
+                            flex: 0 0 65px;
+                            .card {
+                                .card-image {
+                                    width: 65px;
+                                    height: 100px;
+                                }
+                            }
+                        }
+                    }
+                }
+                &.zoom-in {
+                    .board-row {
+                        .board-cell {
+                            height: 400px;
+                            flex: 0 0 260px;
+                            .card {
+                                .card-image {
+                                    width: 260px;
+                                    height: 400px;
+                                }
+                            }
+                        }
+                    }
+                }
                 .board-row {
                     display: flex;
                     flex-direction: row;
@@ -164,7 +229,7 @@
                         .coordinates {
                             top: 15px;
                             left: 15px;
-                            z-index: 15;
+                            z-index: 5;
                             font-size: .8em;
                             position: absolute;
                             color: rgba(255, 255, 255, .15);
@@ -186,6 +251,15 @@
                             }
                         }
                     }
+                }
+            }
+            #board-controls {
+                right: 25px;
+                bottom: 300px;
+                position: absolute;
+                .v-btn {
+                    padding: 0 9px;
+                    margin: 0 0 0 7px;
                 }
             }
         }   
