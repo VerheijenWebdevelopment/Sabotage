@@ -81,22 +81,20 @@ class CardService implements ModelServiceContract
         // Generate action cards 
         //
 
-        $action_cards = [];
-
         // Sabotage cards
         for ($i = 0; $i < 3; $i++)
         {
-            $action_cards[] = $action_sabotage_cart->id;
-            $action_cards[] = $action_sabotage_light->id;
-            $action_cards[] = $action_sabotage_pickaxe->id;
+            $out[] = $action_sabotage_cart->id;
+            $out[] = $action_sabotage_light->id;
+            $out[] = $action_sabotage_pickaxe->id;
         }
 
         // Recover cards
         for ($i = 0; $i < 3; $i++)
         {
-            $action_cards[] = $action_recover_cart->id;
-            $action_cards[] = $action_recover_light->id;
-            $action_cards[] = $action_recover_pickaxe->id;
+            $out[] = $action_recover_cart->id;
+            $out[] = $action_recover_light->id;
+            $out[] = $action_recover_pickaxe->id;
         }
         
         // Combo recover cards
@@ -105,59 +103,54 @@ class CardService implements ModelServiceContract
             $action_recover_pickaxe_cart,
             $action_recover_light_cart,
         ];
-        $action_cards[] = $recoverCombos[rand(0, 2)]->id;
+        $out[] = $recoverCombos[rand(0, 2)]->id;
 
         // Add 3 collapse cards
-        $action_cards[] = $action_collapse->id;
-        $action_cards[] = $action_collapse->id;
-        $action_cards[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
 
         // Add 6 enlighten cards
-        $action_cards[] = $action_enlighten->id;
-        $action_cards[] = $action_enlighten->id;
-        $action_cards[] = $action_enlighten->id;
-        $action_cards[] = $action_enlighten->id;
-        $action_cards[] = $action_enlighten->id;
-        $action_cards[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
 
         // Add 4 thiefery cards
-        $action_thief->id;
-        $action_thief->id;
-        $action_thief->id;
-        $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
 
         // Add 3 dont touch cards
-        $action_cards[] = $action_dont_touch->id;
-        $action_cards[] = $action_dont_touch->id;
-        $action_cards[] = $action_dont_touch->id;
+        $out[] = $action_dont_touch->id;
+        $out[] = $action_dont_touch->id;
+        $out[] = $action_dont_touch->id;
 
         // Add 2 exchange hats cards
-        $action_cards[] = $action_exchange_hats->id;
-        $action_cards[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
 
         // Add 2 inspection cards
-        $action_cards[] = $action_inspection->id;
-        $action_cards[] = $action_inspection->id;
+        $out[] = $action_inspection->id;
+        $out[] = $action_inspection->id;
 
         // Add 2 exchange hands cards
-        $action_cards[] = $action_exchange_hands->id;
-        $action_cards[] = $action_exchange_hands->id;
+        $out[] = $action_exchange_hands->id;
+        $out[] = $action_exchange_hands->id;
 
         // Add 3 imprison cards
-        $action_cards[] = $action_imprison->id;
-        $action_cards[] = $action_imprison->id;
-        $action_cards[] = $action_imprison->id;
+        $out[] = $action_imprison->id;
+        $out[] = $action_imprison->id;
+        $out[] = $action_imprison->id;
 
         // Add 4 free cards
-        $action_cards[] = $action_free->id;
-        $action_cards[] = $action_free->id;
-        $action_cards[] = $action_free->id;
-        $action_cards[] = $action_free->id;
-
-        foreach ($action_cards as $id)
-        {
-            $out[] = ["card_id" => $id];
-        }
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
 
         //
         // Grab all tunnel cards
@@ -214,26 +207,26 @@ class CardService implements ModelServiceContract
 
         // Dead ends with 1 tile
         $singleNoCenters = [
-            $tunnel_single_one->id,
-            $tunnel_single_two->id,
-            $tunnel_single_three->id,
-            $tunnel_single_four->id,
+            $tunnel_single_one,
+            $tunnel_single_two,
+            $tunnel_single_three,
+            $tunnel_single_four,
         ];
         $tunnels[] = $singleNoCenters[rand(0, 3)];
         $tunnels[] = $singleNoCenters[rand(0, 3)];
 
         // Dead ends with 2 tiles
         $doubleNoCenters = [
-            $tunnel_single_center_one->id,
-            $tunnel_single_center_two->id,
-            $tunnel_single_center_three->id,
-            $tunnel_single_center_four->id,
-            $tunnel_double_one->id,
-            $tunnel_double_two->id,
-            $tunnel_double_three->id,
-            $tunnel_double_four->id,
-            $tunnel_double_five->id,
-            $tunnel_double_six->id,
+            $tunnel_single_center_one,
+            $tunnel_single_center_two,
+            $tunnel_single_center_three,
+            $tunnel_single_center_four,
+            $tunnel_double_one,
+            $tunnel_double_two,
+            $tunnel_double_three,
+            $tunnel_double_four,
+            $tunnel_double_five,
+            $tunnel_double_six,
         ];
         $tunnels[] = $doubleNoCenters[rand(0, 5)];
         $tunnels[] = $doubleNoCenters[rand(0, 5)];
@@ -242,79 +235,91 @@ class CardService implements ModelServiceContract
 
         // Dead ends with 3 tiles
         $tripleNoCenters = [
-            $tunnel_triple_one->id,
-            $tunnel_triple_two->id,
-            $tunnel_triple_three->id,
-            $tunnel_triple_four->id,
+            $tunnel_triple_one,
+            $tunnel_triple_two,
+            $tunnel_triple_three,
+            $tunnel_triple_four,
         ];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
         $tunnels[] = $tripleNoCenters[rand(0, 3)];
 
         // Dead ends with 4 tiles
-        $tunnels[] = $tunnel_quadruple->id;
+        $tunnels[] = $tunnel_quadruple;
 
         // Connected tunnel 2 tiles 
-        $tunnels[] = $tunnel_double_center_one->id;
-        $tunnels[] = $tunnel_double_center_two->id;
-        $tunnels[] = $tunnel_double_center_three->id;
-        $tunnels[] = $tunnel_double_center_four->id;
-        $tunnels[] = $tunnel_double_center_five->id;
-        $tunnels[] = $tunnel_double_center_six->id;
+        $tunnels[] = $tunnel_double_center_one;
+        $tunnels[] = $tunnel_double_center_two;
+        $tunnels[] = $tunnel_double_center_three;
+        $tunnels[] = $tunnel_double_center_four;
+        $tunnels[] = $tunnel_double_center_five;
+        $tunnels[] = $tunnel_double_center_six;
 
         // Connected tunnel 3 tiles
-        $tunnels[] = $tunnel_triple_center_one->id;
-        $tunnels[] = $tunnel_triple_center_two->id;
-        $tunnels[] = $tunnel_triple_center_three->id;
-        $tunnels[] = $tunnel_triple_center_four->id;
+        $tunnels[] = $tunnel_triple_center_one;
+        $tunnels[] = $tunnel_triple_center_two;
+        $tunnels[] = $tunnel_triple_center_three;
+        $tunnels[] = $tunnel_triple_center_four;
 
         // Connected tunnel 4 tiles
-        $tunnels[] = $tunnel_quadruple_center->id;
-        $tunnels[] = $tunnel_quadruple_center->id;
-        $tunnels[] = $tunnel_quadruple_center->id;
-        $tunnels[] = $tunnel_quadruple_center->id;
-        $tunnels[] = $tunnel_quadruple_center->id;
-        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
 
-        // Add the ladders and crystals to the tunnel cards randomly
-        shuffle($tunnels);
-        $ladders_placed = 0;
-        $crystals_placed = 0;
-        for ($i = 0; $i < count($tunnels); $i++)
-        {
-            if ($ladders_placed < $num_ladders)
-            {
-                $card = $this->find($tunnels[$i]);
+        // // Add the ladders and crystals to the tunnel cards randomly
+        // shuffle($tunnels);
+        // $ladders_placed = 0;
+        // $crystals_placed = 0;
+        // // Process all of the tunnels available
+        // for ($i = 0; $i < count($tunnels); $i++)
+        // {
+        //     // If we need more ladders
+        //     if ($ladders_placed < $num_ladders)
+        //     {
+        //         // If this tunnel has a ladder version
+        //         $ladder_version = $this->findByName($tunnels[$i]->name."_ladder");
+        //         if ($ladder_version)
+        //         {
+        //             // Add the ladder version to the output & up the counter
+        //             $out[] = $ladder_version->id;
+        //             $ladders_placed++;
+        //         }
+        //         // If we could not find the ladder version 
+        //         else
+        //         {
+        //             $out[] = $tunnels[$i]->id;
+        //         }
+        //     }
+        //     // If we need more crystals
+        //     else if ($crystals_placed < $num_crystals)
+        //     {
+        //         // If this tunnel has a crystal version
+        //         $crystal_version = $this->findByName($tunnels[$i]->name."_crystal");
+        //         if ($crystal_version)
+        //         {
+        //             // Add crystal version to the output & up the counter
+        //             $out[] = $crystal_version->id;
+        //             $crystals_placed++;
+        //         }
+        //         // If we could not find the crystal version
+        //         else
+        //         {
+        //             $out[] = $tunnels[$i]->id;
+        //         }
+        //     }
+        //     // If we're good on ladders & crystals
+        //     else
+        //     {
+        //         $out[] = $tunnels[$i]->id;
+        //     }
+        // }
 
-                $out[] = [
-                    "card_id" => $tunnels[$i],
-                    "has_crystal" => false,
-                    "has_ladder" => true,
-                    "ladder_location" => $card->open_positions[rand(0, (count($card->open_positions)-1))],
-                ];
-
-                $ladders_placed++;
-            }
-            else if ($crystals_placed < $num_crystals)
-            {
-                $card = $this->find($tunnels[$i]);
-                
-                $out[] = [
-                    "card_id" => $tunnels[$i],
-                    "has_crystal" => true,
-                    "crystal_location" => $card->open_positions[rand(0, (count($card->open_positions)-1))],
-                    "has_ladder" => false,
-                ];
-
-                $crystals_placed++;
-            }
-            else
-            {
-                $out[] = [
-                    "card_id" => $tunnels[$i],
-                    "has_crystal" => false,
-                    "has_ladder" => false,
-                ];
-            }
-        }
+        // Shuffle the output to make things random
+        shuffle($out);
 
         // Return the generated list of card id's
         return $out;
@@ -620,10 +625,10 @@ class CardService implements ModelServiceContract
 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
 
-                $image->insert($pickaxe, "top", 0, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($pickaxe, "center");
+                $image->insert($recover, "center");
 
             break;
             case "recover_cart":
@@ -634,10 +639,10 @@ class CardService implements ModelServiceContract
 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
 
-                $image->insert($cart, "top", 0, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($cart, "center");
+                $image->insert($recover, "center");
 
             break;
             case "recover_light":
@@ -648,10 +653,10 @@ class CardService implements ModelServiceContract
                 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
 
-                $image->insert($light, "top", 0, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($light, "center");
+                $image->insert($recover, "center");
 
             break;
             case "recover_pickaxe_cart":

@@ -34,6 +34,22 @@
                         </game-board>
                     </div>
 
+                    <!-- Mode bar -->
+                    <div id="game-ui__mode-wrapper" v-if="showModeBar">
+                        <!-- Select gold location mode -->
+                        <div id="game-ui__mode" class="elevation-1" v-if="modes.select_gold_location">
+                            Selecteer de goud locatie die je wilt bekijken.
+                        </div>
+                        <!-- Collapse tunnel mode -->
+                        <div id="game-ui__mode" class="elevation-1" v-if="modes.select_tunnel">
+                            Selecteer de tunnel die je in wilt laten storten. Jij boefje.
+                        </div>
+                        <!-- Place tunnel mode -->
+                        <div id="game-ui__mode" class="elevation-1" v-if="modes.select_tile">
+                            Selecteer de tegel waar je de tunnel wilt plaatsen.
+                        </div>
+                    </div>
+
                     <!-- Action bar -->
                     <div id="game-ui__action-bar">
 
@@ -84,28 +100,33 @@
                     <!-- Card actions -->
                     <div id="card-actions__wrapper" :class="{ visible: showCardActions }">
                         <div id="card-actions" class="elevation-1">
-                            <div class="card-action" v-if="numSelectedHandCards === 1">
+                            <div class="card-action" v-if="showCardActionPlay">
                                 <v-btn small dark @click="onClickPlayCard">
                                     <i class="fas fa-long-arrow-alt-up"></i>
                                     Speel kaart
                                 </v-btn>
                             </div>
-                            <div class="card-action" v-if="numSelectedHandCards === 1">
+                            <div class="card-action" v-if="showCardActionFoldCard">
                                 <v-btn small dark @click="onClickFoldCard">
                                     <i class="far fa-times-circle"></i>
                                     Kaart afleggen
                                 </v-btn>
                             </div>
-                            <div class="card-action" v-if="numSelectedHandCards > 1">
+                            <div class="card-action" v-if="showCardActionFoldCards">
                                 <v-btn small dark @click="onClickFoldCards">
                                     <i class="far fa-times-circle"></i>
                                     Kaarten afleggen
                                 </v-btn>
                             </div>
-                            <div class="card-action" v-if="numSelectedHandCards === 2">
+                            <div class="card-action" v-if="showCardActionFoldCardsUnblock">
                                 <v-btn small dark @click="onClickFoldCardsUnblock">
                                     <i class="far fa-times-circle"></i>
                                     Kaarten afleggen & deblokkeren
+                                </v-btn>
+                            </div>
+                            <div class="card-action">
+                                <v-btn small dark class="icon-only" @click="onClickViewCard">
+                                    <i class="far fa-eye"></i>
                                 </v-btn>
                             </div>
                         </div>
@@ -175,35 +196,22 @@
         </v-dialog>
 
         <!-- View (play) card dialog -->
-        <v-dialog v-model="dialogs.play_card.show" width="600">
-            <div class="dialog dark" v-if="dialogs.play_card.index !== null">
+        <v-dialog v-model="dialogs.view_card.show" width="600">
+            <div class="dialog dark" v-if="dialogs.view_card.index !== null">
                 <!-- Close button -->
-                <div class="dialog__close-button" @click="onClickCancelPlayCard">
+                <div class="dialog__close-button" @click="onClickCancelViewCard">
                     <i class="fas fa-times"></i>
                 </div>
                 <!-- Content -->
                 <div class="dialog-content">
                     <!-- Title -->
-                    <div class="dialog-title">Kaart spelen</div>
+                    <div class="dialog-title">Kaart bekijken</div>
                     <!-- Text -->
                     <div class="dialog-text centered">
-                        <div class="card mb-15 ma" :style="{ backgroundImage: 'url('+playCardDialogCard.image_url+')' }"></div>
-                        Weet je zeker dat je deze kaart wilt afleggen?<br>
-                        Nadat je de kaart aflegt trek je een nieuwe kaart en is je beurt voorbij.
-                    </div>
-                </div>
-                <!-- Controls -->
-                <div class="dialog-controls">
-                    <div class="dialog-controls__left">
-                        <v-btn text dark @click="onClickCancelPlayCard">
-                            <i class="fas fa-arrow-left"></i>
-                            Annuleren
-                        </v-btn>
-                    </div>
-                    <div class="dialog-controls__right">
-                        <v-btn dark color="red" @click="onClickConfirmPlayCard" :loading="dialogs.play_card.loading">
-                            Speel kaart
-                        </v-btn>
+                        <div class="card mb-15 ma" :style="{ backgroundImage: 'url('+viewCardDialogCard.image_url+')' }"></div>
+                        <div class="card-description">
+                            {{ viewCardDialogCard.description }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -288,6 +296,390 @@
             
         </v-dialog>
 
+        <!-- Sabotage player dialog -->
+        <v-dialog v-model="dialogs.sabotage.show" width="600">
+            <div class="dialog dark" v-if="dialogs.sabotage.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelSabotage">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">{{ sabotageDialogTitle }}</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.sabotage.player_id === player.id }" @click="onClickSelectPlayer('sabotage', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Select tool -->
+                    <div class="select-tool" v-if="sabotageDialogShowToolSelection">
+                        <div class="select-tool__title">Selecteer gereedschapschap dat je wilt blokkeren</div>
+                        <div class="select-tool__list">
+                            <div class="select-tool__list-item" v-for="(tool, ti) in sabotageDialogToolOptions" :key="ti">
+                                <div class="tool-option" :class="{ selected: dialogs.sabotage.tool === tool }" @click="onClickSelectTool('sabotage', tool)">
+                                    {{ tool }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelSabotage">
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmSabotage" :loading="dialogs.sabotage.loading" :disabled="sabotageDialogDisableSubmit">
+                            Saboteer gereedschap
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Recover player dialog -->
+        <v-dialog v-model="dialogs.recover.show" width="600">
+            <div class="dialog dark" v-if="dialogs.recover.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelRecover">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">{{ recoverDialogTitle }}</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayers" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.recover.player_id === player.id }" @click="onClickSelectPlayer('recover', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Select tool -->
+                    <div class="select-tool" v-if="recoverDialogShowToolSelection">
+                        <div class="select-tool__title">Selecteer gereedschap dat je wilt herstellen</div>
+                        <div class="select-tool__list">
+                            <div class="select-tool__list-item" v-for="(tool, ti) in recoverDialogToolOptions" :key="ti">
+                                <div class="tool-option" :class="{ selected: dialogs.recover.tool === tool }" @click="onClickSelectTool('recover', tool)">
+                                    {{ tool }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelRecover">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmRecover" :loading="dialogs.recover.loading" :disabled="recoverDialogDisableSubmit">
+                            Herstel speler's gereedschap
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+        
+        <!-- Imprison player dialog -->
+        <v-dialog v-model="dialogs.imprison.show" width="600">
+            <div class="dialog dark" v-if="dialogs.imprison.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelImprison">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Speler in de gevangenis stoppen</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.imprison.player_id === player.id }" @click="onClickSelectPlayer('imprison', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelImprison">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmImprison" :loading="dialogs.imprison.loading" :disabled="imprisonDialogDisableSubmit">
+                            Naar de gevangenis!
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Free player dialog -->
+        <v-dialog v-model="dialogs.free.show" width="600">
+            <div class="dialog dark" v-if="dialogs.free.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelFree">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Speler bevrijden uit de gevangenis</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayers" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.free.player_id === player.id }" @click="onClickSelectPlayer('free', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelFree">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmFree" :loading="dialogs.free.loading" :disabled="freeDialogDisableSubmit">
+                            Bevrijd speler
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Thief dialog -->
+        <v-dialog v-model="dialogs.thief.show" width="600">
+            <div class="dialog dark" v-if="dialogs.thief.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelThief">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Dief kaart spelen</div>
+                    <!-- Text -->
+                    <div class="dialog-text">{{ thiefDialogCard.description }}</div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelThief">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmThief" :loading="dialogs.thief.loading">
+                            Dief kaart spelen
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Dont touch dialog -->
+        <v-dialog v-model="dialogs.dont_touch.show" width="600">
+            <div class="dialog dark" v-if="dialogs.dont_touch.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelDontTouch">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Swieber niet stelen!</div>
+                    <!-- Text -->
+                    <div class="dialog-text">{{ dontTouchDialogCard.description }}</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.free.player_id === player.id }" @click="onClickSelectPlayer('dont_touch', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelDontTouch">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmDontTouch" :loading="dialogs.dont_touch.loading" :disabled="dontTouchDialogDisableSubmit">
+                            Aflbijven!
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Enlighten dialog -->
+        <v-dialog v-model="dialogs.enlighten.show" width="700">
+            <div class="dialog dark" v-if="dialogs.enlighten.card_index !== null && dialogs.enlighten.gold_location !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelEnlighten">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Plan kaart spelen</div>
+                    <!-- Text -->
+                    <div class="dialog-text">
+                        {{ enlightenDialogCard.description }}
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelEnlighten">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmEnlighten">
+                            Selecteer goud locatie
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Confirm (enlighten) gold location dialog -->
+        <v-dialog v-model="dialogs.confirm_enlighten.show" width="800">
+            <div class="dialog dark" v-if="dialogs.confirm_enlighten.card_index !== null && dialogs.confirm_enlighten.gold_location !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelConfirmEnlighten">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Goud locatie bekijken</div>
+                    <!-- Text -->
+                    <div class="dialog-text">
+                        {{ confirmEnlightenText }}<br>
+                        Weet je zeker dat je deze goud locatie wilt bekijken?
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelConfirmEnlighten">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                        <v-btn text dark @click="onClickRetryConfirmEnlighten">
+                            <i class="fas fa-recycle"></i>
+                            Andere locatie selecteren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmConfirmEnlighten" :loading="dialogs.confirm_enlighten.loading">
+                            <i class="far fa-eye"></i>
+                            Bekijk goud locatie
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Gold location dialog (result of confirm enlighten dialog) -->
+        <v-dialog v-model="dialogs.reveal_gold_location.show" width="500">
+            <div class="dialog dark" v-if="dialogs.reveal_gold_location.gold_location !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="dialogs.reveal_gold_location.show = false">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Goud Locatie #{{ dialogs.reveal_gold_location.gold_location }}</div>
+                    <!-- Does contain gold text -->
+                    <div class="dialog-text" v-if="dialogs.reveal_gold_location.contains_gold">
+                        <div id="reveal-gold-location">
+                            <div id="reveal-gold-location__image" :style="{ backgroundImage: 'url('+icons.gold_bars+')' }"></div>
+                            <div id="reveal-gold-location__text">
+                                Het goud bevindt zich hier!
+                            </div>
+                        </div>
+                    </div>  
+                    <!-- Does not contain gold text -->
+                    <div class="dialog-text" v-if="!dialogs.reveal_gold_location.contains_gold">
+                        <div id="reveal-gold-location">
+                            <div id="reveal-gold-location__image" :style="{ backgroundImage: 'url('+icons.coal+')' }"></div>
+                            <div id="reveal-gold-location__text">
+                                Hier bevindt het goud zich niet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Inspection dialog -->
+        <v-dialog v-model="dialogs.inspection.show" width="600">
+
+        </v-dialog>
+
+        <!-- Exchange hands dialog -->
+        <v-dialog v-model="dialogs.exchange_hands.show" width="600">
+
+        </v-dialog>
+
+        <!-- Exchange hats dialog -->
+        <v-dialog v-model="dialogs.exchange_hats.show" width="600">
+
+        </v-dialog>
+
+        <!-- Collapse tunnel dialog -->
+        <v-dialog v-model="dialogs.collapse.show" width="600">
+
+        </v-dialog>
+
+        <!-- Place tunnel dialog -->
+        <v-dialog v-model="dialogs.place_tunnel.show" width="600">
+
+        </v-dialog>
+
     </div>
 </template>
 
@@ -317,10 +709,9 @@
                 my_role: {
                     show: false,
                 },
-                play_card: {
+                view_card: {
                     show: false,
                     index: null,
-                    loading: false,
                 },
                 fold_card: {
                     show: false,
@@ -338,6 +729,89 @@
                     tool: null,
                     loading: false,
                 },
+                sabotage: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    tool: null,
+                    loading: false,
+                },
+                recover: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    tool: null,
+                    loading: false,
+                },
+                imprison: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    loading: false,
+                },
+                free: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    loading: false,
+                },
+                thief: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    loading: false,
+                },
+                dont_touch: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                    loading: false,
+                },
+                enlighten: {
+                    show: false,
+                    card_index: null,
+                },
+                confirm_enlighten: {
+                    show: false,
+                    loading: false,
+                    card_index: null,
+                    gold_location: null,
+                },
+                inspection: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                },
+                collapse: {
+                    show: false,
+                    card_index: null,
+                    tile_coordinates: null,
+                },
+                place_tunnel: {
+                    show: false,
+                    card_index: null,
+                    tile_coordinates: null,
+                },
+                exchange_hands: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                },
+                exchange_hats: {
+                    show: false,
+                    card_index: null,
+                    player_id: null,
+                },
+                reveal_gold_location: {
+                    show: false,
+                    gold_location: null,
+                    contains_gold: false,
+                },
+            },
+            modes: {
+                select_gold_location: false,
+                select_tunnel: false,
+                select_tile: false,
             },
         }),
         computed: {
@@ -352,6 +826,16 @@
             },
             itsMyTurn() {
                 return this.playerAtPlay.id === this.player.id;
+            },
+            // Players
+            mutablePlayersExcludingMe() {
+                let out = [];
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id !== this.mutablePlayer.id) {
+                        out.push(this.mutablePlayers[i]);
+                    }
+                }
+                return out;
             },
             // Hand
             selectedHandCards() {
@@ -376,10 +860,36 @@
             showCardActions() {
                 return this.numSelectedHandCards > 0 && this.numSelectedHandCards < 4;
             },
-            // Play card dialog
-            playCardDialogCard() {
-                if (this.dialogs.play_card.index !== null) {
-                    return this.mutableHand[this.dialogs.play_card.index].card;
+            showCardActionPlay() {
+                if (this.numSelectedHandCards === 1 && this.itsMyTurn) {
+                    if (this.selectedHandCard.card.type === "tunnel") {
+                        return this.mutablePlayer.pickaxe_available && 
+                               this.mutablePlayer.light_available && 
+                               this.mutablePlayer.cart_available &&
+                               !this.mutablePlayer.in_jail;
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            showCardActionFoldCard() {
+                return this.numSelectedHandCards === 1 && this.itsMyTurn;
+            },
+            showCardActionFoldCards() {
+                return this.numSelectedHandCards > 1 && this.itsMyTurn;
+            },
+            showCardActionFoldCardsUnblock() {
+                return this.numSelectedHandCards === 2 && this.itsMyTurn;
+            },
+            // UI
+            showModeBar() {
+                return this.modes.select_gold_location || this.modes.select_tunnel || this.modes.select_tile;
+            },
+            // View card dialog
+            viewCardDialogCard() {
+                if (this.dialogs.view_card.index !== null) {
+                    return this.mutableHand[this.dialogs.view_card.index].card;
                 }
                 return false;
             },
@@ -400,6 +910,202 @@
             },
             // Fold cards & unblock dialog
 
+            // Sabotage dialog
+            sabotageDialogCard() {
+                if (this.dialogs.sabotage.card_index !== null) {
+                    return this.mutableHand[this.dialogs.sabotage.card_index].card;
+                }
+                return false;
+            },
+            sabotageDialogTitle() {
+                if (this.dialogs.sabotage.card_index !== null) {
+                    let out = "Saboteer speler's ";
+                    let card = this.mutableHand[this.dialogs.sabotage.card_index].card;
+                    if (card.name === "sabotage_pickaxe") {
+                        out += "pickaxe";
+                    } else if (card.name === "sabotage_light") {
+                        out += "lantaarn";
+                    } else if (card.name === "sabotage_cart") {
+                        out += "minecart";
+                    } else {
+                        out += "gereedschap";
+                    }
+                    console.log("title: ", out, card.name);
+                    return out;
+                }
+                return "";
+            },
+            sabotageDialogDisableSubmit() {
+                let card = this.mutableHand[this.dialogs.sabotage.card_index];
+                if (card) {
+                    if (card.name === "sabotage_pickaxe_light" || card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_light_cart") {
+                        return this.dialogs.sabotage.player_id === null || this.dialogs.sabotage.tool === null ? true : false;
+                    } else {
+                        return this.dialogs.sabotage.player_id === null ? true : false;
+                    }
+                }
+                return true;
+            },
+            sabotageDialogShowToolSelection() {
+                let sabotageCard = this.mutableHand[this.dialogs.sabotage.card_index];
+                if (sabotageCard) {
+                    return sabotageCard.card.name === "sabotage_pickaxe_light" || sabotageCard.card.name === "sabotage_pickaxe_axe" || sabotageCard.card.name === "sabotage_light_cart";
+                }
+                return false;
+            },
+            sabotageDialogToolOptions() {
+                let out = [];
+                let sabotageCard = this.mutableHand[this.dialogs.sabotage.card_index];
+                if (sabotageCard) {
+                    if (sabotageCard.card.name === "sabotage_pickaxe_light") {
+                        out.push("pickaxe");
+                        out.push("light");
+                    } else if (sabotageCard.card.name === "sabotage_pickaxe_cart") {
+                        out.push("pickaxe");
+                        out.push("cart");
+                    } else {
+                        out.push("light");
+                        out.push("cart");
+                    }
+                }
+                return out;
+            },
+            // Recover dialog
+            recoverDialogCard() {
+                if (this.dialogs.recover.card_index !== null) {
+                    return this.mutableHand[this.dialogs.recover.card_index].card;
+                }
+                return false;
+            },
+            recoverDialogTitle() {
+                if (this.dialogs.recover.card_index !== null) {
+                    let out = "Herstel speler's ";
+                    let card = this.mutableHand[this.dialogs.recover.card_index].card;
+                    if (card.name === "recover_pickaxe") {
+                        out += "pickaxe";
+                    } else if (card.name === "recover_light") {
+                        out += "light";
+                    } else if (card.name === "recover_cart") {
+                        out += "cart";
+                    } else {
+                        out += "gereedschap";
+                    }
+                    return out;
+                }
+                return "";
+            },
+            recoverDialogDisableSubmit() {
+                let recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+                if (recoverCard) {
+                    if (recoverCard.card.name === "recover_pickaxe_light" || recoverCard.card.name === "recover_pickaxe_cart" || recoverCard.card.name === "recover_light_cart") {
+                        return this.dialogs.recover.player_id === null || this.dialogs.recover.tool === null ? true : false;
+                    } else {
+                        return this.dialogs.recover.player_id === null ? true : false;
+                    }
+                }
+                return true;
+            },
+            recoverDialogShowToolSelection() {
+                let recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+                if (recoverCard) {
+                    return recoverCard.card.name === "recover_pickaxe_light" || recoverCard.card.name === "recover_pickaxe_cart" || recoverCard.card.name === "recover_light_cart";
+                }
+                return false;
+            },
+            recoverDialogToolOptions() {
+                let out = [];
+                let recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+                if (recoverCard) {
+                    if (recoverCard.card.name === "recover_pickaxe_light") {
+                        out.push("pickaxe");
+                        out.push("light");
+                    } else if (recoverCard.card.name === "recover_pickaxe_cart") {
+                        out.push("pickaxe");
+                        out.push("cart");
+                    } else {
+                        out.push("light");
+                        out.push("cart");
+                    }
+                }
+                return out;
+            },
+            // Imprison dialog
+            imprisonDialogCard() {
+                if (this.dialogs.imprison.card_index !== null) {
+                    return this.mutableHand[this.dialogs.imprison.card_index].card;
+                }
+                return false;
+            },
+            imprisonDialogDisableSubmit() {
+                return this.dialogs.imprison.player_id === null ? true : false;
+            },
+            // Free dialog
+            freeDialogCard() {
+                if (this.dialogs.free.card_index !== null) {
+                    return this.mutableHand[this.dialogs.free.card_index].card;
+                }
+                return false;
+            },
+            freeDialogDisableSubmit() {
+                return this.dialogs.free.player_id === null ? true : false;
+            },
+            // Thief dialog
+            thiefDialogCard() {
+                if (this.dialogs.thief.card_index !== null) {
+                    return this.mutableHand[this.dialogs.thief.card_index].card;
+                }
+                return false;
+            },
+            // Dont touch dialog
+            dontTouchDialogCard() {
+                if (this.dialogs.dont_touch.card_index !== null) {
+                    return this.mutableHand[this.dialogs.dont_touch.card_index].card;
+                }
+                return false;
+            },
+            dontTouchDialogDisableSubmit() {
+                return this.dialogs.dont_touch.player_id === null ? true : false;
+            },
+            // Enlighten dialog
+            enlightenDialogCard() {
+                if (this.dialogs.enlighten.card_index !== null) {
+                    return this.mutableHand[this.dialogs.enlighten.card_index].card;
+                }
+                return false;
+            },
+            // Confirm enlighten dialog
+            confirmEnlightenDialogCard() {
+                if (this.dialogs.confirm_enlighten.card_index !== null) {
+                    return this.mutableHand[this.dialogs.confirm_enlighten.card_index].card;
+                }
+                return false;
+            },
+            confirmEnlightenText() {
+                let out = "Je hebt de ";
+                if (this.dialogs.confirm_enlighten.gold_location === 1) {
+                    out += "eerste (bovenste)";
+                } else if (this.dialogs.confirm_enlighten.gold_location === 2) {
+                    out += "tweede (middelste)";
+                } else {
+                    out += "laatste (onderste)"
+                }
+                out += " goud locatie gekozen.";
+                return out;
+            },
+            // Collapse tunnel dialog
+            collapseDialogCard() {
+                if (this.dialogs.collapse.card_index !== null) {
+                    return this.mutableHand[this.dialogs.collapse.card_index].card;
+                }
+                return false;
+            },
+            // Place tunnel dialog
+            placeTunnelDialogCard() {
+                if (this.dialogs.place_tunnel.card_index !== null) {
+                    return this.mutableHand[this.dialogs.place_tunnel.card_index].card;
+                }
+                return false;
+            },
         },
         methods: {
             initialize() {
@@ -453,6 +1159,10 @@
                     .listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole)
                     .listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked)
                     .listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered)
+                    .listen('Game\\PlayerImprisoned', this.onPlayerImprisoned)
+                    .listen('Game\\PlayerFreed', this.onPlayerFreed)
+                    .listen('Game\\PlayerIsThief', this.onPlayerIsThief)
+                    .listen('Game\\PlayerNoLongerThief', this.onPlayerNoLongerThief)
                     .listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation)
                     .listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed)
                     .listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel)
@@ -503,10 +1213,128 @@
             onPlayerToolBlocked(e) {
                 console.log(this.tag+"[event] received event player tool blocked:", e);
 
+                // Update the target player's tool's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.target_player.id) {
+                        if (e.tool === "pickaxe") {
+                            this.mutablePlayers[i].pickaxe_available = 0;
+                        } else if (e.tool === "light") {
+                            this.mutablePlayers[i].light_available = 0;
+                        } else if (e.tool === "cart") {
+                            this.mutablePlayers[i].cart_available = 0;
+                        }
+                        break;
+                    }
+                }
+
+                // If we were the target player, update our mutablePlayer as well
+                if (e.target_player.id === this.mutablePlayer.id) {
+                    if (e.tool === "pickaxe") {
+                        this.mutablePlayer.pickaxe_available = 0;
+                    } else if (e.tool === "light") {
+                        this.mutablePlayer.light_available = 0;
+                    } else if (e.tool === "cart") {
+                        this.mutablePlayer.cart_available = 0;
+                    }
+                }
+
             },
             onPlayerToolRecovered(e) {
                 console.log(this.tag+"[event] received event player tool recovered:", e);
 
+                // Update the target player's tool's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.target_player.id) {
+                        if (e.tool === "pickaxe") {
+                            this.mutablePlayers[i].pickaxe_available = 1;
+                        } else if (e.tool === "light") {
+                            this.mutablePlayers[i].light_available = 1;
+                        } else if (e.tool === "cart") {
+                            this.mutablePlayers[i].cart_available = 1;
+                        }
+                        break;
+                    }
+                }
+
+                // If we were the target player, update our mutablePlayer as well
+                if (e.target_player.id === this.mutablePlayer.id) {
+                    if (e.tool === "pickaxe") {
+                        this.mutablePlayer.pickaxe_available = 1;
+                    } else if (e.tool === "light") {
+                        this.mutablePlayer.light_available = 1;
+                    } else if (e.tool === "cart") {
+                        this.mutablePlayer.cart_available = 1;
+                    }
+                }
+
+            },
+            onPlayerImprisoned(e) {
+                console.log(this.tag+"[event] received event player was imprisoned:", e);
+
+                // Update player's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.target_player.id) {
+                        this.mutablePlayers[i].in_jail = 1;
+                        break;
+                    }
+                }
+
+                // If we were the target player, update mutable player as well
+                if (e.target_player.id === this.mutablePlayer.id) {
+                    this.mutablePlayer.in_jail = 1;
+                }
+
+            },
+            onPlayerFreed(e) {
+                console.log(this.tag+"[event] received event player was freed from prison:", e);
+
+                // Update player's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.target_player.id) {
+                        this.mutablePlayers[i].in_jail = 0;
+                        break;
+                    }
+                }
+
+                // If we were the target player, update mutable player as well
+                if (e.target_player.id === this.mutablePlayer.id) {
+                    this.mutablePlayer.in_jail = 0;
+                }
+                
+            },
+            onPlayerIsThief(e) {
+                console.log(this.tag+"[event] received event player is thief:", e);
+
+                // Update player's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.player.id) {
+                        this.mutablePlayers[i].thief_activated = 1;
+                        break;
+                    }
+                }
+
+                // If we were the target player, update mutable player as well
+                if (e.player.id === this.mutablePlayer.id) {
+                    this.mutablePlayer.thief_activated = 1;
+                }
+                
+            },
+            onPlayerNoLongerThief(e) {
+                console.log(this.tag+"[event] received event player is no longer thief:", e);
+
+                // Update player's status
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === e.target_player.id) {
+                        this.mutablePlayers[i].thief_activated = 0;
+                        break;
+                    }
+                }
+
+                // If we were the target player, update mutable player as well
+                if (e.target_player.id === this.mutablePlayer.id) {
+                    this.mutablePlayer.thief_activated = 0;
+                }l
+                
             },
             onPlayerCheckedGoldLocation(e) {
                 console.log(this.tag+"[event] received event player checked gold location:", e);
@@ -562,19 +1390,105 @@
             },
             onClickBoardTile(e) {
                 console.log(this.tag+" clicked board tile: ", e);
+
+                // If we're in gold location selection mode
+                if (this.modes.select_gold_location) {
+
+                    // Determine the ID of the start card
+                    let startCardId = this.getCardIdByName("start");
+                    if (startCardId) {
+                        
+                        // Determine the coordinates of the start card
+                        let startCoordinates = null;
+                        for (let y = 0; y < this.mutableRound.board.length; y++) {
+                            if (startCoordinates !== null) break;
+                            for (let x = 0; x < this.mutableRound.board[y].length; x++) {
+                                if (this.mutableRound.board[y][x] !== null && this.mutableRound.board[y][x].card_id === startCardId) {
+                                    startCoordinates = { x: x, y: y };
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Use the start card coordinates to determine the gold location card's coordinates
+                        let goldLocationOne = { x: startCoordinates.x + 8, y: startCoordinates.y - 2 };
+                        let goldLocationTwo = { x: startCoordinates.x + 8, y: startCoordinates.y };
+                        let goldLocationThree = { x: startCoordinates.x + 8, y: startCoordinates.y + 2 };
+
+                        // If the first gold location was selected
+                        if (e.rowIndex === goldLocationOne.y && e.columnIndex === goldLocationOne.x) {
+                            this.modes.select_gold_location = false;
+                            this.dialogs.confirm_enlighten.gold_location = 1;
+                            this.dialogs.confirm_enlighten.show = true;
+                        }
+                        // If the second gold location was selected
+                        else if (e.rowIndex === goldLocationTwo.y && e.columnIndex === goldLocationTwo.x) {
+                            this.modes.select_gold_location = false;
+                            this.dialogs.confirm_enlighten.gold_location = 2;
+                            this.dialogs.confirm_enlighten.show = true;
+                        }
+                        // If the third gold location was selected
+                        else if (e.rowIndex === goldLocationThree.y && e.columnIndex === goldLocationThree.x) {
+                            this.modes.select_gold_location = false;
+                            this.dialogs.confirm_enlighten.gold_location = 3;
+                            this.dialogs.confirm_enlighten.show = true;
+                        }
+                    }
+                }
+
             },
             // Hand actions
             onClickPlayCard() {
                 console.log(this.tag+" clicked play card button");
-                // Find & save selected card's index
+                // Grab the card's index & data
+                let card, index;
                 for (let i = 0; i < this.mutableHand.length; i++) {
                     if (this.mutableHand[i].selected) {
-                        this.dialogs.play_card.index = i;
+                        index = i;
+                        card = this.mutableHand[i].card;
                         break;
                     }
                 }
-                // Show dialog
-                this.dialogs.play_card.show = true;
+                // Show appropriate dialog depending on the selected card
+                if (card.type === "tunnel") {
+                    this.dialogs.place_tunnel.card_index = index;
+                    this.dialogs.place_tunnel.show = true;
+                } else {
+                    if (card.name.includes("sabotage")) {
+                        this.dialogs.sabotage.card_index = index;
+                        this.dialogs.sabotage.show = true;
+                    } else if (card.name.includes("recover")) {
+                        this.dialogs.recover.card_index = index;
+                        this.dialogs.recover.show = true;
+                    } else if (card.name === "imprison") {
+                        this.dialogs.imprison.card_index = index;
+                        this.dialogs.imprison.show = true;
+                    } else if (card.name === "free") {
+                        this.dialogs.free.card_index = index;
+                        this.dialogs.free.show = true;
+                    } else if (card.name === "thief") {
+                        this.dialogs.thief.card_index = index;
+                        this.dialogs.thief.show = true;
+                    } else if (card.name === "dont_touch") {
+                        this.dialogs.dont_touch.card_index = index;
+                        this.dialogs.dont_touch.show = true;
+                    } else if (card.name === "collapse") {
+                        this.dialogs.collapse.card_index = index;
+                        this.dialogs.collapse.show = true;
+                    } else if (card.name === "enlighten") {
+                        this.dialogs.enlighten.card_index = index;
+                        this.dialogs.enlighten.show = true;
+                    } else if (card.name === "inspection") {
+                        this.dialogs.inspection.card_index = index;
+                        this.dialogs.inspection.show = true;
+                    } else if (card.name === "exchange_hats") {
+                        this.dialogs.exchange_hats.card_index = index;
+                        this.dialogs.exchange_hats.show = true;
+                    } else if (card.name === "exchange_cards") {
+                        this.dialogs.exchange_cards.card_index = index;
+                        this.dialogs.exchange_cards.show = true;
+                    }
+                }
                 // Deselect cards in our hand
                 this.deselectHandCards();
             },
@@ -620,6 +1534,20 @@
                 // Deselect cards in our hand
                 this.deselectHandCards();
             },
+            onClickViewCard() {
+                console.log(this.tag+" clicked view card button");
+                // Find & save selected card's index
+                for (let i = 0; i < this.mutableHand.length; i++) {
+                    if (this.mutableHand[i].selected) {
+                        this.dialogs.view_card.index = i;
+                        break;
+                    }
+                }
+                // Show dialog
+                this.dialogs.view_card.show = true;
+                // Deselect cards in our hand
+                this.deselectHandCards();
+            },
             deselectHandCards() {
                 for (let i = 0; i < this.mutableHand.length; i++) {
                     if (this.mutableHand[i].selected) {
@@ -627,15 +1555,11 @@
                     }
                 }
             },
-            // Play card dialog
-            onClickCancelPlayCard() {
-                console.log(this.tag+" clicked fold card");
-                this.dialogs.play_card.show = false;
-            },
-            onClickConfirmPlayCard() {
-                console.log(this.tag+" clicked confirm play card");
-                this.dialogs.play_card.loading = true;
-
+            // View card dialog
+            onClickCancelViewCard() {
+                console.log(this.tag+" clicked cancel view card");
+                // Hide the dialog
+                this.dialogs.view_card.show = false;
             },
             // Fold card dialog
             onClickCancelFoldCard() {
@@ -752,6 +1676,463 @@
                         this.dialogs.fold_cards_unblock.loading = false;
                     }.bind(this));
             },
+            // Sabotage dialog
+            onClickCancelSabotage() {
+                console.log(this.tag+" clicked cancel sabotage dialog button");
+                this.dialogs.sabotage.show = false;
+            },
+            onClickConfirmSabotage() {
+                console.log(this.tag+" clicked submit sabotage dialog button");
+                // Start loading
+                this.dialogs.sabotage.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.sabotage.card_index,
+                    player_id: this.dialogs.sabotage.player_id,
+                };
+                // Grab the card we're about to play
+                let card = this.mutableHand[this.dialogs.sabotage.card_index].card;
+                // Determine the tool we're about to disable
+                if (card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_pickaxe_light" || card.name === "sabotage_light_cart") {
+                    data.tool = this.dialogs.sabotage.tool;
+                } else if (card.name === "sabotage_pickaxe") {
+                    data.tool = "pickaxe";
+                } else if (card.name === "sabotage_light") {
+                    data.tool = "light";
+                } else if (card.name === "sabotage_cart") {
+                    data.tool = "cart";
+                }
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", response.data);
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.sabotage.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card, 
+                            selected: false
+                        });
+                        // Update target player's tool status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player_id) {
+                                if (data.tool === "pickaxe") {
+                                    this.mutablePlayers[i].pickaxe_available = false;
+                                } else if (data.tool === "light") {
+                                    this.mutablePlayers[i].light_available = false;
+                                } else if (data.tool === "cart") {
+                                    this.mutablePlayers[i].cart_available = false;
+                                }
+                                break;
+                            }
+                        }
+                        // Stop loading
+                        this.dialogs.sabotage.loading = false;
+                        // Hide dialog
+                        this.dialogs.sabotage.show = false;
+                        // Reset dialog 
+                        this.dialogs.sabotage.player_id = null;
+                        this.dialogs.sabotage.tool = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed", response.data);
+                        // Stop loading
+                        this.dialogs.sabotage.loading = false;
+                    }.bind(this));
+            },
+            // Recover dialog
+            onClickCancelRecover() {
+                console.log(this.tag+" clicked cancel recover dialog button");
+                this.dialogs.recover.show = false;
+            },
+            onClickConfirmRecover() {
+                console.log(this.tag+" clicked submit recover dialog button");
+                // Start loading
+                this.dialogs.recover.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.recover.card_index,
+                    player_id: this.dialogs.recover.player_id,
+                };
+                // Grab the card we want to play
+                let card = this.mutableHand[this.dialogs.recover.card_index].card;
+                // Determine the tool we want to recover
+                if (card.name === "recover_pickaxe_cart" || card.name === "recover_pickaxe_light" || card.name === "recover_light_cart") {
+                    data.tool = this.dialogs.recover.tool;
+                } else if (card.name === "recover_pickaxe") {
+                    data.tool = "pickaxe";
+                } else if (card.name === "recover_light") {
+                    data.tool = "light";
+                } else if (card.name === "recover_cart") {
+                    data.tool = "cart";
+                }
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", response.data);
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.recover.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card,
+                            selected: false
+                        });
+                        // Update target player's tool status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player_id) {
+                                if (data.tool === "pickaxe") {
+                                    this.mutablePlayers[i].pickaxe_available = true;
+                                } else if (data.tool === "light") {
+                                    this.mutablePlayers[i].light_available = true;
+                                } else if (data.tool === "cart") {
+                                    this.mutablePlayers[i].cart_available = true;
+                                }
+                                break;
+                            }
+                        }
+                        // Update mutable player's tool status (if we targeted ourself)
+                        if (this.mutablePlayer.id === data.player_id) {
+                            if (data.tool === "pickaxe") {
+                                this.mutablePlayer.pickaxe_available = true;
+                            } else if (data.tool === "light") {
+                                this.mutablePlayer.light_available = true;
+                            } else if (data.tool === "cart") {
+                                this.mutablePlayer.cart_available = true;
+                            }
+                        }
+                        // Stop loading
+                        this.dialogs.recover.loading = false;
+                        // Hide dialog
+                        this.dialogs.recover.show = false;
+                        // Reset dialog 
+                        this.dialogs.recover.player_id = null;
+                        this.dialogs.recover.tool = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed", response.data);
+                        // Stop loading
+                        this.dialogs.recover.loading = false;
+                    }.bind(this));
+            },
+            // Imprison dialog
+            onClickCancelImprison() {
+                console.log(this.tag+" clicked cancel imprison player button");
+                // Hide dialog
+                this.dialogs.imprison.show = false;
+            },
+            onClickConfirmImprison() {
+                console.log(this.tag+" clicked confirm imprison player button");
+                // Start loading
+                this.dialogs.imprison.loading = true;
+                // Compose API request data
+                let data = {
+                    index: this.dialogs.imprison.card_index,
+                    player_id: this.dialogs.imprison.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.imprison.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card,
+                            selected: false,
+                        });
+                        // Update player's status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player_id) {
+                                this.mutablePlayers[i].in_jail = true;
+                                break;
+                            }
+                        }
+                        // Stop loading
+                        this.dialogs.imprison.loading = false;
+                        // Hide dialog
+                        this.dialogs.imprison.show = false;
+                        // Reset dialog
+                        this.dialogs.imprison.player_id = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.imprison.loading = false;
+                    }.bind(this));
+            },
+            // Free dialog
+            onClickCancelFree() {
+                console.log(this.tag+" clicked cancel free player button");
+                this.dialogs.free.show = false;
+            },
+            onClickConfirmFree() {
+                console.log(this.tag+" clicked confirm free player button");
+                // Start loading
+                this.dialogs.free.loading = true;
+                // Compose API request data
+                let data = {
+                    index: this.dialogs.free.card_index,
+                    player_id: this.dialogs.free.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.free.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card,
+                            selected: false,
+                        });
+                        // Update player's status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player_id) {
+                                this.mutablePlayers[i].in_jail = false;
+                                break;
+                            }
+                        }
+                        // Update mutable player's tool status (if we targeted ourself)
+                        if (this.mutablePlayer.id === data.player_id) {
+                            this.mutablePlayer.in_jail = false;
+                        }
+                        // Stop loading
+                        this.dialogs.free.loading = false;
+                        // Hide dialog
+                        this.dialogs.free.show = false;
+                        // Reset dialog
+                        this.dialogs.free.player_id = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.free.loading = false;
+                    }.bind(this));
+            },
+            // Thief dialog
+            onClickCancelThief() {
+                console.log(this.tag+" clicked cancel thief button");
+                this.dialogs.thief.show = false;
+            },
+            onClickConfirmThief() {
+                console.log(this.tag+" clicked confirm thief button");
+                // Start loading
+                this.dialogs.thief.loading = true;
+                // Compose API request data
+                let data = {
+                    index: this.dialogs.thief.card_index,
+                    player_id: this.dialogs.thief.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.thief.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card,
+                            selected: false,
+                        });
+                        // Update player's status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player.id) {
+                                this.mutablePlayers[i].thief_activated = true;
+                                break;
+                            }
+                        }
+                        // Update mutable player's tool status (if we targeted ourself)
+                        this.mutablePlayer.thief_activated = true;
+                        // Stop loading
+                        this.dialogs.thief.loading = false;
+                        // Hide dialog
+                        this.dialogs.thief.show = false;
+                        // Reset dialog
+                        this.dialogs.thief.player_id = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.thief.loading = false;
+                    }.bind(this));
+            },
+            // Dont touch dialog
+            onClickCancelDontTouch() {
+                console.log(this.tag+" clicked cancel dont touch button");
+                this.dialogs.dont_touch.show = false;
+            },
+            onClickConfirmDontTouch() {
+                console.log(this.tag+" clicked confirm dont touch button");
+                // Start loading
+                this.dialogs.dont_touch.loading = true;
+                // Compose API request data
+                let data = {
+                    index: this.dialogs.dont_touch.card_index,
+                    player_id: this.dialogs.dont_touch.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.dont_touch.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({
+                            card: response.data.new_card,
+                            selected: false,
+                        });
+                        // Update player's status
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === data.player_id) {
+                                this.mutablePlayers[i].thief_activated = false;
+                                break;
+                            }
+                        }
+                        // Stop loading
+                        this.dialogs.dont_touch.loading = false;
+                        // Hide dialog
+                        this.dialogs.dont_touch.show = false;
+                        // Reset dialog
+                        this.dialogs.dont_touch.player_id = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.dont_touch.loading = false;
+                    }.bind(this));
+            },
+            // Enlighten dialog
+            onClickCancelEnlighten() {
+                console.log(this.tag+" clicked cancel enlighten button");
+                this.dialogs.enlighten.show = false;
+            },
+            onClickConfirmEnlighten() {
+                console.log(this.tag+" clicked confirm enlighten button");
+                // Hide dialog
+                this.dialogs.enlighten.show = false;
+                // Transfer index of the card we're playing
+                this.dialogs.confirm_enlighten.card_index = this.dialogs.enlighten.card_index;
+                // Enable 'select gold location' mode
+                this.modes.select_gold_location = true;
+            },
+            // Confirm enlighten dialog
+            onClickCancelConfirmEnlighten() {
+                console.log(this.tag+" clicked cancel confirm enlighten button");
+                this.dialogs.confirm_enlighten.show = false;
+            },
+            onClickRetryConfirmEnlighten() {
+                console.log(this.tag+" clicked retry confirm enlighten button");
+                this.dialogs.confirm_enlighten.show = false;
+                this.modes.select_gold_location = true;
+            },
+            onClickConfirmConfirmEnlighten() {
+                console.log(this.tag+" clicked confirm confirm enlighten button");
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.confirm_enlighten.card_index,
+                    gold_location: this.dialogs.confirm_enlighten.gold_location,
+                };
+                // Send API requst
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded: ", response.data);
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.confirm_enlighten.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
+                        // Stop loading
+                        this.dialogs.confirm_enlighten.loading = false;
+                        // Close dialog
+                        this.dialogs.confirm_enlighten.show = false;
+                        // Open up gold reveal dialog
+                        this.dialogs.reveal_gold_location.gold_location = this.dialogs.confirm_enlighten.gold_location;
+                        this.dialogs.reveal_gold_location.contains_gold = response.data.contains_gold;
+                        this.dialogs.reveal_gold_location.show = true;
+                        // Reset dialog
+                        this.dialogs.confirm_enlighten.gold_location = null;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.confirm_enlighten.loading = false;
+                    }.bind(this));
+            },
+            // All dialogs that require player / tool selection
+            onClickSelectPlayer(dialog, player_id) {
+                if (dialog === "sabotage") {
+                    if (this.dialogs.sabotage.player_id === player_id) {
+                        this.dialogs.sabotage.player_id = null;
+                    } else {
+                        this.dialogs.sabotage.player_id = player_id;
+                    }
+                } else if (dialog === "recover") {
+                    if (this.dialogs.recover.player_id === player_id) {
+                        this.dialogs.recover.player_id = null;
+                    } else {
+                        this.dialogs.recover.player_id = player_id;
+                    }
+                } else if (dialog === "thief") {
+                    if (this.dialogs.thief.player_id === player_id) {
+                        this.dialogs.thief.player_id = null;
+                    } else {
+                        this.dialogs.thief.player_id = player_id;
+                    }
+                } else if (dialog === "dont_touch") {
+                    if (this.dialogs.dont_touch.player_id === player_id) {
+                        this.dialogs.dont_touch.player_id = null;
+                    } else {
+                        this.dialogs.dont_touch.player_id = player_id;
+                    }
+                } else if (dialog === "imprison") {
+                    if (this.dialogs.imprison.player_id === player_id) {
+                        this.dialogs.imprison.player_id = null;
+                    } else {
+                        this.dialogs.imprison.player_id = player_id;
+                    }
+                } else if (dialog === "free") {
+                    if (this.dialogs.free.player_id === player_id) {
+                        this.dialogs.free.player_id = null;
+                    } else {
+                        this.dialogs.free.player_id = player_id;
+                    }
+                } else if (dialog === "inspection") {
+                    if (this.dialogs.inspection.player_id === player_id) {
+                        this.dialogs.inspection.player_id = null;
+                    } else {
+                        this.dialogs.inspection.player_id = player_id;
+                    }
+                } else if (dialog === "exchange_hats") {
+                    if (this.dialogs.exchange_hats.player_id === player_id) {
+                        this.dialogs.exchange_hats.player_id = null;
+                    } else {
+                        this.dialogs.exchange_hats.player_id = player_id;
+                    }
+                } else if (dialog === "exchange_cards") {
+                    if (this.dialogs.exchange_cards.player_id === player_id) {
+                        this.dialogs.exchange_cards.player_id = null;
+                    } else {
+                        this.dialogs.exchange_cards.player_id = player_id;
+                    }
+                }
+            },
+            onClickSelectTool(dialog, tool) {
+                if (dialog === "sabotage") {
+                    if (this.dialogs.sabotage.tool === tool) {
+                        this.dialogs.sabotage.tool = null;
+                    } else {
+                        this.dialogs.sabotage.tool = tool;
+                    }
+                } else if (dialog === "recover") {
+                    if (this.dialogs.recover.tool === tool) {
+                        this.dialogs.recover.tool = null;
+                    } else {
+                        this.dialogs.recover.tool = tool;
+                    }
+                }
+            },
             // API interaction
             sendPerformActionRequest(action, data) {
                 return new Promise(function(resolve, reject) {
@@ -794,6 +2175,14 @@
                 for (let i = 0; i < this.cards.length; i++) {
                     if (this.cards[i].id === id) {
                         return this.cards[i];
+                    }
+                }
+                return false;
+            },
+            getCardIdByName(name) {
+                for (let i = 0; i < this.cards.length; i++) {
+                    if (this.cards[i].name === name) {
+                        return this.cards[i].id;
                     }
                 }
                 return false;
@@ -973,6 +2362,24 @@
                 }
             }
         }
+        #game-ui__mode-wrapper {
+            left: 0;
+            top: 25px;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            position: absolute;
+            flex-direction: row;
+            justify-content: center;
+            #game-ui__mode {
+                display: flex;
+                color: #ffffff;
+                border-radius: 3px;
+                padding: 10px 15px;
+                box-sizing: border-box;
+                background-color: hsl(0, 0%, 10%);
+            }
+        }
         #card-actions__wrapper {
             left: 0;
             width: 100%;
@@ -1056,6 +2463,94 @@
         justify-content: center;
         .card {
             margin: 0 15px;
+        }
+    }
+    .select-player {
+        width: 100%;
+        .select-player__title {
+            margin: 0 0 10px 0;
+        }
+        .select-player__list {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            margin: 0 -15px -30px -15px;
+            .select-player__list-item {
+                flex: 0 0 50%;
+                box-sizing: border-box;
+                padding: 0 15px 30px 15px;
+                .player-option {
+                    padding: 15px;
+                    color: #000;
+                    border-radius: 3px;
+                    transition: all .3s;
+                    box-sizing: border-box;
+                    background-color: rgba(255, 255, 255, .25);
+                    &:hover {
+                        cursor: pointer;
+                        background-color: rgba(255, 255, 255, .5);
+                    }
+                    &.selected {
+                        background-color: rgba(255, 255, 255, 1);
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .select-tool {
+        width: 100%;
+        margin: 15px 0 0 0;
+        .select-tool__title {
+            margin: 0 0 10px 0;
+        }
+        .select-tool__list {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            margin: 0 -15px -30px -15px;
+            .select-tool__list-item {
+                flex: 0 0 50%;
+                box-sizing: border-box;
+                padding: 0 15px 30px 15px;
+                .tool-option {
+                    padding: 15px;
+                    color: #000;
+                    border-radius: 3px;
+                    transition: all .3s;
+                    box-sizing: border-box;
+                    text-transform: capitalize;
+                    background-color: rgba(255, 255, 255, .25);
+                    &:hover {
+                        cursor: pointer;
+                        background-color: rgba(255, 255, 255, .5);
+                    }
+                    &.selected {
+                        background-color: rgba(255, 255, 255, 1);
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #reveal-gold-location {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        #reveal-gold-location__image {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px auto;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+        #reveal-gold-location__text {
+            text-align: center;
         }
     }
 </style>

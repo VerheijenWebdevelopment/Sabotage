@@ -3070,6 +3070,398 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -3086,10 +3478,9 @@ __webpack_require__.r(__webpack_exports__);
         my_role: {
           show: false
         },
-        play_card: {
+        view_card: {
           show: false,
-          index: null,
-          loading: false
+          index: null
         },
         fold_card: {
           show: false,
@@ -3106,7 +3497,90 @@ __webpack_require__.r(__webpack_exports__);
           indices: [],
           tool: null,
           loading: false
+        },
+        sabotage: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          tool: null,
+          loading: false
+        },
+        recover: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          tool: null,
+          loading: false
+        },
+        imprison: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          loading: false
+        },
+        free: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          loading: false
+        },
+        thief: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          loading: false
+        },
+        dont_touch: {
+          show: false,
+          card_index: null,
+          player_id: null,
+          loading: false
+        },
+        enlighten: {
+          show: false,
+          card_index: null
+        },
+        confirm_enlighten: {
+          show: false,
+          loading: false,
+          card_index: null,
+          gold_location: null
+        },
+        inspection: {
+          show: false,
+          card_index: null,
+          player_id: null
+        },
+        collapse: {
+          show: false,
+          card_index: null,
+          tile_coordinates: null
+        },
+        place_tunnel: {
+          show: false,
+          card_index: null,
+          tile_coordinates: null
+        },
+        exchange_hands: {
+          show: false,
+          card_index: null,
+          player_id: null
+        },
+        exchange_hats: {
+          show: false,
+          card_index: null,
+          player_id: null
+        },
+        reveal_gold_location: {
+          show: false,
+          gold_location: null,
+          contains_gold: false
         }
+      },
+      modes: {
+        select_gold_location: false,
+        select_tunnel: false,
+        select_tile: false
       }
     };
   },
@@ -3123,6 +3597,18 @@ __webpack_require__.r(__webpack_exports__);
     },
     itsMyTurn: function itsMyTurn() {
       return this.playerAtPlay.id === this.player.id;
+    },
+    // Players
+    mutablePlayersExcludingMe: function mutablePlayersExcludingMe() {
+      var out = [];
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id !== this.mutablePlayer.id) {
+          out.push(this.mutablePlayers[i]);
+        }
+      }
+
+      return out;
     },
     // Hand
     selectedHandCards: function selectedHandCards() {
@@ -3151,10 +3637,34 @@ __webpack_require__.r(__webpack_exports__);
     showCardActions: function showCardActions() {
       return this.numSelectedHandCards > 0 && this.numSelectedHandCards < 4;
     },
-    // Play card dialog
-    playCardDialogCard: function playCardDialogCard() {
-      if (this.dialogs.play_card.index !== null) {
-        return this.mutableHand[this.dialogs.play_card.index].card;
+    showCardActionPlay: function showCardActionPlay() {
+      if (this.numSelectedHandCards === 1 && this.itsMyTurn) {
+        if (this.selectedHandCard.card.type === "tunnel") {
+          return this.mutablePlayer.pickaxe_available && this.mutablePlayer.light_available && this.mutablePlayer.cart_available && !this.mutablePlayer.in_jail;
+        } else {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    showCardActionFoldCard: function showCardActionFoldCard() {
+      return this.numSelectedHandCards === 1 && this.itsMyTurn;
+    },
+    showCardActionFoldCards: function showCardActionFoldCards() {
+      return this.numSelectedHandCards > 1 && this.itsMyTurn;
+    },
+    showCardActionFoldCardsUnblock: function showCardActionFoldCardsUnblock() {
+      return this.numSelectedHandCards === 2 && this.itsMyTurn;
+    },
+    // UI
+    showModeBar: function showModeBar() {
+      return this.modes.select_gold_location || this.modes.select_tunnel || this.modes.select_tile;
+    },
+    // View card dialog
+    viewCardDialogCard: function viewCardDialogCard() {
+      if (this.dialogs.view_card.index !== null) {
+        return this.mutableHand[this.dialogs.view_card.index].card;
       }
 
       return false;
@@ -3176,8 +3686,234 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return out;
-    } // Fold cards & unblock dialog
+    },
+    // Fold cards & unblock dialog
+    // Sabotage dialog
+    sabotageDialogCard: function sabotageDialogCard() {
+      if (this.dialogs.sabotage.card_index !== null) {
+        return this.mutableHand[this.dialogs.sabotage.card_index].card;
+      }
 
+      return false;
+    },
+    sabotageDialogTitle: function sabotageDialogTitle() {
+      if (this.dialogs.sabotage.card_index !== null) {
+        var out = "Saboteer speler's ";
+        var card = this.mutableHand[this.dialogs.sabotage.card_index].card;
+
+        if (card.name === "sabotage_pickaxe") {
+          out += "pickaxe";
+        } else if (card.name === "sabotage_light") {
+          out += "lantaarn";
+        } else if (card.name === "sabotage_cart") {
+          out += "minecart";
+        } else {
+          out += "gereedschap";
+        }
+
+        console.log("title: ", out, card.name);
+        return out;
+      }
+
+      return "";
+    },
+    sabotageDialogDisableSubmit: function sabotageDialogDisableSubmit() {
+      var card = this.mutableHand[this.dialogs.sabotage.card_index];
+
+      if (card) {
+        if (card.name === "sabotage_pickaxe_light" || card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_light_cart") {
+          return this.dialogs.sabotage.player_id === null || this.dialogs.sabotage.tool === null ? true : false;
+        } else {
+          return this.dialogs.sabotage.player_id === null ? true : false;
+        }
+      }
+
+      return true;
+    },
+    sabotageDialogShowToolSelection: function sabotageDialogShowToolSelection() {
+      var sabotageCard = this.mutableHand[this.dialogs.sabotage.card_index];
+
+      if (sabotageCard) {
+        return sabotageCard.card.name === "sabotage_pickaxe_light" || sabotageCard.card.name === "sabotage_pickaxe_axe" || sabotageCard.card.name === "sabotage_light_cart";
+      }
+
+      return false;
+    },
+    sabotageDialogToolOptions: function sabotageDialogToolOptions() {
+      var out = [];
+      var sabotageCard = this.mutableHand[this.dialogs.sabotage.card_index];
+
+      if (sabotageCard) {
+        if (sabotageCard.card.name === "sabotage_pickaxe_light") {
+          out.push("pickaxe");
+          out.push("light");
+        } else if (sabotageCard.card.name === "sabotage_pickaxe_cart") {
+          out.push("pickaxe");
+          out.push("cart");
+        } else {
+          out.push("light");
+          out.push("cart");
+        }
+      }
+
+      return out;
+    },
+    // Recover dialog
+    recoverDialogCard: function recoverDialogCard() {
+      if (this.dialogs.recover.card_index !== null) {
+        return this.mutableHand[this.dialogs.recover.card_index].card;
+      }
+
+      return false;
+    },
+    recoverDialogTitle: function recoverDialogTitle() {
+      if (this.dialogs.recover.card_index !== null) {
+        var out = "Herstel speler's ";
+        var card = this.mutableHand[this.dialogs.recover.card_index].card;
+
+        if (card.name === "recover_pickaxe") {
+          out += "pickaxe";
+        } else if (card.name === "recover_light") {
+          out += "light";
+        } else if (card.name === "recover_cart") {
+          out += "cart";
+        } else {
+          out += "gereedschap";
+        }
+
+        return out;
+      }
+
+      return "";
+    },
+    recoverDialogDisableSubmit: function recoverDialogDisableSubmit() {
+      var recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+
+      if (recoverCard) {
+        if (recoverCard.card.name === "recover_pickaxe_light" || recoverCard.card.name === "recover_pickaxe_cart" || recoverCard.card.name === "recover_light_cart") {
+          return this.dialogs.recover.player_id === null || this.dialogs.recover.tool === null ? true : false;
+        } else {
+          return this.dialogs.recover.player_id === null ? true : false;
+        }
+      }
+
+      return true;
+    },
+    recoverDialogShowToolSelection: function recoverDialogShowToolSelection() {
+      var recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+
+      if (recoverCard) {
+        return recoverCard.card.name === "recover_pickaxe_light" || recoverCard.card.name === "recover_pickaxe_cart" || recoverCard.card.name === "recover_light_cart";
+      }
+
+      return false;
+    },
+    recoverDialogToolOptions: function recoverDialogToolOptions() {
+      var out = [];
+      var recoverCard = this.mutableHand[this.dialogs.recover.card_index];
+
+      if (recoverCard) {
+        if (recoverCard.card.name === "recover_pickaxe_light") {
+          out.push("pickaxe");
+          out.push("light");
+        } else if (recoverCard.card.name === "recover_pickaxe_cart") {
+          out.push("pickaxe");
+          out.push("cart");
+        } else {
+          out.push("light");
+          out.push("cart");
+        }
+      }
+
+      return out;
+    },
+    // Imprison dialog
+    imprisonDialogCard: function imprisonDialogCard() {
+      if (this.dialogs.imprison.card_index !== null) {
+        return this.mutableHand[this.dialogs.imprison.card_index].card;
+      }
+
+      return false;
+    },
+    imprisonDialogDisableSubmit: function imprisonDialogDisableSubmit() {
+      return this.dialogs.imprison.player_id === null ? true : false;
+    },
+    // Free dialog
+    freeDialogCard: function freeDialogCard() {
+      if (this.dialogs.free.card_index !== null) {
+        return this.mutableHand[this.dialogs.free.card_index].card;
+      }
+
+      return false;
+    },
+    freeDialogDisableSubmit: function freeDialogDisableSubmit() {
+      return this.dialogs.free.player_id === null ? true : false;
+    },
+    // Thief dialog
+    thiefDialogCard: function thiefDialogCard() {
+      if (this.dialogs.thief.card_index !== null) {
+        return this.mutableHand[this.dialogs.thief.card_index].card;
+      }
+
+      return false;
+    },
+    // Dont touch dialog
+    dontTouchDialogCard: function dontTouchDialogCard() {
+      if (this.dialogs.dont_touch.card_index !== null) {
+        return this.mutableHand[this.dialogs.dont_touch.card_index].card;
+      }
+
+      return false;
+    },
+    dontTouchDialogDisableSubmit: function dontTouchDialogDisableSubmit() {
+      return this.dialogs.dont_touch.player_id === null ? true : false;
+    },
+    // Enlighten dialog
+    enlightenDialogCard: function enlightenDialogCard() {
+      if (this.dialogs.enlighten.card_index !== null) {
+        return this.mutableHand[this.dialogs.enlighten.card_index].card;
+      }
+
+      return false;
+    },
+    // Confirm enlighten dialog
+    confirmEnlightenDialogCard: function confirmEnlightenDialogCard() {
+      if (this.dialogs.confirm_enlighten.card_index !== null) {
+        return this.mutableHand[this.dialogs.confirm_enlighten.card_index].card;
+      }
+
+      return false;
+    },
+    confirmEnlightenText: function confirmEnlightenText() {
+      var out = "Je hebt de ";
+
+      if (this.dialogs.confirm_enlighten.gold_location === 1) {
+        out += "eerste (bovenste)";
+      } else if (this.dialogs.confirm_enlighten.gold_location === 2) {
+        out += "tweede (middelste)";
+      } else {
+        out += "laatste (onderste)";
+      }
+
+      out += " goud locatie gekozen.";
+      return out;
+    },
+    // Collapse tunnel dialog
+    collapseDialogCard: function collapseDialogCard() {
+      if (this.dialogs.collapse.card_index !== null) {
+        return this.mutableHand[this.dialogs.collapse.card_index].card;
+      }
+
+      return false;
+    },
+    // Place tunnel dialog
+    placeTunnelDialogCard: function placeTunnelDialogCard() {
+      if (this.dialogs.place_tunnel.card_index !== null) {
+        return this.mutableHand[this.dialogs.place_tunnel.card_index].card;
+      }
+
+      return false;
+    }
   },
   methods: {
     initialize: function initialize() {
@@ -3229,7 +3965,7 @@ __webpack_require__.r(__webpack_exports__);
       // Role selection component events
       _event_bus_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$on("role_selected", this.onRoleSelected); // Game channel events
 
-      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound).listen('Game\\NewRoundStarted', this.onNewRoundStarted).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
+      Echo["private"]('game.' + this.game.id).listen('Game\\PlayerSelectedRole', this.onPlayerSelectedRole).listen('Game\\PlayerToolBlocked', this.onPlayerToolBlocked).listen('Game\\PlayerToolRecovered', this.onPlayerToolRecovered).listen('Game\\PlayerImprisoned', this.onPlayerImprisoned).listen('Game\\PlayerFreed', this.onPlayerFreed).listen('Game\\PlayerIsThief', this.onPlayerIsThief).listen('Game\\PlayerNoLongerThief', this.onPlayerNoLongerThief).listen('Game\\PlayerCheckedGoldLocation', this.onPlayerCheckedGoldLocation).listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed).listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel).listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel).listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold).listen('Game\\TurnEnded', this.onTurnEnded).listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound).listen('Game\\NewRoundStarted', this.onNewRoundStarted).listen('Game\\RoundEnded', this.onRoundEnded).listen('Game\\GameEnded', this.onGameEnded);
     },
     // Event handlers
     onRoleSelected: function onRoleSelected(e) {
@@ -3260,10 +3996,122 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     onPlayerToolBlocked: function onPlayerToolBlocked(e) {
-      console.log(this.tag + "[event] received event player tool blocked:", e);
+      console.log(this.tag + "[event] received event player tool blocked:", e); // Update the target player's tool's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          if (e.tool === "pickaxe") {
+            this.mutablePlayers[i].pickaxe_available = 0;
+          } else if (e.tool === "light") {
+            this.mutablePlayers[i].light_available = 0;
+          } else if (e.tool === "cart") {
+            this.mutablePlayers[i].cart_available = 0;
+          }
+
+          break;
+        }
+      } // If we were the target player, update our mutablePlayer as well
+
+
+      if (e.target_player.id === this.mutablePlayer.id) {
+        if (e.tool === "pickaxe") {
+          this.mutablePlayer.pickaxe_available = 0;
+        } else if (e.tool === "light") {
+          this.mutablePlayer.light_available = 0;
+        } else if (e.tool === "cart") {
+          this.mutablePlayer.cart_available = 0;
+        }
+      }
     },
     onPlayerToolRecovered: function onPlayerToolRecovered(e) {
-      console.log(this.tag + "[event] received event player tool recovered:", e);
+      console.log(this.tag + "[event] received event player tool recovered:", e); // Update the target player's tool's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          if (e.tool === "pickaxe") {
+            this.mutablePlayers[i].pickaxe_available = 1;
+          } else if (e.tool === "light") {
+            this.mutablePlayers[i].light_available = 1;
+          } else if (e.tool === "cart") {
+            this.mutablePlayers[i].cart_available = 1;
+          }
+
+          break;
+        }
+      } // If we were the target player, update our mutablePlayer as well
+
+
+      if (e.target_player.id === this.mutablePlayer.id) {
+        if (e.tool === "pickaxe") {
+          this.mutablePlayer.pickaxe_available = 1;
+        } else if (e.tool === "light") {
+          this.mutablePlayer.light_available = 1;
+        } else if (e.tool === "cart") {
+          this.mutablePlayer.cart_available = 1;
+        }
+      }
+    },
+    onPlayerImprisoned: function onPlayerImprisoned(e) {
+      console.log(this.tag + "[event] received event player was imprisoned:", e); // Update player's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          this.mutablePlayers[i].in_jail = 1;
+          break;
+        }
+      } // If we were the target player, update mutable player as well
+
+
+      if (e.target_player.id === this.mutablePlayer.id) {
+        this.mutablePlayer.in_jail = 1;
+      }
+    },
+    onPlayerFreed: function onPlayerFreed(e) {
+      console.log(this.tag + "[event] received event player was freed from prison:", e); // Update player's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          this.mutablePlayers[i].in_jail = 0;
+          break;
+        }
+      } // If we were the target player, update mutable player as well
+
+
+      if (e.target_player.id === this.mutablePlayer.id) {
+        this.mutablePlayer.in_jail = 0;
+      }
+    },
+    onPlayerIsThief: function onPlayerIsThief(e) {
+      console.log(this.tag + "[event] received event player is thief:", e); // Update player's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.player.id) {
+          this.mutablePlayers[i].thief_activated = 1;
+          break;
+        }
+      } // If we were the target player, update mutable player as well
+
+
+      if (e.player.id === this.mutablePlayer.id) {
+        this.mutablePlayer.thief_activated = 1;
+      }
+    },
+    onPlayerNoLongerThief: function onPlayerNoLongerThief(e) {
+      console.log(this.tag + "[event] received event player is no longer thief:", e); // Update player's status
+
+      for (var i = 0; i < this.mutablePlayers.length; i++) {
+        if (this.mutablePlayers[i].id === e.target_player.id) {
+          this.mutablePlayers[i].thief_activated = 0;
+          break;
+        }
+      } // If we were the target player, update mutable player as well
+
+
+      if (e.target_player.id === this.mutablePlayer.id) {
+        this.mutablePlayer.thief_activated = 0;
+      }
+
+      l;
     },
     onPlayerCheckedGoldLocation: function onPlayerCheckedGoldLocation(e) {
       console.log(this.tag + "[event] received event player checked gold location:", e);
@@ -3307,21 +4155,117 @@ __webpack_require__.r(__webpack_exports__);
       this.mutableHand[index].selected = !this.mutableHand[index].selected;
     },
     onClickBoardTile: function onClickBoardTile(e) {
-      console.log(this.tag + " clicked board tile: ", e);
+      console.log(this.tag + " clicked board tile: ", e); // If we're in gold location selection mode
+
+      if (this.modes.select_gold_location) {
+        // Determine the ID of the start card
+        var startCardId = this.getCardIdByName("start");
+
+        if (startCardId) {
+          // Determine the coordinates of the start card
+          var startCoordinates = null;
+
+          for (var y = 0; y < this.mutableRound.board.length; y++) {
+            if (startCoordinates !== null) break;
+
+            for (var x = 0; x < this.mutableRound.board[y].length; x++) {
+              if (this.mutableRound.board[y][x] !== null && this.mutableRound.board[y][x].card_id === startCardId) {
+                startCoordinates = {
+                  x: x,
+                  y: y
+                };
+                break;
+              }
+            }
+          } // Use the start card coordinates to determine the gold location card's coordinates
+
+
+          var goldLocationOne = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y - 2
+          };
+          var goldLocationTwo = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y
+          };
+          var goldLocationThree = {
+            x: startCoordinates.x + 8,
+            y: startCoordinates.y + 2
+          }; // If the first gold location was selected
+
+          if (e.rowIndex === goldLocationOne.y && e.columnIndex === goldLocationOne.x) {
+            this.modes.select_gold_location = false;
+            this.dialogs.confirm_enlighten.gold_location = 1;
+            this.dialogs.confirm_enlighten.show = true;
+          } // If the second gold location was selected
+          else if (e.rowIndex === goldLocationTwo.y && e.columnIndex === goldLocationTwo.x) {
+              this.modes.select_gold_location = false;
+              this.dialogs.confirm_enlighten.gold_location = 2;
+              this.dialogs.confirm_enlighten.show = true;
+            } // If the third gold location was selected
+            else if (e.rowIndex === goldLocationThree.y && e.columnIndex === goldLocationThree.x) {
+                this.modes.select_gold_location = false;
+                this.dialogs.confirm_enlighten.gold_location = 3;
+                this.dialogs.confirm_enlighten.show = true;
+              }
+        }
+      }
     },
     // Hand actions
     onClickPlayCard: function onClickPlayCard() {
-      console.log(this.tag + " clicked play card button"); // Find & save selected card's index
+      console.log(this.tag + " clicked play card button"); // Grab the card's index & data
+
+      var card, index;
 
       for (var i = 0; i < this.mutableHand.length; i++) {
         if (this.mutableHand[i].selected) {
-          this.dialogs.play_card.index = i;
+          index = i;
+          card = this.mutableHand[i].card;
           break;
         }
-      } // Show dialog
+      } // Show appropriate dialog depending on the selected card
 
 
-      this.dialogs.play_card.show = true; // Deselect cards in our hand
+      if (card.type === "tunnel") {
+        this.dialogs.place_tunnel.card_index = index;
+        this.dialogs.place_tunnel.show = true;
+      } else {
+        if (card.name.includes("sabotage")) {
+          this.dialogs.sabotage.card_index = index;
+          this.dialogs.sabotage.show = true;
+        } else if (card.name.includes("recover")) {
+          this.dialogs.recover.card_index = index;
+          this.dialogs.recover.show = true;
+        } else if (card.name === "imprison") {
+          this.dialogs.imprison.card_index = index;
+          this.dialogs.imprison.show = true;
+        } else if (card.name === "free") {
+          this.dialogs.free.card_index = index;
+          this.dialogs.free.show = true;
+        } else if (card.name === "thief") {
+          this.dialogs.thief.card_index = index;
+          this.dialogs.thief.show = true;
+        } else if (card.name === "dont_touch") {
+          this.dialogs.dont_touch.card_index = index;
+          this.dialogs.dont_touch.show = true;
+        } else if (card.name === "collapse") {
+          this.dialogs.collapse.card_index = index;
+          this.dialogs.collapse.show = true;
+        } else if (card.name === "enlighten") {
+          this.dialogs.enlighten.card_index = index;
+          this.dialogs.enlighten.show = true;
+        } else if (card.name === "inspection") {
+          this.dialogs.inspection.card_index = index;
+          this.dialogs.inspection.show = true;
+        } else if (card.name === "exchange_hats") {
+          this.dialogs.exchange_hats.card_index = index;
+          this.dialogs.exchange_hats.show = true;
+        } else if (card.name === "exchange_cards") {
+          this.dialogs.exchange_cards.card_index = index;
+          this.dialogs.exchange_cards.show = true;
+        }
+      } // Deselect cards in our hand
+
 
       this.deselectHandCards();
     },
@@ -3372,6 +4316,21 @@ __webpack_require__.r(__webpack_exports__);
 
       this.deselectHandCards();
     },
+    onClickViewCard: function onClickViewCard() {
+      console.log(this.tag + " clicked view card button"); // Find & save selected card's index
+
+      for (var i = 0; i < this.mutableHand.length; i++) {
+        if (this.mutableHand[i].selected) {
+          this.dialogs.view_card.index = i;
+          break;
+        }
+      } // Show dialog
+
+
+      this.dialogs.view_card.show = true; // Deselect cards in our hand
+
+      this.deselectHandCards();
+    },
     deselectHandCards: function deselectHandCards() {
       for (var i = 0; i < this.mutableHand.length; i++) {
         if (this.mutableHand[i].selected) {
@@ -3379,14 +4338,11 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
-    // Play card dialog
-    onClickCancelPlayCard: function onClickCancelPlayCard() {
-      console.log(this.tag + " clicked fold card");
-      this.dialogs.play_card.show = false;
-    },
-    onClickConfirmPlayCard: function onClickConfirmPlayCard() {
-      console.log(this.tag + " clicked confirm play card");
-      this.dialogs.play_card.loading = true;
+    // View card dialog
+    onClickCancelViewCard: function onClickCancelViewCard() {
+      console.log(this.tag + " clicked cancel view card"); // Hide the dialog
+
+      this.dialogs.view_card.show = false;
     },
     // Fold card dialog
     onClickCancelFoldCard: function onClickCancelFoldCard() {
@@ -3508,6 +4464,464 @@ __webpack_require__.r(__webpack_exports__);
         this.dialogs.fold_cards_unblock.loading = false;
       }.bind(this));
     },
+    // Sabotage dialog
+    onClickCancelSabotage: function onClickCancelSabotage() {
+      console.log(this.tag + " clicked cancel sabotage dialog button");
+      this.dialogs.sabotage.show = false;
+    },
+    onClickConfirmSabotage: function onClickConfirmSabotage() {
+      console.log(this.tag + " clicked submit sabotage dialog button"); // Start loading
+
+      this.dialogs.sabotage.loading = true; // Compose API request payload
+
+      var data = {
+        index: this.dialogs.sabotage.card_index,
+        player_id: this.dialogs.sabotage.player_id
+      }; // Grab the card we're about to play
+
+      var card = this.mutableHand[this.dialogs.sabotage.card_index].card; // Determine the tool we're about to disable
+
+      if (card.name === "sabotage_pickaxe_cart" || card.name === "sabotage_pickaxe_light" || card.name === "sabotage_light_cart") {
+        data.tool = this.dialogs.sabotage.tool;
+      } else if (card.name === "sabotage_pickaxe") {
+        data.tool = "pickaxe";
+      } else if (card.name === "sabotage_light") {
+        data.tool = "light";
+      } else if (card.name === "sabotage_cart") {
+        data.tool = "cart";
+      } // Send API request
+
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded", response.data); // Update player's hand
+
+        this.mutableHand.splice(this.dialogs.sabotage.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update target player's tool status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            if (data.tool === "pickaxe") {
+              this.mutablePlayers[i].pickaxe_available = false;
+            } else if (data.tool === "light") {
+              this.mutablePlayers[i].light_available = false;
+            } else if (data.tool === "cart") {
+              this.mutablePlayers[i].cart_available = false;
+            }
+
+            break;
+          }
+        } // Stop loading
+
+
+        this.dialogs.sabotage.loading = false; // Hide dialog
+
+        this.dialogs.sabotage.show = false; // Reset dialog 
+
+        this.dialogs.sabotage.player_id = null;
+        this.dialogs.sabotage.tool = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed", response.data); // Stop loading
+
+        this.dialogs.sabotage.loading = false;
+      }.bind(this));
+    },
+    // Recover dialog
+    onClickCancelRecover: function onClickCancelRecover() {
+      console.log(this.tag + " clicked cancel recover dialog button");
+      this.dialogs.recover.show = false;
+    },
+    onClickConfirmRecover: function onClickConfirmRecover() {
+      console.log(this.tag + " clicked submit recover dialog button"); // Start loading
+
+      this.dialogs.recover.loading = true; // Compose API request payload
+
+      var data = {
+        index: this.dialogs.recover.card_index,
+        player_id: this.dialogs.recover.player_id
+      }; // Grab the card we want to play
+
+      var card = this.mutableHand[this.dialogs.recover.card_index].card; // Determine the tool we want to recover
+
+      if (card.name === "recover_pickaxe_cart" || card.name === "recover_pickaxe_light" || card.name === "recover_light_cart") {
+        data.tool = this.dialogs.recover.tool;
+      } else if (card.name === "recover_pickaxe") {
+        data.tool = "pickaxe";
+      } else if (card.name === "recover_light") {
+        data.tool = "light";
+      } else if (card.name === "recover_cart") {
+        data.tool = "cart";
+      } // Send API request
+
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded", response.data); // Update player's hand
+
+        this.mutableHand.splice(this.dialogs.recover.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update target player's tool status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            if (data.tool === "pickaxe") {
+              this.mutablePlayers[i].pickaxe_available = true;
+            } else if (data.tool === "light") {
+              this.mutablePlayers[i].light_available = true;
+            } else if (data.tool === "cart") {
+              this.mutablePlayers[i].cart_available = true;
+            }
+
+            break;
+          }
+        } // Update mutable player's tool status (if we targeted ourself)
+
+
+        if (this.mutablePlayer.id === data.player_id) {
+          if (data.tool === "pickaxe") {
+            this.mutablePlayer.pickaxe_available = true;
+          } else if (data.tool === "light") {
+            this.mutablePlayer.light_available = true;
+          } else if (data.tool === "cart") {
+            this.mutablePlayer.cart_available = true;
+          }
+        } // Stop loading
+
+
+        this.dialogs.recover.loading = false; // Hide dialog
+
+        this.dialogs.recover.show = false; // Reset dialog 
+
+        this.dialogs.recover.player_id = null;
+        this.dialogs.recover.tool = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed", response.data); // Stop loading
+
+        this.dialogs.recover.loading = false;
+      }.bind(this));
+    },
+    // Imprison dialog
+    onClickCancelImprison: function onClickCancelImprison() {
+      console.log(this.tag + " clicked cancel imprison player button"); // Hide dialog
+
+      this.dialogs.imprison.show = false;
+    },
+    onClickConfirmImprison: function onClickConfirmImprison() {
+      console.log(this.tag + " clicked confirm imprison player button"); // Start loading
+
+      this.dialogs.imprison.loading = true; // Compose API request data
+
+      var data = {
+        index: this.dialogs.imprison.card_index,
+        player_id: this.dialogs.imprison.player_id
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.imprison.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update player's status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            this.mutablePlayers[i].in_jail = true;
+            break;
+          }
+        } // Stop loading
+
+
+        this.dialogs.imprison.loading = false; // Hide dialog
+
+        this.dialogs.imprison.show = false; // Reset dialog
+
+        this.dialogs.imprison.player_id = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.imprison.loading = false;
+      }.bind(this));
+    },
+    // Free dialog
+    onClickCancelFree: function onClickCancelFree() {
+      console.log(this.tag + " clicked cancel free player button");
+      this.dialogs.free.show = false;
+    },
+    onClickConfirmFree: function onClickConfirmFree() {
+      console.log(this.tag + " clicked confirm free player button"); // Start loading
+
+      this.dialogs.free.loading = true; // Compose API request data
+
+      var data = {
+        index: this.dialogs.free.card_index,
+        player_id: this.dialogs.free.player_id
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.free.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update player's status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            this.mutablePlayers[i].in_jail = false;
+            break;
+          }
+        } // Update mutable player's tool status (if we targeted ourself)
+
+
+        if (this.mutablePlayer.id === data.player_id) {
+          this.mutablePlayer.in_jail = false;
+        } // Stop loading
+
+
+        this.dialogs.free.loading = false; // Hide dialog
+
+        this.dialogs.free.show = false; // Reset dialog
+
+        this.dialogs.free.player_id = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.free.loading = false;
+      }.bind(this));
+    },
+    // Thief dialog
+    onClickCancelThief: function onClickCancelThief() {
+      console.log(this.tag + " clicked cancel thief button");
+      this.dialogs.thief.show = false;
+    },
+    onClickConfirmThief: function onClickConfirmThief() {
+      console.log(this.tag + " clicked confirm thief button"); // Start loading
+
+      this.dialogs.thief.loading = true; // Compose API request data
+
+      var data = {
+        index: this.dialogs.thief.card_index,
+        player_id: this.dialogs.thief.player_id
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.thief.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update player's status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player.id) {
+            this.mutablePlayers[i].thief_activated = true;
+            break;
+          }
+        } // Update mutable player's tool status (if we targeted ourself)
+
+
+        this.mutablePlayer.thief_activated = true; // Stop loading
+
+        this.dialogs.thief.loading = false; // Hide dialog
+
+        this.dialogs.thief.show = false; // Reset dialog
+
+        this.dialogs.thief.player_id = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.thief.loading = false;
+      }.bind(this));
+    },
+    // Dont touch dialog
+    onClickCancelDontTouch: function onClickCancelDontTouch() {
+      console.log(this.tag + " clicked cancel dont touch button");
+      this.dialogs.dont_touch.show = false;
+    },
+    onClickConfirmDontTouch: function onClickConfirmDontTouch() {
+      console.log(this.tag + " clicked confirm dont touch button"); // Start loading
+
+      this.dialogs.dont_touch.loading = true; // Compose API request data
+
+      var data = {
+        index: this.dialogs.dont_touch.card_index,
+        player_id: this.dialogs.dont_touch.player_id
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.dont_touch.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update player's status
+
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === data.player_id) {
+            this.mutablePlayers[i].thief_activated = false;
+            break;
+          }
+        } // Stop loading
+
+
+        this.dialogs.dont_touch.loading = false; // Hide dialog
+
+        this.dialogs.dont_touch.show = false; // Reset dialog
+
+        this.dialogs.dont_touch.player_id = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.dont_touch.loading = false;
+      }.bind(this));
+    },
+    // Enlighten dialog
+    onClickCancelEnlighten: function onClickCancelEnlighten() {
+      console.log(this.tag + " clicked cancel enlighten button");
+      this.dialogs.enlighten.show = false;
+    },
+    onClickConfirmEnlighten: function onClickConfirmEnlighten() {
+      console.log(this.tag + " clicked confirm enlighten button"); // Hide dialog
+
+      this.dialogs.enlighten.show = false; // Transfer index of the card we're playing
+
+      this.dialogs.confirm_enlighten.card_index = this.dialogs.enlighten.card_index; // Enable 'select gold location' mode
+
+      this.modes.select_gold_location = true;
+    },
+    // Confirm enlighten dialog
+    onClickCancelConfirmEnlighten: function onClickCancelConfirmEnlighten() {
+      console.log(this.tag + " clicked cancel confirm enlighten button");
+      this.dialogs.confirm_enlighten.show = false;
+    },
+    onClickRetryConfirmEnlighten: function onClickRetryConfirmEnlighten() {
+      console.log(this.tag + " clicked retry confirm enlighten button");
+      this.dialogs.confirm_enlighten.show = false;
+      this.modes.select_gold_location = true;
+    },
+    onClickConfirmConfirmEnlighten: function onClickConfirmConfirmEnlighten() {
+      console.log(this.tag + " clicked confirm confirm enlighten button"); // Compose API request payload
+
+      var data = {
+        index: this.dialogs.confirm_enlighten.card_index,
+        gold_location: this.dialogs.confirm_enlighten.gold_location
+      }; // Send API requst
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded: ", response.data); // Update player's hand
+
+        this.mutableHand.splice(this.dialogs.confirm_enlighten.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Stop loading
+
+        this.dialogs.confirm_enlighten.loading = false; // Close dialog
+
+        this.dialogs.confirm_enlighten.show = false; // Open up gold reveal dialog
+
+        this.dialogs.reveal_gold_location.gold_location = this.dialogs.confirm_enlighten.gold_location;
+        this.dialogs.reveal_gold_location.contains_gold = response.data.contains_gold;
+        this.dialogs.reveal_gold_location.show = true; // Reset dialog
+
+        this.dialogs.confirm_enlighten.gold_location = null;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.confirm_enlighten.loading = false;
+      }.bind(this));
+    },
+    // All dialogs that require player / tool selection
+    onClickSelectPlayer: function onClickSelectPlayer(dialog, player_id) {
+      if (dialog === "sabotage") {
+        if (this.dialogs.sabotage.player_id === player_id) {
+          this.dialogs.sabotage.player_id = null;
+        } else {
+          this.dialogs.sabotage.player_id = player_id;
+        }
+      } else if (dialog === "recover") {
+        if (this.dialogs.recover.player_id === player_id) {
+          this.dialogs.recover.player_id = null;
+        } else {
+          this.dialogs.recover.player_id = player_id;
+        }
+      } else if (dialog === "thief") {
+        if (this.dialogs.thief.player_id === player_id) {
+          this.dialogs.thief.player_id = null;
+        } else {
+          this.dialogs.thief.player_id = player_id;
+        }
+      } else if (dialog === "dont_touch") {
+        if (this.dialogs.dont_touch.player_id === player_id) {
+          this.dialogs.dont_touch.player_id = null;
+        } else {
+          this.dialogs.dont_touch.player_id = player_id;
+        }
+      } else if (dialog === "imprison") {
+        if (this.dialogs.imprison.player_id === player_id) {
+          this.dialogs.imprison.player_id = null;
+        } else {
+          this.dialogs.imprison.player_id = player_id;
+        }
+      } else if (dialog === "free") {
+        if (this.dialogs.free.player_id === player_id) {
+          this.dialogs.free.player_id = null;
+        } else {
+          this.dialogs.free.player_id = player_id;
+        }
+      } else if (dialog === "inspection") {
+        if (this.dialogs.inspection.player_id === player_id) {
+          this.dialogs.inspection.player_id = null;
+        } else {
+          this.dialogs.inspection.player_id = player_id;
+        }
+      } else if (dialog === "exchange_hats") {
+        if (this.dialogs.exchange_hats.player_id === player_id) {
+          this.dialogs.exchange_hats.player_id = null;
+        } else {
+          this.dialogs.exchange_hats.player_id = player_id;
+        }
+      } else if (dialog === "exchange_cards") {
+        if (this.dialogs.exchange_cards.player_id === player_id) {
+          this.dialogs.exchange_cards.player_id = null;
+        } else {
+          this.dialogs.exchange_cards.player_id = player_id;
+        }
+      }
+    },
+    onClickSelectTool: function onClickSelectTool(dialog, tool) {
+      if (dialog === "sabotage") {
+        if (this.dialogs.sabotage.tool === tool) {
+          this.dialogs.sabotage.tool = null;
+        } else {
+          this.dialogs.sabotage.tool = tool;
+        }
+      } else if (dialog === "recover") {
+        if (this.dialogs.recover.tool === tool) {
+          this.dialogs.recover.tool = null;
+        } else {
+          this.dialogs.recover.tool = tool;
+        }
+      }
+    },
     // API interaction
     sendPerformActionRequest: function sendPerformActionRequest(action, data) {
       return new Promise(function (resolve, reject) {
@@ -3551,6 +4965,15 @@ __webpack_require__.r(__webpack_exports__);
       for (var i = 0; i < this.cards.length; i++) {
         if (this.cards[i].id === id) {
           return this.cards[i];
+        }
+      }
+
+      return false;
+    },
+    getCardIdByName: function getCardIdByName(name) {
+      for (var i = 0; i < this.cards.length; i++) {
+        if (this.cards[i].name === name) {
+          return this.cards[i].id;
         }
       }
 
@@ -9497,7 +10920,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  z-index: 100;\n  display: flex;\n  flex: 0 0 250px;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n  padding: 20px 30px 30px 30px;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1em;\n  font-weight: 600;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-size: 1.5em;\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #card-actions__wrapper {\n  left: 0;\n  width: 100%;\n  z-index: 10;\n  bottom: 221px;\n  display: flex;\n  position: absolute;\n  transition: all 0.3s;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #card-actions__wrapper.visible {\n  bottom: 279px;\n}\n#game-ui #card-actions__wrapper #card-actions {\n  display: flex;\n  margin: 0 auto;\n  padding: 15px 10px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  background-color: #0d0d0d;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action {\n  margin: 0 7px;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action .v-btn {\n  margin: 0;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin-bottom: 15px;\n}\n.card.ma {\n  margin-left: auto;\n  margin-right: auto;\n}\n.cards {\n  display: flex;\n  margin-bottom: 15px;\n  flex-direction: row;\n  justify-content: center;\n}\n.cards .card {\n  margin: 0 15px;\n}", ""]);
+exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  z-index: 100;\n  display: flex;\n  flex: 0 0 250px;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n  padding: 20px 30px 30px 30px;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1em;\n  font-weight: 600;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-size: 1.5em;\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__mode-wrapper {\n  left: 0;\n  top: 25px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__mode-wrapper #game-ui__mode {\n  display: flex;\n  color: #ffffff;\n  border-radius: 3px;\n  padding: 10px 15px;\n  box-sizing: border-box;\n  background-color: #1a1a1a;\n}\n#game-ui #card-actions__wrapper {\n  left: 0;\n  width: 100%;\n  z-index: 10;\n  bottom: 221px;\n  display: flex;\n  position: absolute;\n  transition: all 0.3s;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #card-actions__wrapper.visible {\n  bottom: 279px;\n}\n#game-ui #card-actions__wrapper #card-actions {\n  display: flex;\n  margin: 0 auto;\n  padding: 15px 10px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  background-color: #0d0d0d;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action {\n  margin: 0 7px;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action .v-btn {\n  margin: 0;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin-bottom: 15px;\n}\n.card.ma {\n  margin-left: auto;\n  margin-right: auto;\n}\n.cards {\n  display: flex;\n  margin-bottom: 15px;\n  flex-direction: row;\n  justify-content: center;\n}\n.cards .card {\n  margin: 0 15px;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}", ""]);
 
 // exports
 
@@ -47874,6 +49297,55 @@ var render = function() {
                       1
                     ),
                     _vm._v(" "),
+                    _vm.showModeBar
+                      ? _c("div", { attrs: { id: "game-ui__mode-wrapper" } }, [
+                          _vm.modes.select_gold_location
+                            ? _c(
+                                "div",
+                                {
+                                  staticClass: "elevation-1",
+                                  attrs: { id: "game-ui__mode" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                        Selecteer de goud locatie die je wilt bekijken.\n                    "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.modes.select_tunnel
+                            ? _c(
+                                "div",
+                                {
+                                  staticClass: "elevation-1",
+                                  attrs: { id: "game-ui__mode" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                        Selecteer de tunnel die je in wilt laten storten. Jij boefje.\n                    "
+                                  )
+                                ]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.modes.select_tile
+                            ? _c(
+                                "div",
+                                {
+                                  staticClass: "elevation-1",
+                                  attrs: { id: "game-ui__mode" }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                        Selecteer de tegel waar je de tunnel wilt plaatsen.\n                    "
+                                  )
+                                ]
+                              )
+                            : _vm._e()
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
                     _c("div", { attrs: { id: "game-ui__action-bar" } }, [
                       _c("div", { attrs: { id: "action-bar__my-role" } }, [
                         _c("h3", { staticClass: "action-bar__title" }, [
@@ -48013,7 +49485,7 @@ var render = function() {
                             attrs: { id: "card-actions" }
                           },
                           [
-                            _vm.numSelectedHandCards === 1
+                            _vm.showCardActionPlay
                               ? _c(
                                   "div",
                                   { staticClass: "card-action" },
@@ -48039,7 +49511,7 @@ var render = function() {
                                 )
                               : _vm._e(),
                             _vm._v(" "),
-                            _vm.numSelectedHandCards === 1
+                            _vm.showCardActionFoldCard
                               ? _c(
                                   "div",
                                   { staticClass: "card-action" },
@@ -48064,7 +49536,7 @@ var render = function() {
                                 )
                               : _vm._e(),
                             _vm._v(" "),
-                            _vm.numSelectedHandCards > 1
+                            _vm.showCardActionFoldCards
                               ? _c(
                                   "div",
                                   { staticClass: "card-action" },
@@ -48089,7 +49561,7 @@ var render = function() {
                                 )
                               : _vm._e(),
                             _vm._v(" "),
-                            _vm.numSelectedHandCards === 2
+                            _vm.showCardActionFoldCardsUnblock
                               ? _c(
                                   "div",
                                   { staticClass: "card-action" },
@@ -48114,7 +49586,24 @@ var render = function() {
                                   ],
                                   1
                                 )
-                              : _vm._e()
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              { staticClass: "card-action" },
+                              [
+                                _c(
+                                  "v-btn",
+                                  {
+                                    staticClass: "icon-only",
+                                    attrs: { small: "", dark: "" },
+                                    on: { click: _vm.onClickViewCard }
+                                  },
+                                  [_c("i", { staticClass: "far fa-eye" })]
+                                )
+                              ],
+                              1
+                            )
                           ]
                         )
                       ]
@@ -48253,28 +49742,28 @@ var render = function() {
         {
           attrs: { width: "600" },
           model: {
-            value: _vm.dialogs.play_card.show,
+            value: _vm.dialogs.view_card.show,
             callback: function($$v) {
-              _vm.$set(_vm.dialogs.play_card, "show", $$v)
+              _vm.$set(_vm.dialogs.view_card, "show", $$v)
             },
-            expression: "dialogs.play_card.show"
+            expression: "dialogs.view_card.show"
           }
         },
         [
-          _vm.dialogs.play_card.index !== null
+          _vm.dialogs.view_card.index !== null
             ? _c("div", { staticClass: "dialog dark" }, [
                 _c(
                   "div",
                   {
                     staticClass: "dialog__close-button",
-                    on: { click: _vm.onClickCancelPlayCard }
+                    on: { click: _vm.onClickCancelViewCard }
                   },
                   [_c("i", { staticClass: "fas fa-times" })]
                 ),
                 _vm._v(" "),
                 _c("div", { staticClass: "dialog-content" }, [
                   _c("div", { staticClass: "dialog-title" }, [
-                    _vm._v("Kaart spelen")
+                    _vm._v("Kaart bekijken")
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "dialog-text centered" }, [
@@ -48282,64 +49771,18 @@ var render = function() {
                       staticClass: "card mb-15 ma",
                       style: {
                         backgroundImage:
-                          "url(" + _vm.playCardDialogCard.image_url + ")"
+                          "url(" + _vm.viewCardDialogCard.image_url + ")"
                       }
                     }),
-                    _vm._v(
-                      "\n                    Weet je zeker dat je deze kaart wilt afleggen?"
-                    ),
-                    _c("br"),
-                    _vm._v(
-                      "\n                    Nadat je de kaart aflegt trek je een nieuwe kaart en is je beurt voorbij.\n                "
-                    )
+                    _vm._v(" "),
+                    _c("div", { staticClass: "card-description" }, [
+                      _vm._v(
+                        "\n                        " +
+                          _vm._s(_vm.viewCardDialogCard.description) +
+                          "\n                    "
+                      )
+                    ])
                   ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "dialog-controls" }, [
-                  _c(
-                    "div",
-                    { staticClass: "dialog-controls__left" },
-                    [
-                      _c(
-                        "v-btn",
-                        {
-                          attrs: { text: "", dark: "" },
-                          on: { click: _vm.onClickCancelPlayCard }
-                        },
-                        [
-                          _c("i", { staticClass: "fas fa-arrow-left" }),
-                          _vm._v(
-                            "\n                        Annuleren\n                    "
-                          )
-                        ]
-                      )
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "dialog-controls__right" },
-                    [
-                      _c(
-                        "v-btn",
-                        {
-                          attrs: {
-                            dark: "",
-                            color: "red",
-                            loading: _vm.dialogs.play_card.loading
-                          },
-                          on: { click: _vm.onClickConfirmPlayCard }
-                        },
-                        [
-                          _vm._v(
-                            "\n                        Speel kaart\n                    "
-                          )
-                        ]
-                      )
-                    ],
-                    1
-                  )
                 ])
               ])
             : _vm._e()
@@ -48561,6 +50004,1176 @@ var render = function() {
             _vm.$set(_vm.dialogs.fold_cards_unblock, "show", $$v)
           },
           expression: "dialogs.fold_cards_unblock.show"
+        }
+      }),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.sabotage.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.sabotage, "show", $$v)
+            },
+            expression: "dialogs.sabotage.show"
+          }
+        },
+        [
+          _vm.dialogs.sabotage.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelSabotage }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v(_vm._s(_vm.sabotageDialogTitle))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayersExcludingMe, function(
+                        player,
+                        pi
+                      ) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.sabotage.player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "sabotage",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm.sabotageDialogShowToolSelection
+                    ? _c("div", { staticClass: "select-tool" }, [
+                        _c("div", { staticClass: "select-tool__title" }, [
+                          _vm._v(
+                            "Selecteer gereedschapschap dat je wilt blokkeren"
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "select-tool__list" },
+                          _vm._l(_vm.sabotageDialogToolOptions, function(
+                            tool,
+                            ti
+                          ) {
+                            return _c(
+                              "div",
+                              {
+                                key: ti,
+                                staticClass: "select-tool__list-item"
+                              },
+                              [
+                                _c(
+                                  "div",
+                                  {
+                                    staticClass: "tool-option",
+                                    class: {
+                                      selected:
+                                        _vm.dialogs.sabotage.tool === tool
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.onClickSelectTool(
+                                          "sabotage",
+                                          tool
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                " +
+                                        _vm._s(tool) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                )
+                              ]
+                            )
+                          }),
+                          0
+                        )
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelSabotage }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.sabotage.loading,
+                            disabled: _vm.sabotageDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmSabotage }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Saboteer gereedschap\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.recover.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.recover, "show", $$v)
+            },
+            expression: "dialogs.recover.show"
+          }
+        },
+        [
+          _vm.dialogs.recover.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelRecover }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v(_vm._s(_vm.recoverDialogTitle))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayers, function(player, pi) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.recover.player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "recover",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm.recoverDialogShowToolSelection
+                    ? _c("div", { staticClass: "select-tool" }, [
+                        _c("div", { staticClass: "select-tool__title" }, [
+                          _vm._v("Selecteer gereedschap dat je wilt herstellen")
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "select-tool__list" },
+                          _vm._l(_vm.recoverDialogToolOptions, function(
+                            tool,
+                            ti
+                          ) {
+                            return _c(
+                              "div",
+                              {
+                                key: ti,
+                                staticClass: "select-tool__list-item"
+                              },
+                              [
+                                _c(
+                                  "div",
+                                  {
+                                    staticClass: "tool-option",
+                                    class: {
+                                      selected:
+                                        _vm.dialogs.recover.tool === tool
+                                    },
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.onClickSelectTool(
+                                          "recover",
+                                          tool
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "\n                                " +
+                                        _vm._s(tool) +
+                                        "\n                            "
+                                    )
+                                  ]
+                                )
+                              ]
+                            )
+                          }),
+                          0
+                        )
+                      ])
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelRecover }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.recover.loading,
+                            disabled: _vm.recoverDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmRecover }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Herstel speler's gereedschap\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.imprison.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.imprison, "show", $$v)
+            },
+            expression: "dialogs.imprison.show"
+          }
+        },
+        [
+          _vm.dialogs.imprison.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelImprison }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Speler in de gevangenis stoppen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayersExcludingMe, function(
+                        player,
+                        pi
+                      ) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.imprison.player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "imprison",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelImprison }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.imprison.loading,
+                            disabled: _vm.imprisonDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmImprison }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Naar de gevangenis!\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.free.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.free, "show", $$v)
+            },
+            expression: "dialogs.free.show"
+          }
+        },
+        [
+          _vm.dialogs.free.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelFree }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Speler bevrijden uit de gevangenis")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayers, function(player, pi) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.free.player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "free",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelFree }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.free.loading,
+                            disabled: _vm.freeDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmFree }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Bevrijd speler\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.thief.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.thief, "show", $$v)
+            },
+            expression: "dialogs.thief.show"
+          }
+        },
+        [
+          _vm.dialogs.thief.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelThief }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Dief kaart spelen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(_vm._s(_vm.thiefDialogCard.description))
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelThief }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.thief.loading
+                          },
+                          on: { click: _vm.onClickConfirmThief }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Dief kaart spelen\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.dont_touch.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.dont_touch, "show", $$v)
+            },
+            expression: "dialogs.dont_touch.show"
+          }
+        },
+        [
+          _vm.dialogs.dont_touch.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelDontTouch }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Swieber niet stelen!")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(_vm._s(_vm.dontTouchDialogCard.description))
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayersExcludingMe, function(
+                        player,
+                        pi
+                      ) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.free.player_id === player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "dont_touch",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelDontTouch }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.dont_touch.loading,
+                            disabled: _vm.dontTouchDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmDontTouch }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Aflbijven!\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "700" },
+          model: {
+            value: _vm.dialogs.enlighten.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.enlighten, "show", $$v)
+            },
+            expression: "dialogs.enlighten.show"
+          }
+        },
+        [
+          _vm.dialogs.enlighten.card_index !== null &&
+          _vm.dialogs.enlighten.gold_location !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelEnlighten }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Plan kaart spelen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(_vm.enlightenDialogCard.description) +
+                        "\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelEnlighten }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { dark: "" },
+                          on: { click: _vm.onClickConfirmEnlighten }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Selecteer goud locatie\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_enlighten.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_enlighten, "show", $$v)
+            },
+            expression: "dialogs.confirm_enlighten.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_enlighten.card_index !== null &&
+          _vm.dialogs.confirm_enlighten.gold_location !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelConfirmEnlighten }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Goud locatie bekijken")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(_vm.confirmEnlightenText)
+                    ),
+                    _c("br"),
+                    _vm._v(
+                      "\n                    Weet je zeker dat je deze goud locatie wilt bekijken?\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelConfirmEnlighten }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickRetryConfirmEnlighten }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-recycle" }),
+                          _vm._v(
+                            "\n                        Andere locatie selecteren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_enlighten.loading
+                          },
+                          on: { click: _vm.onClickConfirmConfirmEnlighten }
+                        },
+                        [
+                          _c("i", { staticClass: "far fa-eye" }),
+                          _vm._v(
+                            "\n                        Bekijk goud locatie\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "500" },
+          model: {
+            value: _vm.dialogs.reveal_gold_location.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.reveal_gold_location, "show", $$v)
+            },
+            expression: "dialogs.reveal_gold_location.show"
+          }
+        },
+        [
+          _vm.dialogs.reveal_gold_location.gold_location !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: {
+                      click: function($event) {
+                        _vm.dialogs.reveal_gold_location.show = false
+                      }
+                    }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v(
+                      "Goud Locatie #" +
+                        _vm._s(_vm.dialogs.reveal_gold_location.gold_location)
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _vm.dialogs.reveal_gold_location.contains_gold
+                    ? _c("div", { staticClass: "dialog-text" }, [
+                        _c("div", { attrs: { id: "reveal-gold-location" } }, [
+                          _c("div", {
+                            style: {
+                              backgroundImage:
+                                "url(" + _vm.icons.gold_bars + ")"
+                            },
+                            attrs: { id: "reveal-gold-location__image" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            { attrs: { id: "reveal-gold-location__text" } },
+                            [
+                              _vm._v(
+                                "\n                            Het goud bevindt zich hier!\n                        "
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  !_vm.dialogs.reveal_gold_location.contains_gold
+                    ? _c("div", { staticClass: "dialog-text" }, [
+                        _c("div", { attrs: { id: "reveal-gold-location" } }, [
+                          _c("div", {
+                            style: {
+                              backgroundImage: "url(" + _vm.icons.coal + ")"
+                            },
+                            attrs: { id: "reveal-gold-location__image" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            { attrs: { id: "reveal-gold-location__text" } },
+                            [
+                              _vm._v(
+                                "\n                            Hier bevindt het goud zich niet.\n                        "
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    : _vm._e()
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.inspection.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.inspection, "show", $$v)
+          },
+          expression: "dialogs.inspection.show"
+        }
+      }),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.exchange_hands.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.exchange_hands, "show", $$v)
+          },
+          expression: "dialogs.exchange_hands.show"
+        }
+      }),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.exchange_hats.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.exchange_hats, "show", $$v)
+          },
+          expression: "dialogs.exchange_hats.show"
+        }
+      }),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.collapse.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.collapse, "show", $$v)
+          },
+          expression: "dialogs.collapse.show"
+        }
+      }),
+      _vm._v(" "),
+      _c("v-dialog", {
+        attrs: { width: "600" },
+        model: {
+          value: _vm.dialogs.place_tunnel.show,
+          callback: function($$v) {
+            _vm.$set(_vm.dialogs.place_tunnel, "show", $$v)
+          },
+          expression: "dialogs.place_tunnel.show"
         }
       })
     ],

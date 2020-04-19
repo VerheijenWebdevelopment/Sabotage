@@ -22,6 +22,10 @@ use App\Contracts\ModelServiceContract;
 use App\Events\Game\PlayerSelectedRole;
 use App\Events\Game\PlayerToolBlocked;
 use App\Events\Game\PlayerToolRecovered;
+use App\Events\Game\PlayerFreed;
+use App\Events\Game\PlayerImprisoned;
+use App\Events\Game\PlayerIsThief;
+use App\Events\Game\PlayerNoLongerThief;
 use App\Events\Game\PlayerCheckedGoldLocation;
 use App\Events\Game\PlayerPlacedTunnel;
 use App\Events\Game\PlayerCollapsedTunnel;
@@ -460,6 +464,30 @@ class GameService implements ModelServiceContract
                     if (!array_key_exists("target_coordinates", $data)) throw new Exception("Missing target tile coordinates");
                     $output["board"] = $this->playCollapseCard($game, $player, $card, $data);
                 break;
+
+                // Thief card
+                case "thief":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playThiefCard($game, $player, $card, $data);
+                break;
+
+                // Dont touch card
+                case "dont_touch":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playDontTouchCard($game, $player, $card, $data);
+                break;
+
+                // Imprison card
+                case "imprison":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playImprisonCard($game, $player, $card, $data);
+                break;
+
+                // Free card
+                case "free":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $this->playFreeCard($game, $player, $card, $data);
+                break;
             }
         }
         // If we're dealing with a tunnel card
@@ -484,6 +512,58 @@ class GameService implements ModelServiceContract
 
         // Return the output
         return $output;
+    }
+
+    private function playThiefCard(Game $game, Player $player, Card $card)
+    {
+        // Activate thief status on current player
+        $player->thief_activated = true;
+        $player->save();
+
+        // Broadcast event to other players
+        broadcast(new PlayerIsThief($game, $player));
+    }
+
+    private function playDontTouchCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+        
+        // Remove thief status from target player
+        $targetPlayer->thief_activated = false;
+        $targetPlayer->save();
+
+        // Broadcast event to other players
+        broadcast(new PlayerNoLongerThief($game, $player, $targetPlayer))->toOthers();
+    }
+
+    private function playImprisonCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Place the target player in jail
+        $targetPlayer->in_jail = true;
+        $targetPlayer->save();
+
+        // Broadcast event to other players
+        broadcast(new PlayerImprisoned($game, $player, $targetPlayer))->toOthers();
+    }
+
+    private function playFreeCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Player::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+        
+        // Free the target player from jail
+        $targetPlayer->in_jail = false;
+        $targetPlayer->save();
+
+        // Broadcast event to other player
+        broadcast(new PlayerFreed($game, $player, $targetPlayer));
     }
 
     private function playSabotageCard(Game $game, Player $player, Card $card, array $data)
