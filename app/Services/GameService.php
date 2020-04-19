@@ -488,6 +488,24 @@ class GameService implements ModelServiceContract
                     if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
                     $this->playFreeCard($game, $player, $card, $data);
                 break;
+
+                // Inspection card
+                case "inspection":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    $output["role"] = $this->playInspectionCard($game, $player, $card, $data);
+                break;
+
+                // Exchange hands card
+                case "exchange_hands":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    // $this->playExchangeHandsCard($game, $player, $card, $data);
+                break;
+
+                // Exchange hats card
+                case "exchange_hats":
+                    if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
+                    // $this->playExchangeHatsCard($game, $player, $card, $data);
+                break;
             }
         }
         // If we're dealing with a tunnel card
@@ -512,6 +530,16 @@ class GameService implements ModelServiceContract
 
         // Return the output
         return $output;
+    }
+
+    private function playInspectionCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Return the target player's role
+        return $targetPlayer->role;
     }
 
     private function playThiefCard(Game $game, Player $player, Card $card)

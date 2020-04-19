@@ -196,7 +196,7 @@
         </v-dialog>
 
         <!-- View (play) card dialog -->
-        <v-dialog v-model="dialogs.view_card.show" width="600">
+        <v-dialog v-model="dialogs.view_card.show" width="400">
             <div class="dialog dark" v-if="dialogs.view_card.index !== null">
                 <!-- Close button -->
                 <div class="dialog__close-button" @click="onClickCancelViewCard">
@@ -657,7 +657,61 @@
 
         <!-- Inspection dialog -->
         <v-dialog v-model="dialogs.inspection.show" width="600">
+            <div class="dialog dark" v-if="dialogs.inspection.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelImprison">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Inspectie kaart spelen</div>
+                    <!-- Description -->
+                    <div class="dialog-text">Bekijk de rol van een speler naar keuze.</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.inspection.player_id === player.id }" @click="onClickSelectPlayer('imprison', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelInspection">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmInspection" :loading="dialogs.inspection.loading" :disabled="inspectionDialogDisableSubmit">
+                            Naar de gevangenis!
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
 
+        <!-- Reveal role dialog -->
+        <v-dialog v-model="dialogs.reveal_role.show" width="500">
+            <div class="dialog dark" v-if="dialogs.reveal_role.player_id !== null && dialogs.reveal_role.role !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelRevealRole">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Rol van {{ revealRoleDialogPlayer.user.username  }}</div>
+                    <!-- Text -->
+                    <div class="dialog-text">{{ revealRoleDialogText }}</div>
+                </div>
+            </div>
         </v-dialog>
 
         <!-- Exchange hands dialog -->
@@ -777,10 +831,20 @@
                     card_index: null,
                     gold_location: null,
                 },
+                reveal_gold_location: {
+                    show: false,
+                    gold_location: null,
+                    contains_gold: false,
+                },
                 inspection: {
                     show: false,
                     card_index: null,
                     player_id: null,
+                },
+                reveal_role: {
+                    show: false,
+                    player_id: null,
+                    role: null,
                 },
                 collapse: {
                     show: false,
@@ -801,11 +865,6 @@
                     show: false,
                     card_index: null,
                     player_id: null,
-                },
-                reveal_gold_location: {
-                    show: false,
-                    gold_location: null,
-                    contains_gold: false,
                 },
             },
             modes: {
@@ -1091,6 +1150,30 @@
                 }
                 out += " goud locatie gekozen.";
                 return out;
+            },
+            // Inspection dialog
+            inspectionDialogDisableSubmit() {
+                return this.dialogs.inspection.player_id === null;
+            },
+            // Reveal role dialog
+            revealRoleDialogPlayer() {
+                if (this.dialogs.reveal_role.player_id !== null) {
+                    for (let i = 0; i < this.mutablePlayers.length; i++) {
+                        if (this.mutablePlayers[i].id === this.dialogs.reveal_role.player_id) {
+                            return this.mutablePlayers[i];
+                        }
+                    }
+                }
+                return false;
+            },
+            revealRoleDialogText() {
+                if (this.dialogs.reveal_role.role.name === "green_digger") {
+                    return this.revealRoleDialogPlayer.user.username+" is een <strong>Goudzoeker</strong> uit <span class='green-text'>Team Groen</span>.";
+                } else if (this.dialogs.reveal_role.role.name === "blue_digger") {
+                    return this.revealRoleDialogPlayer.user.username+" is een <strong>Goudzoeker</strong> uit <span class='blue-text'>Team Blauw</span>.";
+                } else {
+                    return this.revealRoleDialogPlayer.user.username+" is een <strong>"+this.dialogs.reveal_role.role.label+"</strong>.";
+                }
             },
             // Collapse tunnel dialog
             collapseDialogCard() {
@@ -1937,7 +2020,7 @@
                         });
                         // Update player's status
                         for (let i = 0; i < this.mutablePlayers.length; i++) {
-                            if (this.mutablePlayers[i].id === data.player.id) {
+                            if (this.mutablePlayers[i].id === this.mutablePlayer.id) {
                                 this.mutablePlayers[i].thief_activated = true;
                                 break;
                             }
@@ -1952,11 +2035,11 @@
                         this.dialogs.thief.player_id = null;
                     }.bind(this))
                     // Request failed
-                    .catch(function(response) {
-                        console.log(this.tag+" request failed: ", response.data);
-                        // Stop loading
-                        this.dialogs.thief.loading = false;
-                    }.bind(this));
+                    // .catch(function(response) {
+                    //     console.log(this.tag+" request failed: ", response.data);
+                    //     // Stop loading
+                    //     this.dialogs.thief.loading = false;
+                    // }.bind(this));
             },
             // Dont touch dialog
             onClickCancelDontTouch() {
@@ -2060,6 +2143,56 @@
                         this.dialogs.confirm_enlighten.loading = false;
                     }.bind(this));
             },
+            // Inspection dialog
+            onClickCancelInspection() {
+                console.log(this.tag+" clicked cancel inspection button");
+                // Hide dialog
+                this.dialogs.inspection.show = false;
+            },
+            onClickConfirmInspection() {
+                console.log(this.tag+" clicked confirm inspection button");
+                // Start loading
+                this.dialogs.inspection.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.inspection.card_index,
+                    player_id: this.dialogs.inspection.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded: ", response.data);
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.inspection.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push(response.data.new_card);
+                        // Populate the reveal role dialog
+                        this.dialogs.reveal_role.player_id = this.dialogs.inspection.player_id;
+                        this.dialogs.reveal_role.role = response.data.role;
+                        // Hide inspection dialog
+                        this.dialogs.inspection.loading = false;
+                        this.dialogs.inspection.show = false;
+                        // Show reveal role dialog
+                        this.dialogs.reveal_role.show = true;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.inspection.loading = false;
+                    }.bind(this));
+
+            },
+            // Reveal role dialog (result from inspection dialog)
+            onClickCancelRevealRole() {
+                console.log(this.tag+" clicked cancel reveal role button");
+                // Hide dialog
+                this.dialogs.reveal_role.show = false;
+            },
+            // Exchange hands dialog
+
+            // Exchange hats dialog
+
             // All dialogs that require player / tool selection
             onClickSelectPlayer(dialog, player_id) {
                 if (dialog === "sabotage") {

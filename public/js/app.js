@@ -3462,6 +3462,60 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -3546,10 +3600,20 @@ __webpack_require__.r(__webpack_exports__);
           card_index: null,
           gold_location: null
         },
+        reveal_gold_location: {
+          show: false,
+          gold_location: null,
+          contains_gold: false
+        },
         inspection: {
           show: false,
           card_index: null,
           player_id: null
+        },
+        reveal_role: {
+          show: false,
+          player_id: null,
+          role: null
         },
         collapse: {
           show: false,
@@ -3570,11 +3634,6 @@ __webpack_require__.r(__webpack_exports__);
           show: false,
           card_index: null,
           player_id: null
-        },
-        reveal_gold_location: {
-          show: false,
-          gold_location: null,
-          contains_gold: false
         }
       },
       modes: {
@@ -3897,6 +3956,31 @@ __webpack_require__.r(__webpack_exports__);
 
       out += " goud locatie gekozen.";
       return out;
+    },
+    // Inspection dialog
+    inspectionDialogDisableSubmit: function inspectionDialogDisableSubmit() {
+      return this.dialogs.inspection.player_id === null;
+    },
+    // Reveal role dialog
+    revealRoleDialogPlayer: function revealRoleDialogPlayer() {
+      if (this.dialogs.reveal_role.player_id !== null) {
+        for (var i = 0; i < this.mutablePlayers.length; i++) {
+          if (this.mutablePlayers[i].id === this.dialogs.reveal_role.player_id) {
+            return this.mutablePlayers[i];
+          }
+        }
+      }
+
+      return false;
+    },
+    revealRoleDialogText: function revealRoleDialogText() {
+      if (this.dialogs.reveal_role.role.name === "green_digger") {
+        return this.revealRoleDialogPlayer.user.username + " is een <strong>Goudzoeker</strong> uit <span class='green-text'>Team Groen</span>.";
+      } else if (this.dialogs.reveal_role.role.name === "blue_digger") {
+        return this.revealRoleDialogPlayer.user.username + " is een <strong>Goudzoeker</strong> uit <span class='blue-text'>Team Blauw</span>.";
+      } else {
+        return this.revealRoleDialogPlayer.user.username + " is een <strong>" + this.dialogs.reveal_role.role.label + "</strong>.";
+      }
     },
     // Collapse tunnel dialog
     collapseDialogCard: function collapseDialogCard() {
@@ -4726,7 +4810,7 @@ __webpack_require__.r(__webpack_exports__);
         }); // Update player's status
 
         for (var i = 0; i < this.mutablePlayers.length; i++) {
-          if (this.mutablePlayers[i].id === data.player.id) {
+          if (this.mutablePlayers[i].id === this.mutablePlayer.id) {
             this.mutablePlayers[i].thief_activated = true;
             break;
           }
@@ -4740,12 +4824,12 @@ __webpack_require__.r(__webpack_exports__);
         this.dialogs.thief.show = false; // Reset dialog
 
         this.dialogs.thief.player_id = null;
-      }.bind(this)) // Request failed
-      ["catch"](function (response) {
-        console.log(this.tag + " request failed: ", response.data); // Stop loading
-
-        this.dialogs.thief.loading = false;
-      }.bind(this));
+      }.bind(this)); // Request failed
+      // .catch(function(response) {
+      //     console.log(this.tag+" request failed: ", response.data);
+      //     // Stop loading
+      //     this.dialogs.thief.loading = false;
+      // }.bind(this));
     },
     // Dont touch dialog
     onClickCancelDontTouch: function onClickCancelDontTouch() {
@@ -4849,6 +4933,51 @@ __webpack_require__.r(__webpack_exports__);
         this.dialogs.confirm_enlighten.loading = false;
       }.bind(this));
     },
+    // Inspection dialog
+    onClickCancelInspection: function onClickCancelInspection() {
+      console.log(this.tag + " clicked cancel inspection button"); // Hide dialog
+
+      this.dialogs.inspection.show = false;
+    },
+    onClickConfirmInspection: function onClickConfirmInspection() {
+      console.log(this.tag + " clicked confirm inspection button"); // Start loading
+
+      this.dialogs.inspection.loading = true; // Compose API request payload
+
+      var data = {
+        index: this.dialogs.inspection.card_index,
+        player_id: this.dialogs.inspection.player_id
+      }; // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        console.log(this.tag + " request succeeded: ", response.data); // Update player's hand
+
+        this.mutableHand.splice(this.dialogs.inspection.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push(response.data.new_card); // Populate the reveal role dialog
+
+        this.dialogs.reveal_role.player_id = this.dialogs.inspection.player_id;
+        this.dialogs.reveal_role.role = response.data.role; // Hide inspection dialog
+
+        this.dialogs.inspection.loading = false;
+        this.dialogs.inspection.show = false; // Show reveal role dialog
+
+        this.dialogs.reveal_role.show = true;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.inspection.loading = false;
+      }.bind(this));
+    },
+    // Reveal role dialog (result from inspection dialog)
+    onClickCancelRevealRole: function onClickCancelRevealRole() {
+      console.log(this.tag + " clicked cancel reveal role button"); // Hide dialog
+
+      this.dialogs.reveal_role.show = false;
+    },
+    // Exchange hands dialog
+    // Exchange hats dialog
     // All dialogs that require player / tool selection
     onClickSelectPlayer: function onClickSelectPlayer(dialog, player_id) {
       if (dialog === "sabotage") {
@@ -49740,7 +49869,7 @@ var render = function() {
       _c(
         "v-dialog",
         {
-          attrs: { width: "600" },
+          attrs: { width: "400" },
           model: {
             value: _vm.dialogs.view_card.show,
             callback: function($$v) {
@@ -51122,16 +51251,181 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("v-dialog", {
-        attrs: { width: "600" },
-        model: {
-          value: _vm.dialogs.inspection.show,
-          callback: function($$v) {
-            _vm.$set(_vm.dialogs.inspection, "show", $$v)
-          },
-          expression: "dialogs.inspection.show"
-        }
-      }),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.inspection.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.inspection, "show", $$v)
+            },
+            expression: "dialogs.inspection.show"
+          }
+        },
+        [
+          _vm.dialogs.inspection.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelImprison }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Inspectie kaart spelen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v("Bekijk de rol van een speler naar keuze.")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "select-player" }, [
+                    _c("div", { staticClass: "select-player__title" }, [
+                      _vm._v("Selecteer je doelwit")
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "select-player__list" },
+                      _vm._l(_vm.mutablePlayersExcludingMe, function(
+                        player,
+                        pi
+                      ) {
+                        return _c(
+                          "div",
+                          { key: pi, staticClass: "select-player__list-item" },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "player-option",
+                                class: {
+                                  selected:
+                                    _vm.dialogs.inspection.player_id ===
+                                    player.id
+                                },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.onClickSelectPlayer(
+                                      "imprison",
+                                      player.id
+                                    )
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                                " +
+                                    _vm._s(player.user.username) +
+                                    "\n                            "
+                                )
+                              ]
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelInspection }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.inspection.loading,
+                            disabled: _vm.inspectionDialogDisableSubmit
+                          },
+                          on: { click: _vm.onClickConfirmInspection }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Naar de gevangenis!\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "500" },
+          model: {
+            value: _vm.dialogs.reveal_role.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.reveal_role, "show", $$v)
+            },
+            expression: "dialogs.reveal_role.show"
+          }
+        },
+        [
+          _vm.dialogs.reveal_role.player_id !== null &&
+          _vm.dialogs.reveal_role.role !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelRevealRole }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v(
+                      "Rol van " +
+                        _vm._s(_vm.revealRoleDialogPlayer.user.username)
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(_vm._s(_vm.revealRoleDialogText))
+                  ])
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
       _vm._v(" "),
       _c("v-dialog", {
         attrs: { width: "600" },
