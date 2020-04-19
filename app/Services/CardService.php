@@ -398,11 +398,14 @@ class CardService implements ModelServiceContract
             {
                 $image = $this->addHeaderText($image, "Action Card");
                 $image = $this->addCardLabelText($image, $card->text);
+                $image = $this->addActionIcon($image, $card);
             }
             // If we're dealing with a tunnel card
             elseif ($card->type == "tunnel")
             {
                 $image = $this->addTunnel($image, $card);
+                if ($card->has_ladder) $image = $this->addLadder($image, $card, $w, $h);
+                if ($card->has_crystal) $image = $this->addCrystal($image, $card, $w, $h);
                 // $image = $this->addHeaderText($image, "Tunnel Card");
             }
         }
@@ -519,6 +522,290 @@ class CardService implements ModelServiceContract
         }
 
         // Return the updated image
+        return $image;
+    }
+
+    private function addCrystal(\Intervention\Image\Image $image, Card $card, $w, $h)
+    {
+        switch ($card->crystal_location)
+        {
+            case "center":
+                $image->insert(public_path("storage/images/cards/crystal.png"), "center");
+            break;
+
+            case "top":
+                $image->insert(public_path("storage/images/cards/crystal.png"), "top", 0, 0);
+            break;
+            
+            case "right":
+                $image->insert(public_path("storage/images/cards/crystal.png"), "right", 0, 0);
+            break;
+            
+            case "bottom":
+                $image->insert(public_path("storage/images/cards/crystal.png"), "bottom", 0, 0);
+            break;
+            
+            case "left":
+                $image->insert(public_path("storage/images/cards/crystal.png"), "left", 0, 0);
+            break;
+        }
+
+        return $image;
+    }
+
+    private function addLadder(\Intervention\Image\Image $image, Card $card, $w, $h)
+    {
+        switch ($card->ladder_location)
+        {
+            case "center":
+                $image->insert(public_path("storage/images/cards/ladder.png"), "top", 0, 145);
+            break;
+
+            case "top":
+                $image->insert(public_path("storage/images/cards/ladder.png"), "top", 0, 0);
+            break;
+            
+            case "right":
+                $image->insert(public_path("storage/images/cards/ladder.png"), "right", 0, 0);
+            break;
+            
+            case "bottom":
+                $image->insert(public_path("storage/images/cards/ladder.png"), "bottom", 0, 0);
+            break;
+            
+            case "left":
+                $image->insert(public_path("storage/images/cards/ladder.png"), "left", 0, 0);
+            break;
+        }
+
+        return $image;
+    }
+
+    private function addActionIcon(\Intervention\Image\Image $image, Card $card)
+    {
+        switch ($card->name)
+        {
+            case "exchange_hands":
+                $image->insert(public_path("storage/images/cards/exchange_hands.png"), "center");
+            break;
+            case "exchange_hats":
+                $image->insert(public_path("storage/images/cards/exchange_hats.png"), "center");
+            break;
+            case "inspection":
+                $image->insert(public_path("storage/images/cards/inspection.png"), "center");
+            break;
+            case "free":
+                $image->insert(public_path("storage/images/cards/escape.png"), "center");
+            break;
+            case "imprison":
+                $image->insert(public_path("storage/images/cards/imprison.png"), "center");
+            break;
+            case "dont_touch":
+                $image->insert(public_path("storage/images/cards/dont_touch.png"), "center");
+            break;
+            case "thief":
+                $image->insert(public_path("storage/images/cards/thief.png"), "center");
+            break;
+            case "enlighten":
+                $image->insert(public_path("storage/images/cards/enlighten.png"), "center");
+            break;
+            case "collapse":
+                $image->insert(public_path("storage/images/cards/collapse.png"), "center");
+            break;
+            case "recover_pickaxe":
+
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+
+                $image->insert($pickaxe, "top", 0, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "recover_cart":
+                
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+
+                $image->insert($cart, "top", 0, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "recover_light":
+
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+                
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+
+                $image->insert($light, "top", 0, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "recover_pickaxe_cart":
+
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+
+                $image->insert($pickaxe, "top-left", 25, 100);
+                $image->insert($cart, "top-right", 25, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "recover_pickaxe_light":
+
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+
+                $image->insert($pickaxe, "top-left", 25, 100);
+                $image->insert($light, "top-right", 25, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "recover_light_cart":
+
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+                
+                $recover = Image::canvas(150, 150);
+                $recover->insert(public_path("storage/images/cards/recover.png"));
+                $recover->resize(120, 120);
+                
+                $image->insert($light, "top-left", 25, 100);
+                $image->insert($cart, "top-right", 25, 100);
+                $image->insert($recover, "bottom", 0, 75);
+
+            break;
+            case "sabotage_pickaxe":
+                
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+                
+                $sabotage = Image::canvas(160, 160);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"), "center");
+
+                $image->insert($pickaxe, "center");
+                $image->insert($sabotage, "center");
+
+            break;
+            case "sabotage_light":
+                
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+
+                $sabotage = Image::canvas(160, 160);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"), "center");
+                
+                $image->insert($light, "center");
+                $image->insert($sabotage, "center");
+
+            break;
+            case "sabotage_cart":
+                
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+
+                $sabotage = Image::canvas(160, 160);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"), "center");
+
+                $image->insert($cart, "center");
+                $image->insert($sabotage, "center");
+
+            break;
+            case "sabotage_pickaxe_cart":
+                
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+                
+                $sabotage = Image::canvas(150, 150);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"));
+
+                $image->insert($pickaxe, "left", 50);
+                $image->insert($cart, "right", 50);
+                $image->insert($sabotage, "center");
+
+            break;
+            case "sabotage_pickaxe_light":
+                
+                $pickaxe = Image::canvas(150, 150);
+                $pickaxe->insert(public_path("storage/images/cards/pickaxe.png"));
+                $pickaxe->resize(100, 100);
+                
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+
+                $sabotage = Image::canvas(150, 150);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"));
+
+                $image->insert($pickaxe, "left", 50);
+                $image->insert($light, "right", 50);
+                $image->insert($sabotage, "center");
+
+            break;
+            case "sabotage_light_cart":
+                
+                $light = Image::canvas(150, 150);
+                $light->insert(public_path("storage/images/cards/lantern.png"));
+                $light->resize(100, 100);
+                
+                $cart = Image::canvas(150, 150);
+                $cart->insert(public_path("storage/images/cards/cart.png"));
+                $cart->resize(100, 100);
+
+                $sabotage = Image::canvas(150, 150);
+                $sabotage->insert(public_path("storage/images/cards/disable.png"));
+
+                $image->insert($light, "left", 50);
+                $image->insert($cart, "right", 50);
+                $image->insert($sabotage, "center");
+
+            break;
+        }
+
         return $image;
     }
 

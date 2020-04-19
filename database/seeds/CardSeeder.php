@@ -209,7 +209,6 @@ class CardSeeder extends Seeder
         // Tunnel cards
         // ------------------------------------------------
         
-
         // Single tunnel - no center
         Card::create([
             "type" => "tunnel",
@@ -232,6 +231,36 @@ class CardSeeder extends Seeder
             "open_positions" => ["left"],
         ]);
 
+        // Single tunnel - no center - with crystal
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_top_crystal",
+            "open_positions" => ["top"],
+            "has_crystal" => true,
+            "crystal_location" => "top",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_right_crystal",
+            "open_positions" => ["right"],
+            "has_crystal" => true,
+            "crystal_location" => "right",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_bottom_crystal",
+            "open_positions" => ["bottom"],
+            "has_crystal" => true,
+            "crystal_location" => "bottom",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_left_crystal",
+            "open_positions" => ["left"],
+            "has_crystal" => true,
+            "crystal_location" => "left",
+        ]);
+        
         // Single tunnel - with center
         Card::create([
             "type" => "tunnel",
@@ -252,6 +281,66 @@ class CardSeeder extends Seeder
             "type" => "tunnel",
             "name" => "tunnel_center_left",
             "open_positions" => ["center", "left"],
+        ]);
+        
+        // Single tunnel - with center - with crystal
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_crystal",
+            "open_positions" => ["center", "top"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_crystal",
+            "open_positions" => ["center", "right"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_crystal",
+            "open_positions" => ["center", "bottom"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_crystal",
+            "open_positions" => ["center", "left"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+
+        // Single tunnel - with center - with ladder
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_ladder",
+            "open_positions" => ["center", "top"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_ladder",
+            "open_positions" => ["center", "right"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_ladder",
+            "open_positions" => ["center", "bottom"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_ladder",
+            "open_positions" => ["center", "left"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
         ]);
 
         // Double tunnel - with center
@@ -285,7 +374,95 @@ class CardSeeder extends Seeder
             "name" => "tunnel_center_left_right",
             "open_positions" => ["center", "left", "right"],
         ]);
+
+        // Double tunnel - with center - with crystal
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_crystal",
+            "open_positions" => ["center", "top", "right"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom_crystal",
+            "open_positions" => ["center", "right", "bottom"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left_crystal",
+            "open_positions" => ["center", "bottom", "left"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top_crystal",
+            "open_positions" => ["center", "left", "top"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_bottom_crystal",
+            "open_positions" => ["center", "top", "bottom"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_right_crystal",
+            "open_positions" => ["center", "left", "right"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
         
+        // Double tunnel - with center - with ladder
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_ladder",
+            "open_positions" => ["center", "top", "right"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom_ladder",
+            "open_positions" => ["center", "right", "bottom"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left_ladder",
+            "open_positions" => ["center", "bottom", "left"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top_ladder",
+            "open_positions" => ["center", "left", "top"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_bottom_ladder",
+            "open_positions" => ["center", "top", "bottom"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_right_ladder",
+            "open_positions" => ["center", "left", "right"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+
         // Double tunnel - no center
         Card::create([
             "type" => "tunnel",
@@ -318,28 +495,6 @@ class CardSeeder extends Seeder
             "open_positions" => ["left", "right", "center"],
         ]);
 
-        // Triple tunnel - no center
-        Card::create([
-            "type" => "tunnel",
-            "name" => "tunnel_top_right_bottom",
-            "open_positions" => ["top", "right", "bottom"],
-        ]);
-        Card::create([
-            "type" => "tunnel",
-            "name" => "tunnel_right_bottom_left",
-            "open_positions" => ["right", "bottom", "left"],
-        ]);
-        Card::create([
-            "type" => "tunnel",
-            "name" => "tunnel_bottom_left_top",
-            "open_positions" => ["bottom", "left", "top"],
-        ]);
-        Card::create([
-            "type" => "tunnel",
-            "name" => "tunnel_left_top_right",
-            "open_positions" => ["left", "top", "right"],
-        ]);
-
         // Triple tunnel - with center
         Card::create([
             "type" => "tunnel",
@@ -361,6 +516,89 @@ class CardSeeder extends Seeder
             "name" => "tunnel_center_left_top_right",
             "open_positions" => ["left", "top", "right", "center"],
         ]);
+
+
+        // Triple tunnel - with center - with crystal
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_bottom_crystal",
+            "open_positions" => ["top", "right", "bottom", "center"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom_left_crystal",
+            "open_positions" => ["right", "bottom", "left", "center"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left_top_crystal",
+            "open_positions" => ["bottom", "left", "top", "center"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top_right_crystal",
+            "open_positions" => ["left", "top", "right", "center"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+
+        // Triple tunnel - with center - with ladder
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_bottom_ladder",
+            "open_positions" => ["top", "right", "bottom", "center"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom_left_ladder",
+            "open_positions" => ["right", "bottom", "left", "center"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left_top_ladder",
+            "open_positions" => ["bottom", "left", "top", "center"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top_right_ladder",
+            "open_positions" => ["left", "top", "right", "center"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
+        ]);
+
+        // Triple tunnel - no center
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_top_right_bottom",
+            "open_positions" => ["top", "right", "bottom"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_right_bottom_left",
+            "open_positions" => ["right", "bottom", "left"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_bottom_left_top",
+            "open_positions" => ["bottom", "left", "top"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_left_top_right",
+            "open_positions" => ["left", "top", "right"],
+        ]);
         
         // Quadruple cards
         Card::create([
@@ -372,6 +610,20 @@ class CardSeeder extends Seeder
             "type" => "tunnel",
             "name" => "tunnel_center_top_right_bottom_left",
             "open_positions" => ["top", "right", "bottom", "left", "center"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_bottom_left_crystal",
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
+            "has_crystal" => true,
+            "crystal_location" => "center",
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_bottom_left_ladder",
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
+            "has_ladder" => true,
+            "ladder_location" => "center",
         ]);
     }
 }

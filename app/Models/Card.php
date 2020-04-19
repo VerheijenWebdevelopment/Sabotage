@@ -14,6 +14,10 @@ class Card extends Model
         "description",
         "action",
         "open_positions",
+        "has_crystal",
+        "crystal_location",
+        "has_ladder",
+        "ladder_location",
     ];
 
     //

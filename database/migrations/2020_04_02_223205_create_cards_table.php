@@ -21,6 +21,10 @@ class CreateCardsTable extends Migration
             $table->text('description')->nullable();            // Description of what the card does
             $table->string('action')->nullable();               // The action this card performs
             $table->text('open_positions')->nullable();         // Directions in which this tunnel card can be connected [top, right, bottom, left]
+            $table->boolean('has_ladder')->default(false);      // Tunnel --> does it have a ladder?
+            $table->string('ladder_location')->nullable();      // Tunnel with ladder --> tile ladder is placed on (center, top, right, bottom, left)
+            $table->boolean('has_crystal')->default(false);     // Tunnel --> does it have a crystal?
+            $table->string('crystal_location')->nullable();     // Tunnel with crystal --> tile crystal is placed on (center, top, right, bottom, left)
             $table->timestamps();
         });
     }
