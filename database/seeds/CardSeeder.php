@@ -23,7 +23,7 @@ class CardSeeder extends Seeder
             "text" => "Start",
             "name" => "start",
             "description" => "This is where the journey begins.",
-            "open_positions" => ["top", "right", "bottom", "left"],
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
         ]);
 
         $gold_location_card = Card::create([
@@ -38,7 +38,7 @@ class CardSeeder extends Seeder
             "text" => "Coal",
             "name" => "coal",
             "description" => "This gold location contained coal. Bummer.",
-            "open_positions" => ["top", "right", "bottom", "left"],
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
         ]);
 
         $gold_location_gold_card = Card::create([
@@ -46,7 +46,7 @@ class CardSeeder extends Seeder
             "text" => "Gold",
             "name" => "gold",
             "description" => "This gold location contained gold! Awesome.",
-            "open_positions" => ["top", "right", "bottom", "left"],
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
         ]);
 
         // ------------------------------------------------
@@ -153,7 +153,7 @@ class CardSeeder extends Seeder
         $action_thief = Card::create([
             "type" => "action",
             "text" => "Diefstal",
-            "name" => "thiefery",
+            "name" => "thief",
             "description" => "Deze kaart blijft actief zolang hij 'op tafel' ligt. Aan het einde van de ronde, na het verdelen van de goudstukken, mag je van 1 speler naar keuze 1 goudstuk stelen (indien mogelijk).",
         ]);
 
@@ -209,86 +209,168 @@ class CardSeeder extends Seeder
         // Tunnel cards
         // ------------------------------------------------
         
-        // 1 opening cards
-        $tunnel_single_one = Card::create([
+
+        // Single tunnel - no center
+        Card::create([
             "type" => "tunnel",
-            "name" => "single_top",
-            "open_positions" => ["top", "center"],
+            "name" => "tunnel_top",
+            "open_positions" => ["top"],
         ]);
-        $tunnel_single_two = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "single_right",
-            "open_positions" => ["right", "center"],
+            "name" => "tunnel_right",
+            "open_positions" => ["right"],
         ]);
-        $tunnel_single_three = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "single_bottom",
-            "open_positions" => ["bottom", "center"],
+            "name" => "tunnel_bottom",
+            "open_positions" => ["bottom"],
         ]);
-        $tunnel_single_four = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "single_left",
-            "open_positions" => ["left", "center"],
+            "name" => "tunnel_left",
+            "open_positions" => ["left"],
         ]);
 
-        // 2 opening cards
-        $tunnel_double_one = Card::create([
+        // Single tunnel - with center
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_top_right",
+            "name" => "tunnel_center_top",
+            "open_positions" => ["center", "top"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right",
+            "open_positions" => ["center", "right"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom",
+            "open_positions" => ["center", "bottom"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left",
+            "open_positions" => ["center", "left"],
+        ]);
+
+        // Double tunnel - with center
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right",
+            "open_positions" => ["center", "top", "right"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom",
+            "open_positions" => ["center", "right", "bottom"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left",
+            "open_positions" => ["center", "bottom", "left"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top",
+            "open_positions" => ["center", "left", "top"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_bottom",
+            "open_positions" => ["center", "top", "bottom"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_right",
+            "open_positions" => ["center", "left", "right"],
+        ]);
+        
+        // Double tunnel - no center
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_top_right",
             "open_positions" => ["top", "right", "center"],
         ]);
-        $tunnel_double_two = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_right_bottom",
+            "name" => "tunnel_right_bottom",
             "open_positions" => ["right", "bottom", "center"],
         ]);
-        $tunnel_double_three = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_bottom_left",
+            "name" => "tunnel_bottom_left",
             "open_positions" => ["bottom", "left", "center"],
         ]);
-        $tunnel_double_four = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_left_top",
+            "name" => "tunnel_left_top",
             "open_positions" => ["left", "top", "center"],
         ]);
-        $tunnel_double_five = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_top_bottom",
+            "name" => "tunnel_top_bottom",
             "open_positions" => ["top", "bottom", "center"],
         ]);
-        $tunnel_double_six = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "double_left_right",
+            "name" => "tunnel_left_right",
             "open_positions" => ["left", "right", "center"],
         ]);
 
-        // 3 opening cards
-        $tunnel_triple_one = Card::create([
+        // Triple tunnel - no center
+        Card::create([
             "type" => "tunnel",
-            "name" => "triple_top_right_bottom",
-            "open_positions" => ["top", "right", "bottom", "center"],
+            "name" => "tunnel_top_right_bottom",
+            "open_positions" => ["top", "right", "bottom"],
         ]);
-        $tunnel_triple_two = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "triple_right_bottom_left",
-            "open_positions" => ["right", "bottom", "left", "center"],
+            "name" => "tunnel_right_bottom_left",
+            "open_positions" => ["right", "bottom", "left"],
         ]);
-        $tunnel_triple_three = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "triple_bottom_left_top",
-            "open_positions" => ["bottom", "left", "top", "center"],
+            "name" => "tunnel_bottom_left_top",
+            "open_positions" => ["bottom", "left", "top"],
         ]);
-        $tunnel_triple_four = Card::create([
+        Card::create([
             "type" => "tunnel",
-            "name" => "triple_left_top_right",
-            "open_positions" => ["left", "top", "right", "center"],
+            "name" => "tunnel_left_top_right",
+            "open_positions" => ["left", "top", "right"],
         ]);
 
-        // 4 opening cards
-        $tunnel_quadruple_one = Card::create([
+        // Triple tunnel - with center
+        Card::create([
             "type" => "tunnel",
-            "name" => "quadruple",
+            "name" => "tunnel_center_top_right_bottom",
+            "open_positions" => ["top", "right", "bottom", "center"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_right_bottom_left",
+            "open_positions" => ["right", "bottom", "left", "center"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_bottom_left_top",
+            "open_positions" => ["bottom", "left", "top", "center"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_left_top_right",
+            "open_positions" => ["left", "top", "right", "center"],
+        ]);
+        
+        // Quadruple cards
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_top_right_bottom_left",
+            "open_positions" => ["top", "right", "bottom", "left"],
+        ]);
+        Card::create([
+            "type" => "tunnel",
+            "name" => "tunnel_center_top_right_bottom_left",
             "open_positions" => ["top", "right", "bottom", "left", "center"],
         ]);
     }

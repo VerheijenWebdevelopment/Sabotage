@@ -48,144 +48,273 @@ class CardService implements ModelServiceContract
         $out = [];
 
         //
-        // Action cards
+        // Grab all action cards
         //
 
-        // Add 3 of each single sabotage card
-        $actionSabotageCart = $this->findByName("sabotage_cart");
-        $actionSabotageLight = $this->findByName("sabotage_light");
-        $actionSabotagePickaxe = $this->findByName("sabotage_pickaxe");
-        for ($i = 0; $i < 3; $i++) {
-            $out[] = $actionSabotageCart->id;
-            $out[] = $actionSabotageLight->id;
-            $out[] = $actionSabotagePickaxe->id;
+        $action_sabotage_cart = $this->findByName("sabotage_cart");
+        $action_sabotage_light = $this->findByName("sabotage_light");
+        $action_sabotage_pickaxe = $this->findByName("sabotage_pickaxe");
+
+        $action_sabotage_pickaxe_light = $this->findByName("sabotage_pickaxe_light");
+        $action_sabotage_pickaxe_cart = $this->findByName("sabotage_pickaxe_cart");
+        $action_sabotage_light_cart = $this->findByName("sabotage_light_cart");
+
+        $action_recover_cart = $this->findByName("recover_cart");
+        $action_recover_light = $this->findByName("recover_light");
+        $action_recover_pickaxe = $this->findByName("recover_pickaxe");
+
+        $action_recover_pickaxe_light = $this->findByName("recover_pickaxe_light");
+        $action_recover_pickaxe_cart = $this->findByName("recover_pickaxe_cart");
+        $action_recover_light_cart = $this->findByName("recover_light_cart");
+
+        $action_enlighten = $this->findByName("enlighten");
+        $action_collapse = $this->findByName("collapse");
+        $action_thief = $this->findByName("thief");
+        $action_dont_touch = $this->findByName("dont_touch");
+        $action_imprison = $this->findByName("imprison");
+        $action_free = $this->findByName("free");
+        $action_inspection = $this->findByName("inspection");
+        $action_exchange_hats = $this->findByName("exchange_hats");
+        $action_exchange_hands = $this->findByName("exchange_hands");
+
+        //
+        // Generate action cards 
+        //
+
+        $action_cards = [];
+
+        // Sabotage cards
+        for ($i = 0; $i < 3; $i++)
+        {
+            $action_cards[] = $action_sabotage_cart->id;
+            $action_cards[] = $action_sabotage_light->id;
+            $action_cards[] = $action_sabotage_pickaxe->id;
         }
 
-        // // Add 2 random combo sabotage cards
-        // $actionSabotageCombos = [
-        //     $this->findByName("sabotage_pickaxe_light"),
-        //     $this->findByName("sabotage_pickaxe_cart"),
-        //     $this->findByName("sabotage_light_cart"),
-        // ];
-        // for ($i < 0; $i < 2; $i++) {
-        //     $out[] = $actionSabotageCombos[rand(0, 2)]->id;
-        // }
-
-        // Add 2 of each single recover card
-        $actionRecoverCart = $this->findByName("recover_cart");
-        $actionRecoverLight = $this->findByName("recover_light");
-        $actionRecoverPickaxe = $this->findByName("recover_pickaxe");
-        for ($i = 0; $i < 3; $i++) {
-            $out[] = $actionRecoverCart->id;
-            $out[] = $actionRecoverLight->id;
-            $out[] = $actionRecoverPickaxe->id;
+        // Recover cards
+        for ($i = 0; $i < 3; $i++)
+        {
+            $action_cards[] = $action_recover_cart->id;
+            $action_cards[] = $action_recover_light->id;
+            $action_cards[] = $action_recover_pickaxe->id;
         }
         
-        // // Add 1 of each combo recover card
-        $actionRecoverCombos = [
-            $this->findByName("recover_pickaxe_light"),
-            $this->findByName("recover_pickaxe_cart"),
-            $this->findByName("recover_light_cart"),
+        // Combo recover cards
+        $recoverCombos = [
+            $action_recover_pickaxe_light,
+            $action_recover_pickaxe_cart,
+            $action_recover_light_cart,
         ];
-        for ($i = 0; $i < 1; $i++) {
-            $out[] = $actionRecoverCombos[rand(0, 2)]->id;
-        }
+        $action_cards[] = $recoverCombos[rand(0, 2)]->id;
 
-        // Add 3 demolish cards
-        $actionDemolish = $this->findByName("collapse");
-        for ($i = 0; $i < 3; $i++) $out[] = $actionDemolish->id;
+        // Add 3 collapse cards
+        $action_cards[] = $action_collapse->id;
+        $action_cards[] = $action_collapse->id;
+        $action_cards[] = $action_collapse->id;
 
         // Add 6 enlighten cards
-        $actionEnlighten = $this->findByName("enlighten");
-        for ($i = 0; $i < 6; $i++) $out[] = $actionEnlighten->id;
+        $action_cards[] = $action_enlighten->id;
+        $action_cards[] = $action_enlighten->id;
+        $action_cards[] = $action_enlighten->id;
+        $action_cards[] = $action_enlighten->id;
+        $action_cards[] = $action_enlighten->id;
+        $action_cards[] = $action_enlighten->id;
+
+        // Add 4 thiefery cards
+        $action_thief->id;
+        $action_thief->id;
+        $action_thief->id;
+        $action_thief->id;
+
+        // Add 3 dont touch cards
+        $action_cards[] = $action_dont_touch->id;
+        $action_cards[] = $action_dont_touch->id;
+        $action_cards[] = $action_dont_touch->id;
+
+        // Add 2 exchange hats cards
+        $action_cards[] = $action_exchange_hats->id;
+        $action_cards[] = $action_exchange_hats->id;
+
+        // Add 2 inspection cards
+        $action_cards[] = $action_inspection->id;
+        $action_cards[] = $action_inspection->id;
+
+        // Add 2 exchange hands cards
+        $action_cards[] = $action_exchange_hands->id;
+        $action_cards[] = $action_exchange_hands->id;
+
+        // Add 3 imprison cards
+        $action_cards[] = $action_imprison->id;
+        $action_cards[] = $action_imprison->id;
+        $action_cards[] = $action_imprison->id;
+
+        // Add 4 free cards
+        $action_cards[] = $action_free->id;
+        $action_cards[] = $action_free->id;
+        $action_cards[] = $action_free->id;
+        $action_cards[] = $action_free->id;
+
+        foreach ($action_cards as $id)
+        {
+            $out[] = ["card_id" => $id];
+        }
 
         //
-        // Tunnel cards
+        // Grab all tunnel cards
         //
 
-        $out[] = 27;
-        $out[] = 27;
-        $out[] = 27;
-        $out[] = 27;
-        $out[] = 27;
+        $tunnel_single_one = $this->findByName("tunnel_top");
+        $tunnel_single_two = $this->findByName("tunnel_right");
+        $tunnel_single_three = $this->findByName("tunnel_bottom");
+        $tunnel_single_four = $this->findByName("tunnel_left");
 
-        $out[] = 28;
-        $out[] = 28;
-        $out[] = 28;
-        $out[] = 28;
+        $tunnel_single_center_one = $this->findByName("tunnel_center_top");
+        $tunnel_single_center_two = $this->findByName("tunnel_center_right");
+        $tunnel_single_center_three = $this->findByName("tunnel_center_bottom");
+        $tunnel_single_center_four = $this->findByName("tunnel_center_left");
 
-        $out[] = 31;
-        $out[] = 31;
-        $out[] = 31;
-        $out[] = 31;
+        $tunnel_double_one = $this->findByName("tunnel_top_right");
+        $tunnel_double_two = $this->findByName("tunnel_right_bottom");
+        $tunnel_double_three = $this->findByName("tunnel_bottom_left");
+        $tunnel_double_four = $this->findByName("tunnel_left_top");
+        $tunnel_double_five = $this->findByName("tunnel_top_bottom");
+        $tunnel_double_six = $this->findByName("tunnel_left_right");
 
-        $out[] = 32;
-        $out[] = 32;
-        $out[] = 32;
+        $tunnel_double_center_one = $this->findByName("tunnel_center_top_right");
+        $tunnel_double_center_two = $this->findByName("tunnel_center_right_bottom");
+        $tunnel_double_center_three = $this->findByName("tunnel_center_bottom_left");
+        $tunnel_double_center_four = $this->findByName("tunnel_center_left_top");
+        $tunnel_double_center_five = $this->findByName("tunnel_center_top_bottom");
+        $tunnel_double_center_six = $this->findByName("tunnel_center_left_right");
 
-        $out[] = 33;
-        $out[] = 33;
-        $out[] = 33;
-        $out[] = 33;
-        $out[] = 33;
+        $tunnel_triple_one = $this->findByName("tunnel_top_right_bottom");
+        $tunnel_triple_two = $this->findByName("tunnel_right_bottom_left");
+        $tunnel_triple_three = $this->findByName("tunnel_bottom_left_top");
+        $tunnel_triple_four = $this->findByName("tunnel_left_top_right");
 
-        $out[] = 34;
-        $out[] = 34;
-        $out[] = 34;
-        $out[] = 34;
-        $out[] = 34;
+        $tunnel_triple_center_one = $this->findByName("tunnel_center_top_right_bottom");
+        $tunnel_triple_center_two = $this->findByName("tunnel_center_right_bottom_left");
+        $tunnel_triple_center_three = $this->findByName("tunnel_center_bottom_left_top");
+        $tunnel_triple_center_four = $this->findByName("tunnel_center_left_top_right");
 
-        $out[] = 37;
-        $out[] = 37;
-        $out[] = 37;
-        $out[] = 37;
-        $out[] = 37;
+        $tunnel_quadruple = $this->findByName("tunnel_top_right_bottom_left");
 
+        $tunnel_quadruple_center = $this->findByName("tunnel_center_top_right_bottom_left");
 
-        // Add 1 of every one slot card (x4)
-        $out[] = $this->findByName("single_top")->id;
-        $out[] = $this->findByName("single_right")->id;
-        $out[] = $this->findByName("single_bottom")->id;
-        // $out[] = $this->findByName("single_left")->id;
+        //
+        // Generate tunnel cards
+        //
         
-        // // Add 5 of all the corner 2 slot cards (x20)
-        // $twoSlotTunnelOne = $this->findByName("double_top_right");
-        // $twoSlotTunnelTwo = $this->findByName("double_right_bottom");
-        // $twoSlotTunnelThree = $this->findByName("double_bottom_left");
-        // $twoSlotTunnelFour = $this->findByName("double_left_top");
-        // for ($i = 0; $i < 5; $i++) {
-        //     $out[] = $twoSlotTunnelOne->id;
-        //     $out[] = $twoSlotTunnelTwo->id;
-        //     $out[] = $twoSlotTunnelThree->id;
-        //     $out[] = $twoSlotTunnelFour->id;
-        // }
+        // TODO: grab these numbers from the game's saved settings
+        $num_ladders = 4;
+        $num_crystals = 8;
 
-        // // Add 4 of all of the straight 2 slot cards (x8)
-        // $twoSlotTunnelFive = $this->findByName("double_top_bottom");
-        // $twoSlotTunnelSix = $this->findByName("double_left_right");
-        // for ($i = 0; $i < 2; $i++) {
-        //     $out[] = $twoSlotTunnelFive->id;
-        //     $out[] = $twoSlotTunnelSix->id;
-        // }
+        // Gather the tunnels seperately first so we can post-process them
+        $tunnels = [];
 
-        // // Add 2 of every three slot card (x8)
-        // $threeSlotTunnelOne = $this->findByName("triple_top_right_bottom");
-        // $threeSlotTunnelTwo = $this->findByName("triple_right_bottom_left");
-        // $threeSlotTunnelThree = $this->findByName("triple_bottom_left_top");
-        // $threeSlotTunnelFour = $this->findByName("triple_left_top_right");
-        // for ($i = 0; $i < 1; $i++) {
-        //     $out[] = $threeSlotTunnelOne->id;
-        //     $out[] = $threeSlotTunnelTwo->id;
-        //     $out[] = $threeSlotTunnelThree->id;
-        //     $out[] = $threeSlotTunnelFour->id;
-        // }
+        // Dead ends with 1 tile
+        $singleNoCenters = [
+            $tunnel_single_one->id,
+            $tunnel_single_two->id,
+            $tunnel_single_three->id,
+            $tunnel_single_four->id,
+        ];
+        $tunnels[] = $singleNoCenters[rand(0, 3)];
+        $tunnels[] = $singleNoCenters[rand(0, 3)];
 
-        // // Add 4 of the four slot cards (x4)
-        // $fourSlotTunnel = $this->findByName("quadruple");
-        // for ($i = 0; $i < 4; $i++) $out[] = $fourSlotTunnel->id;
+        // Dead ends with 2 tiles
+        $doubleNoCenters = [
+            $tunnel_single_center_one->id,
+            $tunnel_single_center_two->id,
+            $tunnel_single_center_three->id,
+            $tunnel_single_center_four->id,
+            $tunnel_double_one->id,
+            $tunnel_double_two->id,
+            $tunnel_double_three->id,
+            $tunnel_double_four->id,
+            $tunnel_double_five->id,
+            $tunnel_double_six->id,
+        ];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
 
-        // Shuffle the deck
-        shuffle($out);
+        // Dead ends with 3 tiles
+        $tripleNoCenters = [
+            $tunnel_triple_one->id,
+            $tunnel_triple_two->id,
+            $tunnel_triple_three->id,
+            $tunnel_triple_four->id,
+        ];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+
+        // Dead ends with 4 tiles
+        $tunnels[] = $tunnel_quadruple->id;
+
+        // Connected tunnel 2 tiles 
+        $tunnels[] = $tunnel_double_center_one->id;
+        $tunnels[] = $tunnel_double_center_two->id;
+        $tunnels[] = $tunnel_double_center_three->id;
+        $tunnels[] = $tunnel_double_center_four->id;
+        $tunnels[] = $tunnel_double_center_five->id;
+        $tunnels[] = $tunnel_double_center_six->id;
+
+        // Connected tunnel 3 tiles
+        $tunnels[] = $tunnel_triple_center_one->id;
+        $tunnels[] = $tunnel_triple_center_two->id;
+        $tunnels[] = $tunnel_triple_center_three->id;
+        $tunnels[] = $tunnel_triple_center_four->id;
+
+        // Connected tunnel 4 tiles
+        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center->id;
+        $tunnels[] = $tunnel_quadruple_center->id;
+
+        // Add the ladders and crystals to the tunnel cards randomly
+        shuffle($tunnels);
+        $ladders_placed = 0;
+        $crystals_placed = 0;
+        for ($i = 0; $i < count($tunnels); $i++)
+        {
+            if ($ladders_placed < $num_ladders)
+            {
+                $card = $this->find($tunnels[$i]);
+
+                $out[] = [
+                    "card_id" => $tunnels[$i],
+                    "has_crystal" => false,
+                    "has_ladder" => true,
+                    "ladder_location" => $card->open_positions[rand(0, (count($card->open_positions)-1))],
+                ];
+
+                $ladders_placed++;
+            }
+            else if ($crystals_placed < $num_crystals)
+            {
+                $card = $this->find($tunnels[$i]);
+                
+                $out[] = [
+                    "card_id" => $tunnels[$i],
+                    "has_crystal" => true,
+                    "crystal_location" => $card->open_positions[rand(0, (count($card->open_positions)-1))],
+                    "has_ladder" => false,
+                ];
+
+                $crystals_placed++;
+            }
+            else
+            {
+                $out[] = [
+                    "card_id" => $tunnels[$i],
+                    "has_crystal" => false,
+                    "has_ladder" => false,
+                ];
+            }
+        }
 
         // Return the generated list of card id's
         return $out;
@@ -335,20 +464,32 @@ class CardService implements ModelServiceContract
         $ghs = $gw;
         $ghl = ($h - $gw) / 2;
 
-        // Draw the center tile for all tunnel types
-        $image->rectangle($gw, $ghl, ($gw*2), ($ghs + $ghl), function($draw) use ($color) {
-            $draw->background($color);
-        });
+        // Determine if this card has a center tile
+        $hasCenterTile = in_array("center", $card->open_positions);
 
         // Draw all the open position tiles
         foreach ($card->open_positions as $position)
         {
             switch ($position)
             {
-                case "top":
-                    $image->rectangle($gw, 0, ($gw*2), $ghl, function($draw) use ($color) {
+                case "center":
+                    $image->rectangle($gw, $ghl, ($gw*2), ($ghs + $ghl), function($draw) use ($color) {
                         $draw->background($color);
                     });
+                break;
+                case "top":
+                    if ($hasCenterTile)
+                    {
+                        $image->rectangle($gw, 0, ($gw*2), $ghl, function($draw) use ($color) {
+                            $draw->background($color);
+                        });
+                    }
+                    else
+                    {
+                        $image->rectangle($gw, 0, ($gw*2), $gw, function($draw) use ($color) {
+                            $draw->background($color);
+                        });
+                    }
                 break;
                 case "right":
                     $image->rectangle(($gw*2), $ghl, ($gw*3), ($ghs+$ghl), function($draw) use ($color) {
@@ -356,9 +497,18 @@ class CardService implements ModelServiceContract
                     });
                 break;
                 case "bottom":
-                    $image->rectangle($gw, ($ghs+$ghl), ($gw*2), $h, function($draw) use ($color) {
-                        $draw->background($color);
-                    });
+                    if ($hasCenterTile)
+                    {
+                        $image->rectangle($gw, ($ghs+$ghl), ($gw*2), $h, function($draw) use ($color) {
+                            $draw->background($color);
+                        });
+                    }
+                    else
+                    {
+                        $image->rectangle($gw, ($ghs+$ghl+($ghl-$ghs)), ($gw*2), $h, function($draw) use ($color) {
+                            $draw->background($color);
+                        });
+                    }
                 break;
                 case "left":
                     $image->rectangle(0, $ghl, $gw, ($ghs+$ghl), function($draw) use ($color) {
