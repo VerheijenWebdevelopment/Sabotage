@@ -102,29 +102,37 @@
                         <div id="card-actions" class="elevation-1">
                             <div class="card-action" v-if="showCardActionPlay">
                                 <v-btn small dark @click="onClickPlayCard">
-                                    <i class="fas fa-long-arrow-alt-up"></i>
+                                    <span>
+                                        <i class="fas fa-long-arrow-alt-up"></i>
+                                    </span>
                                     Speel kaart
                                 </v-btn>
                             </div>
                             <div class="card-action" v-if="showCardActionFoldCard">
                                 <v-btn small dark @click="onClickFoldCard">
-                                    <i class="far fa-times-circle"></i>
+                                    <span>
+                                        <i class="far fa-times-circle"></i>
+                                    </span>
                                     Kaart afleggen
                                 </v-btn>
                             </div>
                             <div class="card-action" v-if="showCardActionFoldCards">
                                 <v-btn small dark @click="onClickFoldCards">
-                                    <i class="far fa-times-circle"></i>
+                                    <span>
+                                        <i class="far fa-times-circle"></i>
+                                    </span>
                                     Kaarten afleggen
                                 </v-btn>
                             </div>
                             <div class="card-action" v-if="showCardActionFoldCardsUnblock">
                                 <v-btn small dark @click="onClickFoldCardsUnblock">
-                                    <i class="far fa-times-circle"></i>
+                                    <span>
+                                        <i class="far fa-times-circle"></i>
+                                    </span>
                                     Kaarten afleggen & deblokkeren
                                 </v-btn>
                             </div>
-                            <div class="card-action">
+                            <div class="card-action" v-if="numSelectedHandCards === 1">
                                 <v-btn small dark class="icon-only" @click="onClickViewCard">
                                     <i class="far fa-eye"></i>
                                 </v-btn>
@@ -292,8 +300,56 @@
         </v-dialog>
 
         <!-- Fold cards and unblock tool dialog -->
-        <v-dialog v-model="dialogs.fold_cards_unblock.show" width="600">
-            
+        <v-dialog v-model="dialogs.fold_cards_unblock.show" width="800">
+            <div class="dialog dark" v-if="dialogs.fold_cards_unblock.indices.length > 0">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelFoldCardsUnblock">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Kaarten afleggen & gereedschap deblokkeren</div>
+                    <!-- Text -->
+                    <div class="dialog-text centered">
+                        <div class="cards">
+                            <div class="card mb-15" v-for="(card, ci) in foldCardsUnblockDialogCards" :key="ci" :style="{ backgroundImage: 'url('+card.image_url+')' }"></div>
+                        </div>
+                        <!-- Select tool -->
+                        <div class="select-tool">
+                            <div class="select-tool__title">
+                                Selecteer het gereedschap dat je wilt herstellen door de bovenstaande kaarten af te leggen.<br>
+                                Je krijgt er maar 1 kaart voor terug.
+                            </div>
+                            <div class="select-tool__list" v-if="foldCardsUnblockDialogToolOptions.length > 0">
+                                <div class="select-tool__list-item" v-for="(tool, ti) in foldCardsUnblockDialogToolOptions" :key="ti">
+                                    <div class="tool-option" :class="{ selected: dialogs.fold_cards_unblock.tool === tool }" @click="onClickSelectTool('fold_cards_unblock', tool)">
+                                        {{ tool }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-box" v-if="foldCardsUnblockDialogToolOptions.length === 0">
+                                Er is geen gereedschap geblokkeerd op dit moment!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelFoldCardsUnblock">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark color="red" @click="onClickConfirmFoldCardsUnblock" :loading="dialogs.fold_cards_unblock.loading" :disabled="foldCardsUnblockDialogConfirmDisabled">
+                            <i class="fas fa-recycle"></i>
+                            Kaarten afleggen & deblokkeren
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
         </v-dialog>
 
         <!-- Sabotage player dialog -->
@@ -526,7 +582,7 @@
                         <div class="select-player__title">Selecteer je doelwit</div>
                         <div class="select-player__list">
                             <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
-                                <div class="player-option" :class="{ selected: dialogs.free.player_id === player.id }" @click="onClickSelectPlayer('dont_touch', player.id)">
+                                <div class="player-option" :class="{ selected: dialogs.dont_touch.player_id === player.id }" @click="onClickSelectPlayer('dont_touch', player.id)">
                                     {{ player.user.username }}
                                 </div>
                             </div>
@@ -673,7 +729,7 @@
                         <div class="select-player__title">Selecteer je doelwit</div>
                         <div class="select-player__list">
                             <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
-                                <div class="player-option" :class="{ selected: dialogs.inspection.player_id === player.id }" @click="onClickSelectPlayer('imprison', player.id)">
+                                <div class="player-option" :class="{ selected: dialogs.inspection.player_id === player.id }" @click="onClickSelectPlayer('inspection', player.id)">
                                     {{ player.user.username }}
                                 </div>
                             </div>
@@ -690,7 +746,7 @@
                     </div>
                     <div class="dialog-controls__right">
                         <v-btn dark @click="onClickConfirmInspection" :loading="dialogs.inspection.loading" :disabled="inspectionDialogDisableSubmit">
-                            Naar de gevangenis!
+                            Inspecteer speler
                         </v-btn>
                     </div>
                 </div>
@@ -709,19 +765,136 @@
                     <!-- Title -->
                     <div class="dialog-title">Rol van {{ revealRoleDialogPlayer.user.username  }}</div>
                     <!-- Text -->
-                    <div class="dialog-text">{{ revealRoleDialogText }}</div>
+                    <div class="dialog-text" v-html="revealRoleDialogText"></div>
                 </div>
             </div>
         </v-dialog>
 
         <!-- Exchange hands dialog -->
         <v-dialog v-model="dialogs.exchange_hands.show" width="600">
+            <div class="dialog dark" v-if="dialogs.exchange_hands.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelExchangeHands">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Handen ruilen</div>
+                    <!-- Text -->
+                    <div class="dialog-text">Verwissel jouw hand met die van een medespeler.</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.exchange_hands.player_id === player.id }" @click="onClickSelectPlayer('exchange_hands', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelExchangeHands">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmExchangeHands" :loading="dialogs.exchange_hands.loading" :disabled="exchangeHandsDialogDisableSubmit">
+                            Handen wisselen
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
 
+        <!-- Exchange hands completed dialog -->
+        <v-dialog v-model="dialogs.exchange_hands_completed.show" width="500">
+            <div class="dialog dark" v-if="dialogs.exchange_hands_completed.other_player_id !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="dialogs.exchange_hands_completed.show = false">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Handen verwisseld</div>
+                    <!-- Text -->
+                    <div class="dialog-text">Je hebt je hand moeten afstaan aan <strong>{{ exchangeHandsCompletedOtherPlayer }}</strong> en hebt zijn/haar kaarten daarvoor in de plaats gekregen. Daarnaast heb je ook een nieuwe kaart getrokken. Lucky you.</div>
+                </div>
+            </div>
         </v-dialog>
 
         <!-- Exchange hats dialog -->
         <v-dialog v-model="dialogs.exchange_hats.show" width="600">
+            <div class="dialog dark" v-if="dialogs.exchange_hats.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelExchangeHats">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Mutsen ruilen</div>
+                    <!-- Text -->
+                    <div class="dialog-text">De gekozen speler moet zijn rolkaart afstaan, waarop hij of zij een nieuwe rol krijgt toegewezen.</div>
+                    <!-- Select player -->
+                    <div class="select-player">
+                        <div class="select-player__title">Selecteer je doelwit</div>
+                        <div class="select-player__list">
+                            <div class="select-player__list-item" v-for="(player, pi) in mutablePlayersExcludingMe" :key="pi">
+                                <div class="player-option" :class="{ selected: dialogs.exchange_hats.player_id === player.id }" @click="onClickSelectPlayer('exchange_hats', player.id)">
+                                    {{ player.user.username }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelExchangeHats">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmExchangeHats" :loading="dialogs.exchange_hats.loading" :disabled="exchangeHatsDialogDisableSubmit">
+                            Mutsen verwisselen
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
 
+        <!-- Exchange hats completed dialog -->
+        <v-dialog v-model="dialogs.exchange_hats_completed.show" width="500">
+            <div class="dialog dark" v-if="dialogs.exchange_hats_completed.other_player_id !== null && mutablePlayerRole !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="dialogs.exchange_hats_completed.show = false">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Mutsen verwisseld</div>
+                    <!-- Text -->
+                    <div class="dialog-text">Je hebt je muts moeten afdoen van <strong>{{ exchangeHatsCompletedOtherPlayer }}</strong>.<br>Je hebt een nieuwe rol toegewezen gekregen:</div>
+                    <!-- Role -->
+                    <div id="new-role">
+                        <div id="new-role__name">
+                            {{ mutablePlayerRole.label }}
+                            <span class="blue-text" v-if="mutablePlayerRole.name === 'blue_digger'">Blauwe team</span>    
+                            <span class="blue-text" v-if="mutablePlayerRole.name === 'green_digger'">Groene team</span>    
+                        </div>
+                        <div id="new-role__description">{{ mutablePlayerRole.description }}</div>
+                    </div>
+                </div>
+            </div>
         </v-dialog>
 
         <!-- Collapse tunnel dialog -->
@@ -838,6 +1011,7 @@
                 },
                 inspection: {
                     show: false,
+                    loading: false,
                     card_index: null,
                     player_id: null,
                 },
@@ -858,13 +1032,23 @@
                 },
                 exchange_hands: {
                     show: false,
+                    loading: false,
                     card_index: null,
                     player_id: null,
                 },
+                exchange_hands_completed: {
+                    show: false,
+                    other_player_id: null,
+                },
                 exchange_hats: {
                     show: false,
+                    loading: false,
                     card_index: null,
                     player_id: null,
+                },
+                exchange_hats_completed: {
+                    show: false,
+                    other_player_id: null,
                 },
             },
             modes: {
@@ -968,7 +1152,23 @@
                 return out;
             },
             // Fold cards & unblock dialog
-
+            foldCardsUnblockDialogCards() {
+                let out = [];
+                for (let i = 0; i < this.dialogs.fold_cards_unblock.indices.length; i++) {
+                    out.push(this.mutableHand[this.dialogs.fold_cards_unblock.indices[i]].card);
+                }
+                return out;
+            },
+            foldCardsUnblockDialogToolOptions() {
+                let out = [];
+                if (!this.mutablePlayer.pickaxe_available) out.push("pickaxe");
+                if (!this.mutablePlayer.light_available) out.push("light");
+                if (!this.mutablePlayer.cart_available) out.push("cart");
+                return out;
+            },
+            foldCardsUnblockDialogConfirmDisabled() {
+                return this.dialogs.fold_cards_unblock.tool === null;
+            },
             // Sabotage dialog
             sabotageDialogCard() {
                 if (this.dialogs.sabotage.card_index !== null) {
@@ -1175,6 +1375,44 @@
                     return this.revealRoleDialogPlayer.user.username+" is een <strong>"+this.dialogs.reveal_role.role.label+"</strong>.";
                 }
             },
+            // Exchange hands dialog
+            exchangeHandsDialogCard() {
+                if (this.dialogs.exchange_hands.card_index !== null) {
+                    return this.mutableHand[this.dialogs.exchange_hands.card_index].card;
+                }
+                return false;
+            },
+            exchangeHandsDialogDisableSubmit() {
+                return this.dialogs.exchange_hands.player_id === null;
+            },
+            // Exchange hands completed dialog
+            exchangeHandsCompletedOtherPlayer() {
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === this.dialogs.exchange_hands_completed.other_player_id) {
+                        return this.mutablePlayers[i].user.username;
+                    }
+                }
+                return false;
+            },
+            // Exchange hats dialog
+            exchangeHatsDialogCard() {
+                if (this.dialogs.exchange_hats.card_index !== null) {
+                    return this.mutableHand[this.dialogs.exchange_hats.card_index].card;
+                }
+                return false;
+            },
+            exchangeHatsDialogDisableSubmit() {
+                return this.dialogs.exchange_hats.player_id === null;
+            },
+            // Exchange hats completed dialog
+            exchangeHatsCompletedOtherPlayer() {
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === this.dialogs.exchange_hats_completed.other_player_id) {
+                        return this.mutablePlayers[i].user.username;
+                    }
+                }
+                return false;
+            },
             // Collapse tunnel dialog
             collapseDialogCard() {
                 if (this.dialogs.collapse.card_index !== null) {
@@ -1256,6 +1494,11 @@
                     .listen('Game\\NewRoundStarted', this.onNewRoundStarted)
                     .listen('Game\\RoundEnded', this.onRoundEnded)
                     .listen('Game\\GameEnded', this.onGameEnded);
+
+                // Player channel events
+                Echo.private('player.'+this.player.id)
+                    .listen('Game\\PlayerRoleChanged', this.onPlayerRoleChanged)
+                    .listen('Game\\PlayerHandChanged', this.onPlayerHandChanged);
 
             },
             // Event handlers
@@ -1439,6 +1682,22 @@
                 console.log(this.tag+"[event] received event player was awarded gold:", e);
 
             },
+            onPlayerRoleChanged(e) {
+                console.log(this.tag+"[event] received player role changed event", e);
+                // Update the player's role
+                this.mutablePlayerRole = e.role;
+                // Populate & show the exchange hats completed dialog
+                this.dialogs.exchange_hats_completed.other_player_id = e.other_player.id;
+                this.dialogs.exchange_hats_completed.show = true;
+            },
+            onPlayerHandChanged(e) {
+                console.log(this.tag+"[event] received player hand changed event", e);
+                // Update the player's hand
+                this.initializeHand(e.hand);
+                // Populate & show the exchange hands completed dialog
+                this.dialogs.exchange_hands_completed.other_player_id = e.other_player.id;
+                this.dialogs.exchange_hands_completed.show = true;
+            },
             onTurnEnded(e) {
                 console.log(this.tag+"[event] received event turn ended:", e);
                 
@@ -1567,9 +1826,11 @@
                     } else if (card.name === "exchange_hats") {
                         this.dialogs.exchange_hats.card_index = index;
                         this.dialogs.exchange_hats.show = true;
-                    } else if (card.name === "exchange_cards") {
-                        this.dialogs.exchange_cards.card_index = index;
-                        this.dialogs.exchange_cards.show = true;
+                    } else if (card.name === "exchange_hands") {
+                        this.dialogs.exchange_hands.card_index = index;
+                        this.dialogs.exchange_hands.show = true;
+                    } else {
+                        console.warn(this.tag+" unknown action card: "+card.name);
                     }
                 }
                 // Deselect cards in our hand
@@ -1733,31 +1994,55 @@
                 console.log(this.tag+" clicked confirm fold cards & unblock tool button");
                 // Start loading
                 this.dialogs.fold_cards_unblock.loading = true;
+                // Compose API request payload
+                let data = { 
+                    indices: this.dialogs.fold_cards_unblock.indices,
+                    tool: this.dialogs.fold_cards_unblock.tool,
+                };
                 // Make API request
-                this.sendPerformActionRequest("fold_cards_unblock", { indices: this.dialogs.fold_cards_unblock.indices })
+                this.sendPerformActionRequest("fold_cards_unblock", data)
                     // Request succeeded
                     .then(function(response) {
                         console.log(this.tag+" request succeeded: ", response.data);
                         // Remove cards from our hand
-                        for (let i = 0; i < this.dialogs.fold_cards.indices.length; i++) {
-                            this.mutableHand.splice(this.dialogs.fold_cards.indicices[i], 1);
+                        for (let i = 0; i < this.dialogs.fold_cards_unblock.indices.length; i++) {
+                            this.mutableHand.splice(this.dialogs.fold_cards_unblock.indices[i], 1);
                         }
-                        // Add new card to hand if we received one
-                        if (response.data.new_card) this.mutableHand.push({
-                            card: response.data.new_card,
-                            selected: false
-                        });
+                        // Add new cards to hand if we received one
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
+                        // Unblock the mutablePlayer's selected tool 
+                        if (data.tool === "pickaxe") {
+                            this.mutablePlayer.pickaxe_available = true;
+                        } else if (data.tool === "light") {
+                            this.mutablePlayer.light_available = true;
+                        } else if (data.tool === "cart") {
+                            this.mutablePlayer.cart_available = true;
+                        }
+                        // Unblock mutablePlayers entry's selected tool
+                        for (let i = 0; i < this.mutablePlayers.length; i++) {
+                            if (this.mutablePlayers[i].id === this.mutablePlayer.id) {
+                                if (data.tool === "pickaxe") {
+                                    this.mutablePlayers[i].pickaxe_available = true;
+                                } else if (data.tool === "light") {
+                                    this.mutablePlayers[i].light_available = true;
+                                } else if (data.tool === "cart") {
+                                    this.mutablePlayers[i].cart_available = true;
+                                }
+                                break;
+                            }
+                        }
                         // Stop loading
                         this.dialogs.fold_cards_unblock.loading = false;
-                        // Hide dialog
-                        this.dialogs.fold_cards.unblock.show = false;
+                        // Hide & reset dialog
+                        this.dialogs.fold_cards_unblock.show = false;
+                        this.dialogs.fold_cards_unblock.tool = null;
                     }.bind(this))
-                    // Request failed
-                    .catch(function(response) {
-                        console.warn(this.tag+" request failed: ", response.data);
-                        // Stop loading
-                        this.dialogs.fold_cards_unblock.loading = false;
-                    }.bind(this));
+                    // // Request failed
+                    // .catch(function(response) {
+                    //     console.warn(this.tag+" request failed: ", response.data);
+                    //     // Stop loading
+                    //     this.dialogs.fold_cards_unblock.loading = false;
+                    // }.bind(this));
             },
             // Sabotage dialog
             onClickCancelSabotage() {
@@ -2165,7 +2450,7 @@
                         console.log(this.tag+" request succeeded: ", response.data);
                         // Update player's hand
                         this.mutableHand.splice(this.dialogs.inspection.card_index, 1);
-                        if (response.data.new_card) this.mutableHand.push(response.data.new_card);
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
                         // Populate the reveal role dialog
                         this.dialogs.reveal_role.player_id = this.dialogs.inspection.player_id;
                         this.dialogs.reveal_role.role = response.data.role;
@@ -2190,9 +2475,71 @@
                 this.dialogs.reveal_role.show = false;
             },
             // Exchange hands dialog
-
+            onClickCancelExchangeHands() {
+                console.log(this.tag+" clicked cancel exchange hands button");
+                // Hide dialog
+                this.dialogs.exchange_hands.show = false;
+            },
+            onClickConfirmExchangeHands() {
+                console.log(this.tag+" clicked confirm exchange hands button");
+                // Start loading
+                this.dialogs.exchange_hands.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.exchange_hands.card_index,
+                    player_id: this.dialogs.exchange_hands.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", response.data);
+                        // Update player's hand
+                        this.initializeHand(response.data.new_hand);
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
+                        // Stop loading
+                        this.dialogs.exchange_hands.loading = false;
+                        // Hide dialog
+                        this.dialogs.exchange_hands.show = false;
+                    }.bind(this))
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed", data);
+                        // Stop loading
+                        this.dialogs.exchange_hands.loading = false;
+                    }.bind(this));
+            },
             // Exchange hats dialog
-
+            onClickCancelExchangeHats() {
+                console.log(this.tag+" clicked cancel exchange hats button");
+                // Hide dialog
+                this.dialogs.exchange_hats.show = false;
+            },
+            onClickConfirmExchangeHats() {
+                console.log(this.tag+" clicked confirm exchange hats button");
+                // Start loading
+                this.dialogs.exchange_hats.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.exchange_hats.card_index,
+                    player_id: this.dialogs.exchange_hats.player_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", data);
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.exchange_hats.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
+                        // Stop loading
+                        this.dialogs.exchange_hats.loading = false;
+                        // Hide dialog
+                        this.dialogs.exchange_hats.show = false;
+                    }.bind(this))
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed", data);
+                        // Stop loading
+                        this.dialogs.exchange_hats.loading = false;
+                    }.bind(this));
+            },
             // All dialogs that require player / tool selection
             onClickSelectPlayer(dialog, player_id) {
                 if (dialog === "sabotage") {
@@ -2243,11 +2590,11 @@
                     } else {
                         this.dialogs.exchange_hats.player_id = player_id;
                     }
-                } else if (dialog === "exchange_cards") {
-                    if (this.dialogs.exchange_cards.player_id === player_id) {
-                        this.dialogs.exchange_cards.player_id = null;
+                } else if (dialog === "exchange_hands") {
+                    if (this.dialogs.exchange_hands.player_id === player_id) {
+                        this.dialogs.exchange_hands.player_id = null;
                     } else {
-                        this.dialogs.exchange_cards.player_id = player_id;
+                        this.dialogs.exchange_hands.player_id = player_id;
                     }
                 }
             },
@@ -2263,6 +2610,12 @@
                         this.dialogs.recover.tool = null;
                     } else {
                         this.dialogs.recover.tool = tool;
+                    }
+                } else if (dialog === "fold_cards_unblock") {
+                    if (this.dialogs.fold_cards_unblock.tool === tool) {
+                        this.dialogs.fold_cards_unblock.tool = null;
+                    } else {
+                        this.dialogs.fold_cards_unblock.tool = tool;
                     }
                 }
             },
@@ -2643,9 +2996,10 @@
             display: flex;
             flex-wrap: wrap;
             flex-direction: row;
+            justify-content: center;
             margin: 0 -15px -30px -15px;
             .select-tool__list-item {
-                flex: 0 0 50%;
+                flex: 0 0 33.33%;
                 box-sizing: border-box;
                 padding: 0 15px 30px 15px;
                 .tool-option {
@@ -2685,5 +3039,25 @@
         #reveal-gold-location__text {
             text-align: center;
         }
+    }
+    #new-role {
+        padding: 15px;
+        border-radius: 3px;
+        box-sizing: border-box;
+        background-color: hsl(0, 0%, 5%);
+        #new-role__name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: -5px 0 5px 0;
+        }
+        #new-role__description {
+            font-size: .9em;
+        }
+    }
+    .text-box {
+        padding: 15px;
+        border-radius: 3px;
+        box-sizing: border-box;
+        background-color: hsl(0, 0%, 5%);
     }
 </style>

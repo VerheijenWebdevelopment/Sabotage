@@ -33,3 +33,6 @@ Broadcast::channel("game.{game}", GameChannel::class);
 
 // Game's chat channel
 Broadcast::channel("game-chat.{game}", GameChatChannel::class);
+
+// Individual player channel
+Broadcast::channel("player.{player}", PlayerChannel::class);

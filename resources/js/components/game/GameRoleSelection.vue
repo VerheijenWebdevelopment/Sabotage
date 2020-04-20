@@ -181,16 +181,17 @@
         }
         #role-cards {
             display: flex;
+            width: 1024px;
             flex-wrap: wrap;
             flex-direction: row;
             justify-content: center;
-            margin: 0 -15px -30px -15px;
+            margin: 0 auto -30px auto;
             .role-card__wrapper {
                 box-sizing: border-box;
                 padding: 0 15px 30px 15px;
                 .role-card {
-                    width: 130px;
-                    height: 200px;
+                    width: 98px;
+                    height: 150px;
                     display: flex;
                     border-radius: 3px;
                     transition: all .3s;

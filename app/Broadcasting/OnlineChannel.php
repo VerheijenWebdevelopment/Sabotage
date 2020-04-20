@@ -24,9 +24,13 @@ class OnlineChannel
      */
     public function join(User $user)
     {
+        // Only allow logged in users to join this channel
         if (auth()->check())
         {
+            // Return user's information (indicating this is a Presence channel)
             return $user->toArray();
         }
+
+        return false;
     }
 }

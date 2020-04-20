@@ -25,6 +25,7 @@ class PlayerChannel
      */
     public function join(User $user, Player $player)
     {
+        // Only allow the owner of the player to enter this channel
         return $player->user->id == $user->id;
     }
 }

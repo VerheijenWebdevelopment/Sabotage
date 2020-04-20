@@ -132,12 +132,18 @@ class CardService implements ModelServiceContract
         // Add 2 exchange hats cards
         $out[] = $action_exchange_hats->id;
         $out[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
 
         // Add 2 inspection cards
         $out[] = $action_inspection->id;
         $out[] = $action_inspection->id;
 
         // Add 2 exchange hands cards
+        $out[] = $action_exchange_hands->id;
+        $out[] = $action_exchange_hands->id;
+        $out[] = $action_exchange_hands->id;
         $out[] = $action_exchange_hands->id;
         $out[] = $action_exchange_hands->id;
 
@@ -671,11 +677,11 @@ class CardService implements ModelServiceContract
 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
 
-                $image->insert($pickaxe, "top-left", 25, 100);
-                $image->insert($cart, "top-right", 25, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($pickaxe, "left", 50);
+                $image->insert($cart, "right", 50);
+                $image->insert($recover, "center");
 
             break;
             case "recover_pickaxe_light":
@@ -690,11 +696,11 @@ class CardService implements ModelServiceContract
 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
 
-                $image->insert($pickaxe, "top-left", 25, 100);
-                $image->insert($light, "top-right", 25, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($pickaxe, "left", 50);
+                $image->insert($light, "right", 50);
+                $image->insert($recover, "center");
 
             break;
             case "recover_light_cart":
@@ -709,11 +715,11 @@ class CardService implements ModelServiceContract
                 
                 $recover = Image::canvas(150, 150);
                 $recover->insert(public_path("storage/images/cards/recover.png"));
-                $recover->resize(120, 120);
+                $recover->resize(160, 160);
                 
-                $image->insert($light, "top-left", 25, 100);
-                $image->insert($cart, "top-right", 25, 100);
-                $image->insert($recover, "bottom", 0, 75);
+                $image->insert($light, "left", 50);
+                $image->insert($cart, "right", 50);
+                $image->insert($recover, "center");
 
             break;
             case "sabotage_pickaxe":

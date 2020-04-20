@@ -29,6 +29,8 @@ use App\Events\Game\PlayerNoLongerThief;
 use App\Events\Game\PlayerCheckedGoldLocation;
 use App\Events\Game\PlayerPlacedTunnel;
 use App\Events\Game\PlayerCollapsedTunnel;
+use App\Events\Game\PlayerHandChanged;
+use App\Events\Game\PlayerRoleChanged;
 use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
@@ -399,7 +401,32 @@ class GameService implements ModelServiceContract
 
     private function performFoldCardsAndUnblock(Game $game, Player $player, array $indices, string $tool)
     {
+        // Remove the cards from the player's hand
+        $player = Players::removeCardsFromHand($indices, $player);
 
+        // Draw new cards
+        $cards = $this->drawCards($game, $player, count($indices));
+
+        // Recover player's tool
+        switch ($tool)
+        {
+            case "pickaxe":
+                $player->pickaxe_available = 1;
+            break;
+            case "light":
+                $player->light_available = 1;
+            break;
+            case "cart":
+                $player->cart_available = 1;
+            break;
+        }
+        $player->save();
+
+        // Broadcast event to the other players
+        broadcast(new PlayerToolRecovered($game, $player, $player, $tool))->toOthers();
+
+        // Return drawn cards
+        return $cards;
     }
 
     private function performPlayCard(Game $game, Player $player, array $data)
@@ -498,13 +525,13 @@ class GameService implements ModelServiceContract
                 // Exchange hands card
                 case "exchange_hands":
                     if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
-                    // $this->playExchangeHandsCard($game, $player, $card, $data);
+                    $output["new_hand"] = $this->playExchangeHandsCard($game, $player, $card, $data);
                 break;
 
                 // Exchange hats card
                 case "exchange_hats":
                     if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player's ID");
-                    // $this->playExchangeHatsCard($game, $player, $card, $data);
+                    $this->playExchangeHatsCard($game, $player, $card, $data);
                 break;
             }
         }
@@ -530,6 +557,65 @@ class GameService implements ModelServiceContract
 
         // Return the output
         return $output;
+    }
+
+    private function playExchangeHandsCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+        
+        // Grab the hand of the target player
+        $targetPlayerHand = $targetPlayer->hand;
+
+        // Grab the hand of the player who's playing this card
+        $playerHand = $player->hand;
+
+        // Grab the top card from the deck and save the deck
+        $deck = $game->currentRound->deck;
+        $newCard = array_shift($deck);
+        $game->currentRound->deck = $deck;
+        $game->currentRound->save();
+        
+        // Switch target player's hand for player's hand + add the drawn card to the target player's hand as well
+        $playerHand[] = $newCard;
+        $targetPlayer->hand = $playerHand;
+        $targetPlayer->save();
+
+        // Switch player's hand for target player's (old) hand
+        $player->hand = $targetPlayerHand;
+        $player->save();
+
+        // Broadcast event to the target player
+        broadcast(new PlayerHandChanged($game, $targetPlayer, $targetPlayer->hand, $player));
+
+        // Return player's hand
+        return $player->hand;
+    }
+
+    private function playExchangeHatsCard(Game $game, Player $player, Card $card, array $data)
+    {
+        // Grab the player we're targetting
+        $targetPlayer = Players::find($data["player_id"]);
+        if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Grab the first available role (card) from the role deck containing left over roles
+        $roleDeck = $game->currentRound->role_deck;
+        $roleId = array_shift($roleDeck);
+
+        // Save the new role on the target player
+        $targetPlayer->role_id = $roleId;
+        $targetPlayer->save();
+
+        // Save the updated role deck on the current round
+        $game->currentRound->role_deck = $roleDeck;
+        $game->currentRound->save();
+
+        // Grab the role we just assigned to the target player
+        $role = Roles::find($roleId);
+
+        // Broadcast event to the target player informing them what the fudgesicle just happened
+        broadcast(new PlayerRoleChanged($game, $targetPlayer, $role, $player));
     }
 
     private function playInspectionCard(Game $game, Player $player, Card $card, array $data)

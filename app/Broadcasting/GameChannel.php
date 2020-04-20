@@ -26,6 +26,7 @@ class GameChannel
      */
     public function join(User $user, Game $game)
     {
+        // Only allow logged in users that own a player in the given game to join this channel
         if (auth()->check())
         {
             foreach ($game->players as $player)

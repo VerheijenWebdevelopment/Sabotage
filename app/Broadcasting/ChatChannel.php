@@ -24,6 +24,7 @@ class ChatChannel
      */
     public function join(User $user)
     {
+        // Only allow logged in users to join this channel
         return auth()->check();
     }
 }
