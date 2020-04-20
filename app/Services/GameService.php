@@ -806,14 +806,14 @@ class GameService implements ModelServiceContract
     private function playCollapseCard(Game $game, Player $player, Card $card, array $data)
     {
         // Grab the game board
-        $board = $game->board;
+        $board = $game->currentRound->board;
 
         // Set the target tile to null to destroy any placed tunnel
         $board[$data["target_coordinates"]->y][$data["target_coordinates"]->x] = null;
         
         // Update the game's board
-        $game->board = $board;
-        $game->save();
+        $game->currentRound->board = $board;
+        $game->currentRound->save();
 
         // Broadcast event to all other players
         broadcast(new PlayerCollapsedTunnel($game, $player, (array) $data["target_coordinates"]))->toOthers();

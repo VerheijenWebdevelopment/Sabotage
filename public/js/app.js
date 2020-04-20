@@ -3812,6 +3812,34 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -4714,7 +4742,7 @@ __webpack_require__.r(__webpack_exports__);
                   x: e.columnIndex,
                   y: e.rowIndex
                 };
-                this.dialogs.confirm_collapse.card_index = this.dialogs.view_card.index;
+                this.dialogs.confirm_collapse.card_index = this.dialogs.collapse.card_index;
                 this.dialogs.confirm_collapse.show = true;
               } else {
                 this.$toasted.show("De kaart die je hebt geselecteerd is geen tunnel kaart!", {
@@ -5563,28 +5591,47 @@ __webpack_require__.r(__webpack_exports__);
       this.dialogs.collapse.show = false;
     },
     onClickConfirmCollapse: function onClickConfirmCollapse() {
-      console.log(this.tag + " clicked confirm collapse button"); // Start loading
+      console.log(this.tag + " clicked confirm collapse button"); // Hide dialog 
 
-      this.dialogs.collapse.loading = true; // Compose API payload
+      this.dialogs.collapse.show = false; // Enable select tunnel mode
+
+      this.modes.select_tunnel = true;
+    },
+    // Confirm collapse tunnel dialog
+    onClickCancelConfirmCollapse: function onClickCancelConfirmCollapse() {
+      console.log(this.tag + " clicked cancel confirm collapse button");
+      this.dialogs.confirm_collapse.show = false;
+    },
+    onClickConfirmConfirmCollapse: function onClickConfirmConfirmCollapse() {
+      console.log(this.tag + " clicked confirm confirm collapse button"); // Start loading
+
+      this.dialogs.confirm_collapse.loading = true; // Compose API request payload
 
       var data = {
-        index: this.dialogs.collapse.card_index,
-        target_coordinates: this.dialogs.collapse.tunnel_coordinates
+        index: this.dialogs.confirm_collapse.card_index,
+        target_coordinates: this.dialogs.confirm_collapse.tunnel_coordinates
       }; // Make API request
 
       this.sendPerformActionRequest("play_card", data) // Request succeeded
       .then(function (response) {
-        // 
-        // Hide & reset dialog
-        this.dialogs.collapse.loading = false;
-        this.dialogs.collapse.show = false;
-        this.dialogs.tunnel_coordinates = null;
-      }.bind(this)) // Request failed 
-      ["catch"](function (response) {
-        console.log(this.tag + " request failed: ", response.data); // Stop loading
+        console.log(this.tag + " request succeeded: ", response.data); // Update player's hand
 
-        this.dialogs.collapse.loading = false;
-      }.bind(this));
+        this.mutableHand.splice(this.dialogs.confirm_collapse.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update the board
+
+        this.mutableRound.board = response.data.board; // Hide & reset dialog
+
+        this.dialogs.confirm_collapse.loading = false;
+        this.dialogs.confirm_collapse.show = false;
+        this.dialogs.confirm_collapse.tunnel_coordinates = null;
+      }.bind(this)); // // Request failed
+      // .catch(function(response) {
+      //     console.log(this.tag+" request failed: ", response.data);
+      //     this.dialogs.confirm_collapse.loading = false;
+      // }.bind(this));
     },
     // Place tunnel dialog
     onClickCancelPlaceTunnel: function onClickCancelPlaceTunnel() {
@@ -52986,8 +53033,7 @@ var render = function() {
           }
         },
         [
-          _vm.dialogs.collapse.card_index !== null &&
-          _vm.dialogs.collapse.tunnel_coordinates !== null
+          _vm.dialogs.collapse.card_index !== null
             ? _c("div", { staticClass: "dialog dark" }, [
                 _c(
                   "div",
@@ -53005,13 +53051,7 @@ var render = function() {
                   _vm._v(" "),
                   _c("div", { staticClass: "dialog-text centered" }, [
                     _vm._v(
-                      "\n                    Weet je zeker dat je de tunnel wilt vernietigen op coordinaten " +
-                        _vm._s(
-                          _vm.dialogs.collapse.tunnel_coordinates.x +
-                            ":" +
-                            _vm.dialogs.collapse.tunnel_coordinates.y
-                        ) +
-                        "?\n                "
+                      "\n                    Met deze kaart kan je een gespeelde tunnel van het bord verwijderen.\n                "
                     )
                   ])
                 ]),
@@ -53053,7 +53093,7 @@ var render = function() {
                         },
                         [
                           _vm._v(
-                            "\n                        Collapse tunnel\n                    "
+                            "\n                        Tunnel laten instorten\n                    "
                           )
                         ]
                       )
@@ -53066,16 +53106,98 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("v-dialog", {
-        attrs: { width: "600" },
-        model: {
-          value: _vm.dialogs.confirm_collapse.show,
-          callback: function($$v) {
-            _vm.$set(_vm.dialogs.confirm_collapse, "show", $$v)
-          },
-          expression: "dialogs.confirm_collapse.show"
-        }
-      }),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.confirm_collapse.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_collapse, "show", $$v)
+            },
+            expression: "dialogs.confirm_collapse.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_collapse.card_index !== null &&
+          _vm.dialogs.confirm_collapse.tunnel_coordinates !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelConfirmCollapse }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Tunnel laten instorten")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text" }, [
+                    _vm._v(
+                      "\n                    Weet je zeker dat je de tunnel op " +
+                        _vm._s(
+                          _vm.dialogs.confirm_collapse.tunnel_coordinates.x +
+                            ":" +
+                            _vm.dialogs.confirm_collapse.tunnel_coordinates.y
+                        ) +
+                        " wilt laten instorten?\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelConfirmCollapse }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_collapse.loading
+                          },
+                          on: { click: _vm.onClickConfirmConfirmCollapse }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Tunnel laten instorten\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
       _vm._v(" "),
       _c(
         "v-dialog",
