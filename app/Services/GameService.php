@@ -546,7 +546,7 @@ class GameService implements ModelServiceContract
             $game = $this->playTunnelCard($game, $player, $card, $data);
 
             // Add the updated board to the output
-            $output["board"] = $game->board;
+            $output["board"] = $game->currentRound->board;
         }
 
         // Draw a new card

@@ -71,7 +71,7 @@ class Round extends Model
 
     public function getBoardAttribute($value)
     {
-        return json_decode(unserialize($value));
+        return unserialize($value);
     }
 
     public function getReachedGoldLocationsAttribute($value)
@@ -120,7 +120,7 @@ class Round extends Model
 
     public function setBoardAttribute($value)
     {
-        $this->attributes["board"] = serialize(json_encode($value));
+        $this->attributes["board"] = serialize($value);
     }
 
     public function setReachedGoldLocationsAttribute($value)

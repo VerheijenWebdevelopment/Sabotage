@@ -3689,6 +3689,129 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ["game", "round", "player", "playerRole", "hand", "roles", "cards", "icons", "apiEndpoints"],
@@ -3791,13 +3914,26 @@ __webpack_require__.r(__webpack_exports__);
         },
         collapse: {
           show: false,
+          card_index: null
+        },
+        confirm_collapse: {
+          show: false,
+          loading: false,
           card_index: null,
-          tile_coordinates: null
+          tunnel_coordinates: null
         },
         place_tunnel: {
           show: false,
+          inverted: false,
+          card_index: null
+        },
+        confirm_place_tunnel: {
+          show: false,
+          loading: false,
+          inverted: false,
           card_index: null,
-          tile_coordinates: null
+          tunnel_coordinates: null,
+          preview: null
         },
         exchange_hands: {
           show: false,
@@ -4451,10 +4587,14 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.tag + "[event] received event gold location revealed:", e);
     },
     onPlayerPlacedTunnel: function onPlayerPlacedTunnel(e) {
-      console.log(this.tag + "[event] received event player placed tunnel:", e);
+      console.log(this.tag + "[event] received event player placed tunnel:", e); // Update the game board
+
+      this.mutableRound.board = e.game.current_round.board;
     },
     onPlayerCollapsedTunnel: function onPlayerCollapsedTunnel(e) {
-      console.log(this.tag + "[event] received event player collapsed tunnel:", e);
+      console.log(this.tag + "[event] received event player collapsed tunnel:", e); // Update the game board
+
+      this.mutableRound.board = e.game.current_round.board;
     },
     onPlayerWasAwardedGold: function onPlayerWasAwardedGold(e) {
       console.log(this.tag + "[event] received event player was awarded gold:", e);
@@ -4556,7 +4696,83 @@ __webpack_require__.r(__webpack_exports__);
                 this.dialogs.confirm_enlighten.show = true;
               }
         }
-      }
+      } // If we're in collapse tunnel mode
+      else if (this.modes.select_tunnel) {
+          console.log(this.tag + " in collapse tunnel mode"); // If the clicked tile contains a card
+
+          if (this.mutableRound.board[e.rowIndex][e.columnIndex] !== null) {
+            // Grab the card that's on the clicked tile
+            var cardOnTile = this.getCardById(this.mutableRound.board[e.rowIndex][e.columnIndex].card_id);
+
+            if (cardOnTile) {
+              // If the card is a tunnel card
+              if (cardOnTile.type === "tunnel") {
+                // Disable select tunnel mode
+                this.modes.select_tunnel = false; // Initialize & show the confirm collapse dialog
+
+                this.dialogs.confirm_collapse.tunnel_coordinates = {
+                  x: e.columnIndex,
+                  y: e.rowIndex
+                };
+                this.dialogs.confirm_collapse.card_index = this.dialogs.view_card.index;
+                this.dialogs.confirm_collapse.show = true;
+              } else {
+                this.$toasted.show("De kaart die je hebt geselecteerd is geen tunnel kaart!", {
+                  duration: 3000
+                });
+              }
+            } else {
+              this.$toasted.show("We konden de kaart niet ophalen :( wtf", {
+                duration: 3000
+              });
+            }
+          } else {
+            this.$toasted.show("Er bevindt zich daar geen tunnel!", {
+              duration: 3000
+            });
+          }
+        } // If we're in place tunnel mode
+        else if (this.modes.select_tile) {
+            console.log(this.tag + " in place tunnel mode"); // Determine what card is placed on the selected tile
+
+            if (this.mutableRound.board[e.rowIndex][e.columnIndex] === null) {
+              console.log(this.tag + " tile is free"); // Make sure the tile is available
+
+              if (this.tileHasConnectingCards(e.rowIndex, e.columnIndex)) {
+                console.log(this.tag + " tile is available"); // Grab the card we want to place
+
+                var card = this.mutableHand[this.dialogs.place_tunnel.card_index].card;
+                console.log(this.tag + " card we want to place: ", card); // Make sure the card can be placed on the selected tile
+
+                if (this.cardCanBePlacedOnTile(e.rowIndex, e.columnIndex, card)) {
+                  console.log(this.tag + " card can be placed on the given tile!");
+                  this.modes.select_tile = false;
+                  this.dialogs.confirm_place_tunnel.tunnel_coordinates = {
+                    x: e.columnIndex,
+                    y: e.rowIndex
+                  };
+                  this.dialogs.confirm_place_tunnel.card_index = this.dialogs.place_tunnel.card_index;
+                  this.dialogs.confirm_place_tunnel.inverted = this.dialogs.place_tunnel.inverted;
+                  this.dialogs.confirm_place_tunnel.preview = this.generatePlaceTunnelPreview(e, card, this.dialogs.place_tunnel.inverted);
+                  this.dialogs.confirm_place_tunnel.show = true;
+                } else {
+                  this.$toasted.show("De kaart past niet op de geselecteerde tunnel!", {
+                    duration: 3000
+                  });
+                } // Tile has no connecting cards
+
+              } else {
+                this.$toasted.show("Er liggen geen kaarten rondom de geselecteerde tegel!", {
+                  duration: 3000
+                });
+              } // If the card is unavailable
+
+            } else {
+              this.$toasted.show("Er ligt al een kaart op de geselecteerde tegel!", {
+                duration: 3000
+              });
+            }
+          }
     },
     // Hand actions
     onClickPlayCard: function onClickPlayCard() {
@@ -4575,6 +4791,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (card.type === "tunnel") {
         this.dialogs.place_tunnel.card_index = index;
+        this.dialogs.place_tunnel.inverted = false;
         this.dialogs.place_tunnel.show = true;
       } else {
         if (card.name.includes("sabotage")) {
@@ -5340,6 +5557,122 @@ __webpack_require__.r(__webpack_exports__);
         this.dialogs.exchange_hats.loading = false;
       }.bind(this));
     },
+    // Collapse tunnel dialog
+    onClickCancelCollapse: function onClickCancelCollapse() {
+      console.log(this.tag + " clicked cancel collapse button");
+      this.dialogs.collapse.show = false;
+    },
+    onClickConfirmCollapse: function onClickConfirmCollapse() {
+      console.log(this.tag + " clicked confirm collapse button"); // Start loading
+
+      this.dialogs.collapse.loading = true; // Compose API payload
+
+      var data = {
+        index: this.dialogs.collapse.card_index,
+        target_coordinates: this.dialogs.collapse.tunnel_coordinates
+      }; // Make API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // 
+        // Hide & reset dialog
+        this.dialogs.collapse.loading = false;
+        this.dialogs.collapse.show = false;
+        this.dialogs.tunnel_coordinates = null;
+      }.bind(this)) // Request failed 
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.collapse.loading = false;
+      }.bind(this));
+    },
+    // Place tunnel dialog
+    onClickCancelPlaceTunnel: function onClickCancelPlaceTunnel() {
+      console.log(this.tag + " clicked cancel place tunnel button");
+      this.dialogs.place_tunnel.show = false;
+    },
+    onClickInvertCard: function onClickInvertCard() {
+      console.log(this.tag + " clicked invert card button");
+      this.dialogs.place_tunnel.inverted = !this.dialogs.place_tunnel.inverted;
+    },
+    onClickConfirmPlaceTunnel: function onClickConfirmPlaceTunnel() {
+      console.log(this.tag + " clicked confirm place tunnel button"); // Hide dialog
+
+      this.dialogs.place_tunnel.show = false; // Enable tile selection mode
+
+      this.modes.select_tile = true;
+    },
+    // Confirm place tunnel dialog
+    generatePlaceTunnelPreview: function generatePlaceTunnelPreview(coordinates, card, inverted) {
+      var out = []; // Determine the grid bounds
+
+      var startRowIndex = coordinates.rowIndex - 1;
+      var endRowIndex = coordinates.rowIndex + 1;
+      var startColumnIndex = coordinates.columnIndex - 1;
+      var endColumnIndex = coordinates.columnIndex + 1; // Generate the preview grid
+
+      for (var ri = startRowIndex; ri <= endRowIndex; ri++) {
+        var row = [];
+
+        for (var ci = startColumnIndex; ci <= endColumnIndex; ci++) {
+          if (ci === coordinates.columnIndex && ri === coordinates.rowIndex) {
+            row.push({
+              card_id: card.id,
+              inverted: inverted
+            });
+          } else {
+            if (this.mutableRound.board[ri] !== undefined && this.mutableRound.board[ri][ci] !== undefined) {
+              row.push(this.mutableRound.board[ri][ci]);
+            } else {
+              row.push(null);
+            }
+          }
+        }
+
+        out.push(row);
+      }
+
+      return out;
+    },
+    onClickCancelConfirmPlaceTunnel: function onClickCancelConfirmPlaceTunnel() {
+      console.log(this.tag + " clicked cancel confirm place tunnel button");
+      this.dialogs.confirm_place_tunnel.show = false;
+    },
+    onClickConfirmConfirmPlaceTunnel: function onClickConfirmConfirmPlaceTunnel() {
+      console.log(this.tag + " clicked confirm confirm place tunnel button"); // Start loading
+
+      this.dialogs.confirm_place_tunnel.loading = true; // Compose API request payload
+
+      var data = {
+        index: this.dialogs.confirm_place_tunnel.card_index,
+        inverted: this.dialogs.confirm_place_tunnel.inverted,
+        target_coordinates: this.dialogs.confirm_place_tunnel.tunnel_coordinates
+      };
+      console.log("data: ", data); // Send API request
+
+      this.sendPerformActionRequest("play_card", data) // Request succeeded
+      .then(function (response) {
+        // Update player's hand
+        this.mutableHand.splice(this.dialogs.confirm_place_tunnel.card_index, 1);
+        if (response.data.new_card) this.mutableHand.push({
+          card: response.data.new_card,
+          selected: false
+        }); // Update board
+
+        this.mutableRound.board = response.data.board; // Stop loading
+
+        this.dialogs.confirm_place_tunnel.loading = false; // Hide & reset dialog
+
+        this.dialogs.confirm_place_tunnel.show = false;
+        this.dialogs.confirm_place_tunnel.inverted = false;
+        this.dialogs.confirm_place_tunnel.tunnel_coordinates = false;
+      }.bind(this)) // Request failed
+      ["catch"](function (response) {
+        console.log(this.tag + " request failed: ", response.data); // Stop loading
+
+        this.dialogs.confirm_place_tunnel.loading = false;
+      }.bind(this));
+    },
     // All dialogs that require player / tool selection
     onClickSelectPlayer: function onClickSelectPlayer(dialog, player_id) {
       if (dialog === "sabotage") {
@@ -5475,6 +5808,287 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return false;
+    },
+    getCardImageById: function getCardImageById(id) {
+      var card = this.getCardById(id);
+
+      if (card) {
+        return card.image_url;
+      }
+
+      return "";
+    },
+    // Tunnel placement
+    tileHasCard: function tileHasCard(rowIndex, columnIndex) {
+      if (this.mutableRound.board[rowIndex] !== undefined && this.mutableRound.board[rowIndex][columnIndex] !== undefined && this.mutableRound.board[rowIndex][columnIndex] !== null) {
+        return true;
+      }
+
+      return false;
+    },
+    tileHasConnectingCards: function tileHasConnectingCards(rowIndex, columnIndex) {
+      // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
+      // Check tile above
+      var tileAbove = [rowIndex - 1, columnIndex];
+      var tileRight = [rowIndex, columnIndex + 1];
+      var tileBelow = [rowIndex + 1, columnIndex];
+      var tileLeft = [rowIndex, columnIndex - 1]; // Connected tiles we find
+
+      var connectedCards = []; // Count the number of connected gold location tiles
+
+      var connectedGoldLocations = 0; // Check tile above
+
+      if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
+        var card = this.getCardById(this.mutableRound.board[tileAbove[0]][tileAbove[1]].card_id);
+        var inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
+
+        if (card && (card.type === "gold_location" || card.type === "start" || !inverted && card.open_positions.includes("bottom") || inverted && card.open_positions.includes("top"))) {
+          connectedCards.push(card);
+          if (card.type === "gold_location") connectedGoldLocations += 1;
+        }
+      } // Check tile to the right
+
+
+      if (this.tileHasCard(tileRight[0], tileRight[1])) {
+        var _card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
+
+        var _inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
+
+        if (_card && (_card.type === "gold_location" || _card.type === "start" || !_inverted && _card.open_positions.includes("left") || _inverted && _card.open_positions.includes("right"))) {
+          connectedCards.push(_card);
+          if (_card.type === "gold_location") connectedGoldLocations += 1;
+        }
+      } // Check tile below
+
+
+      if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+        var _card2 = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
+
+        var _inverted2 = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
+
+        if (_card2 && (_card2.type === "gold_location" || _card2.type === "start" || !_inverted2 && _card2.open_positions.includes("top") || _inverted2 && _card2.open_positions.includes("bottom"))) {
+          connectedCards.push(_card2);
+          if (_card2.type === "gold_location") connectedGoldLocations += 1;
+        }
+      } // Check tile to the left
+
+
+      if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+        var _card3 = this.getCardById(this.mutableRound.board[tileLeft[0]][tileLeft[1]].card_id);
+
+        var _inverted3 = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
+
+        if (_card3 && (_card3.type === "gold_location" || _card3.type === "start" || !_inverted3 && _card3.open_positions.includes("right") || _inverted3 && _card3.open_positions.includes("left"))) {
+          connectedCards.push(_card3);
+          if (_card3.type === "gold_location") connectedGoldLocations += 1;
+        }
+      } // If we've found compatible connected cards
+
+
+      if (connectedCards.length > 0) {
+        // Make sure we're not connected to only gold locations; since that would allow illegal moves
+        if (connectedCards.length === connectedGoldLocations) {
+          // console.log(this.tag+" only gold locations connected");
+          return false;
+        } // Otherwise all is good
+
+
+        return true;
+      } // If we've reached this point the tile is available but has no connecting card
+
+
+      return false;
+    },
+    cardCanBePlacedOnTile: function cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
+      console.log(this.tag + " checking if card can be placed on tile: ", rowIndex, columnIndex, card); // Gather the required open positions based on the cards surrounding the selected coordinate
+
+      var requiredOpenPositions = [];
+      var requiredClosedPositions = []; // Check card above
+
+      var coordsAbove = {
+        rowIndex: rowIndex - 1,
+        columnIndex: columnIndex
+      }; // console.log("checking tile above: ", coordsAbove);
+
+      if (this.tileHasCard(coordsAbove.rowIndex, coordsAbove.columnIndex)) {
+        // console.log(this.tag+" tile above taken");
+        var _card4 = this.getCardById(this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
+
+        if (_card4) {
+          // console.log(this.tag+" card found above: ", card);
+          if (_card4.type === "start" || _card4.type === "gold_location") {
+            requiredOpenPositions.push("top");
+          } else {
+            if (this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
+              if (_card4.open_positions.includes("top")) {
+                requiredOpenPositions.push("top");
+              } else {
+                requiredClosedPositions.push("top");
+              }
+            } else {
+              if (_card4.open_positions.includes("bottom")) {
+                requiredOpenPositions.push("top");
+              } else {
+                requiredClosedPositions.push("top");
+              }
+            }
+          }
+        }
+      } // Check card to the right
+
+
+      var coordsRight = {
+        rowIndex: rowIndex,
+        columnIndex: columnIndex + 1
+      }; // console.log("checking tile to right", coordsRight);
+
+      if (this.tileHasCard(coordsRight.rowIndex, coordsRight.columnIndex)) {
+        // console.log("tile right taken");
+        var _card5 = this.getCardById(this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
+
+        if (_card5) {
+          // console.log("card found right", card);
+          if (_card5.type === "start" || _card5.type === "gold_location") {
+            requiredOpenPositions.push("right");
+          } else {
+            if (this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
+              if (_card5.open_positions.includes("right")) {
+                requiredOpenPositions.push("right");
+              } else {
+                requiredClosedPositions.push("right");
+              }
+            } else {
+              if (_card5.open_positions.includes("left")) {
+                requiredOpenPositions.push("right");
+              } else {
+                requiredClosedPositions.push("right");
+              }
+            }
+          }
+        }
+      } // Check card below
+
+
+      var coordsBelow = {
+        rowIndex: rowIndex + 1,
+        columnIndex: columnIndex
+      }; // console.log("checking tile below", coordsBelow);
+
+      if (this.tileHasCard(coordsBelow.rowIndex, coordsBelow.columnIndex)) {
+        // console.log("tile below taken");
+        var _card6 = this.getCardById(this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
+
+        if (_card6) {
+          // console.log("card found below", card);
+          if (_card6.type === "start" || _card6.type === "gold_location") {
+            requiredOpenPositions.push("bottom");
+          } else {
+            if (this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
+              if (_card6.open_positions.includes("bottom")) {
+                requiredOpenPositions.push("bottom");
+              } else {
+                requiredClosedPositions.push("bottom");
+              }
+            } else {
+              if (_card6.open_positions.includes("top")) {
+                requiredOpenPositions.push("bottom");
+              } else {
+                requiredClosedPositions.push("bottom");
+              }
+            }
+          }
+        }
+      } // Check card to the left
+
+
+      var coordsLeft = {
+        rowIndex: rowIndex,
+        columnIndex: columnIndex - 1
+      }; // console.log("checking tile to left", coordsLeft, this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columIndex));
+
+      if (this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex)) {
+        // console.log("tile left taken");
+        var _card7 = this.getCardById(this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
+
+        if (_card7) {
+          // console.log("card found left", card);
+          if (_card7.type === "start" || _card7.type === "gold_location") {
+            requiredOpenPositions.push("left");
+          } else {
+            if (this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
+              if (_card7.open_positions.includes("left")) {
+                requiredOpenPositions.push("left");
+              } else {
+                requiredClosedPositions.push("left");
+              }
+            } else {
+              if (_card7.open_positions.includes("right")) {
+                requiredOpenPositions.push("left");
+              } else {
+                requiredClosedPositions.push("left");
+              }
+            }
+          }
+        }
+      } // console.log(this.tag+" required open positions: ", requiredOpenPositions);
+      // console.log(this.tag+" required closed positions: ", requiredClosedPositions);
+      // If the card meets the requirements (in it's current state)
+
+
+      var meetsRequirements = true;
+
+      if (!this.dialogs.view_card.inverted) {
+        // console.log(this.tag+" checking if (non-inverted) card fits on the tile");
+        // Validate against the required open & closed positions
+        for (var i = 0; i < requiredOpenPositions.length; i++) {
+          if (!card.open_positions.includes(requiredOpenPositions[i])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+
+        for (var _i3 = 0; _i3 < requiredClosedPositions.length; _i3++) {
+          if (card.open_positions.includes(requiredClosedPositions[_i3])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+      } else {
+        // console.log(this.tag+" checking if (inverted) card fits on the tile");
+        // Invert the card's open positions
+        var invertedOpenPositions = [];
+
+        for (var _i4 = 0; _i4 < card.open_positions.length; _i4++) {
+          if (card.open_positions[_i4] === "top") {
+            invertedOpenPositions.push("bottom");
+          } else if (card.open_positions[_i4] === "right") {
+            invertedOpenPositions.push("left");
+          } else if (card.open_positions[_i4] === "bottom") {
+            invertedOpenPositions.push("top");
+          } else if (card.open_positions[_i4] === "left") {
+            invertedOpenPositions.push("right");
+          }
+        } // Validate against the required open & closed positions
+
+
+        for (var _i5 = 0; _i5 < requiredOpenPositions.length; _i5++) {
+          if (!invertedOpenPositions.includes(requiredOpenPositions[_i5])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+
+        for (var _i6 = 0; _i6 < requiredClosedPositions.length; _i6++) {
+          if (invertedOpenPositions.includes(requiredClosedPositions[_i6])) {
+            meetsRequirements = false;
+            break;
+          }
+        }
+      } // console.log(this.tag+" tile meets requirements: ", meetsRequirements);
+      // Return result
+
+
+      return meetsRequirements;
     }
   },
   mounted: function mounted() {
@@ -11417,7 +12031,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  z-index: 100;\n  display: flex;\n  flex: 0 0 250px;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n  padding: 20px 30px 30px 30px;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1em;\n  font-weight: 600;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-size: 1.5em;\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__mode-wrapper {\n  left: 0;\n  top: 25px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__mode-wrapper #game-ui__mode {\n  display: flex;\n  color: #ffffff;\n  border-radius: 3px;\n  padding: 10px 15px;\n  box-sizing: border-box;\n  background-color: #1a1a1a;\n}\n#game-ui #card-actions__wrapper {\n  left: 0;\n  width: 100%;\n  z-index: 10;\n  bottom: 221px;\n  display: flex;\n  position: absolute;\n  transition: all 0.3s;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #card-actions__wrapper.visible {\n  bottom: 279px;\n}\n#game-ui #card-actions__wrapper #card-actions {\n  display: flex;\n  margin: 0 auto;\n  padding: 15px 10px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  background-color: #0d0d0d;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action {\n  margin: 0 7px;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action .v-btn {\n  margin: 0;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin-bottom: 15px;\n}\n.card.ma {\n  margin-left: auto;\n  margin-right: auto;\n}\n.cards {\n  display: flex;\n  margin-bottom: 15px;\n  flex-direction: row;\n  justify-content: center;\n}\n.cards .card {\n  margin: 0 15px;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 33.33%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}\n#new-role {\n  padding: 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#new-role #new-role__name {\n  font-size: 1.1em;\n  font-weight: bold;\n  margin: -5px 0 5px 0;\n}\n#new-role #new-role__description {\n  font-size: 0.9em;\n}\n.text-box {\n  padding: 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}", ""]);
+exports.push([module.i, "#game__wrapper {\n  width: 100%;\n  height: 100%;\n}\n#game__wrapper #game {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  flex-direction: row;\n}\n#game__wrapper #game #game-content {\n  flex: 1;\n  height: 100%;\n  display: flex;\n  flex-direction: column;\n}\n#game__wrapper #game #game-sidebar {\n  display: flex;\n  flex: 0 0 400px;\n  flex-direction: column;\n  background-color: #0d0d0d;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__players {\n  flex: 1;\n}\n#game__wrapper #game #game-sidebar #game-sidebar__chat {\n  flex: 0 0 300px;\n}\n#role-selection-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-ui {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  position: relative;\n  flex-direction: column;\n}\n#game-ui #game-ui__board {\n  flex: 1;\n}\n#game-ui #game-ui__action-bar {\n  z-index: 100;\n  display: flex;\n  flex: 0 0 250px;\n  position: relative;\n  flex-direction: row;\n  box-sizing: border-box;\n  padding: 20px 30px 30px 30px;\n  background-color: #050505;\n}\n#game-ui #game-ui__action-bar .action-bar__title {\n  font-size: 1em;\n  font-weight: 600;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role {\n  flex: 0 0 130px;\n  margin: 0 30px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  transition: all 0.3s;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.1);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__icon {\n  opacity: 0.5;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card:hover #my-role-card__title {\n  margin-top: -75px;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__title {\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-role #my-role-card #my-role-card__icon {\n  left: 0;\n  opacity: 0;\n  width: 100%;\n  bottom: 15px;\n  font-size: 2em;\n  position: absolute;\n  text-align: center;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand {\n  flex: 1;\n  display: flex;\n  margin: 0 30px 0 0;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand .action-bar__title {\n  text-align: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards {\n  display: flex;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card {\n  margin: 0 15px 0 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:hover {\n  cursor: pointer;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card:last-child {\n  margin: 0;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card.selected .my-hand__card-image {\n  border: 2px solid #ffd900;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__cards .my-hand__card .my-hand__card-image {\n  width: 130px;\n  height: 200px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  background-color: #333333;\n}\n#game-ui #game-ui__action-bar #action-bar__my-hand #my-hand__no-cards {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: center;\n}\n#game-ui #game-ui__action-bar #action-bar__deck .action-bar__title {\n  text-align: right;\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck {\n  width: 130px;\n  height: 200px;\n  display: flex;\n  color: #fff;\n  border-radius: 3px;\n  position: relative;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  background-color: rgba(255, 255, 255, 0.15);\n}\n#game-ui #game-ui__action-bar #action-bar__deck #deck #deck__num-cards {\n  font-size: 1.5em;\n  font-weight: 500;\n  transition: all 0.3s;\n}\n#game-ui #game-ui__mode-wrapper {\n  left: 0;\n  top: 25px;\n  z-index: 10;\n  width: 100%;\n  display: flex;\n  position: absolute;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #game-ui__mode-wrapper #game-ui__mode {\n  display: flex;\n  color: #ffffff;\n  border-radius: 3px;\n  padding: 10px 15px;\n  box-sizing: border-box;\n  background-color: #1a1a1a;\n}\n#game-ui #card-actions__wrapper {\n  left: 0;\n  width: 100%;\n  z-index: 10;\n  bottom: 221px;\n  display: flex;\n  position: absolute;\n  transition: all 0.3s;\n  flex-direction: row;\n  justify-content: center;\n}\n#game-ui #card-actions__wrapper.visible {\n  bottom: 279px;\n}\n#game-ui #card-actions__wrapper #card-actions {\n  display: flex;\n  margin: 0 auto;\n  padding: 15px 10px;\n  flex-direction: row;\n  box-sizing: border-box;\n  border-top-left-radius: 3px;\n  border-top-right-radius: 3px;\n  background-color: #0d0d0d;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action {\n  margin: 0 7px;\n}\n#game-ui #card-actions__wrapper #card-actions .card-action .v-btn {\n  margin: 0;\n}\n#round-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#game-over-ui {\n  width: 100%;\n  height: 100%;\n}\n#my-role-dialog {\n  display: flex;\n  flex-direction: row;\n}\n#my-role-dialog #my-role-dialog__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-color: #e6e6e6;\n}\n#my-role-dialog #my-role-dialog__text {\n  flex: 1;\n  margin: 0 0 0 30px;\n}\n#my-role-dialog #my-role-dialog__text #my-role-dialog__name {\n  font-size: 1.2em;\n  margin: 0 0 5px 0;\n}\n.card {\n  width: 130px;\n  height: 200px;\n  overflow: hidden;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n.card.mb-15 {\n  margin-bottom: 15px;\n}\n.card.ma {\n  margin-left: auto;\n  margin-right: auto;\n}\n.cards {\n  display: flex;\n  margin-bottom: 15px;\n  flex-direction: row;\n  justify-content: center;\n}\n.cards .card {\n  margin: 0 15px;\n}\n.select-player {\n  width: 100%;\n}\n.select-player .select-player__title {\n  margin: 0 0 10px 0;\n}\n.select-player .select-player__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  margin: 0 -15px -30px -15px;\n}\n.select-player .select-player__list .select-player__list-item {\n  flex: 0 0 50%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-player .select-player__list .select-player__list-item .player-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-player .select-player__list .select-player__list-item .player-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected {\n  background-color: white;\n}\n.select-player .select-player__list .select-player__list-item .player-option.selected:hover {\n  background-color: white;\n}\n.select-tool {\n  width: 100%;\n  margin: 15px 0 0 0;\n}\n.select-tool .select-tool__title {\n  margin: 0 0 10px 0;\n}\n.select-tool .select-tool__list {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: row;\n  justify-content: center;\n  margin: 0 -15px -30px -15px;\n}\n.select-tool .select-tool__list .select-tool__list-item {\n  flex: 0 0 33.33%;\n  box-sizing: border-box;\n  padding: 0 15px 30px 15px;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option {\n  padding: 15px;\n  color: #000;\n  border-radius: 3px;\n  transition: all 0.3s;\n  box-sizing: border-box;\n  text-transform: capitalize;\n  background-color: rgba(255, 255, 255, 0.25);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option:hover {\n  cursor: pointer;\n  background-color: rgba(255, 255, 255, 0.5);\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected {\n  background-color: white;\n}\n.select-tool .select-tool__list .select-tool__list-item .tool-option.selected:hover {\n  background-color: white;\n}\n#reveal-gold-location {\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n}\n#reveal-gold-location #reveal-gold-location__image {\n  width: 150px;\n  height: 150px;\n  margin: 0 auto 15px auto;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#reveal-gold-location #reveal-gold-location__text {\n  text-align: center;\n}\n#new-role {\n  padding: 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n#new-role #new-role__name {\n  font-size: 1.1em;\n  font-weight: bold;\n  margin: -5px 0 5px 0;\n}\n#new-role #new-role__description {\n  font-size: 0.9em;\n}\n.text-box {\n  padding: 15px;\n  border-radius: 3px;\n  box-sizing: border-box;\n  background-color: #0d0d0d;\n}\n.card-info {\n  display: flex;\n  flex-direction: row;\n}\n.card-info .card-info__card {\n  height: 200px;\n  flex: 0 0 130px;\n  border-radius: 3px;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n  transition: all 0.3s;\n}\n.card-info .card-info__card.inverted {\n  transform: rotate(180deg);\n}\n.card-info .card-info__content {\n  flex: 1;\n  display: flex;\n  margin: 0 0 0 30px;\n  flex-direction: column;\n}\n.card-info .card-info__content .card-info__description {\n  flex: 1;\n}\n.card-info .card-info__content .card-info__description .card-info__description-label {\n  font-size: 0.9em;\n  margin: 0 0 5px 0;\n  color: rgba(255, 255, 255, 0.45);\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons {\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn {\n  margin: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .v-btn:last-child {\n  margin: 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .tooltip-wrapper {\n  padding: 0 15px 0 0;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .card-info__actions-buttons-left {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}\n.card-info .card-info__content .card-info__actions .card-info__actions-buttons .card-info__actions-buttons-right {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n  justify-content: flex-end;\n}\n#place-tunnel {\n  display: flex;\n  flex-direction: row;\n}\n#place-tunnel #place-tunnel__preview {\n  margin: 0 30px 0 0;\n}\n#place-tunnel #place-tunnel__preview #preview {\n  width: 195px;\n  height: 300px;\n  border: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row {\n  display: flex;\n  flex-direction: row;\n  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row:last-child {\n  border-bottom: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col {\n  height: 100px;\n  flex: 0 0 65px;\n  overflow: hidden;\n  position: relative;\n  border-right: 1px dashed rgba(255, 255, 255, 0.1);\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col:last-child {\n  border-right: 0;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card {\n  top: 0;\n  left: 0;\n  width: 65px;\n  height: 100px;\n  border-radius: 3px;\n  position: absolute;\n  background-size: contain;\n  background-repeat: no-repeat;\n  background-position: center center;\n}\n#place-tunnel #place-tunnel__preview #preview .preview-row .preview-col .preview-card.inverted {\n  transform: rotate(180deg);\n}\n#place-tunnel #place-tunnel__text {\n  flex: 1;\n  display: flex;\n  flex-direction: row;\n  align-items: center;\n}", ""]);
 
 // exports
 
@@ -52359,27 +52973,374 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("v-dialog", {
-        attrs: { width: "600" },
-        model: {
-          value: _vm.dialogs.collapse.show,
-          callback: function($$v) {
-            _vm.$set(_vm.dialogs.collapse, "show", $$v)
-          },
-          expression: "dialogs.collapse.show"
-        }
-      }),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.collapse.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.collapse, "show", $$v)
+            },
+            expression: "dialogs.collapse.show"
+          }
+        },
+        [
+          _vm.dialogs.collapse.card_index !== null &&
+          _vm.dialogs.collapse.tunnel_coordinates !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelCollapse }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Instortgevaar")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text centered" }, [
+                    _vm._v(
+                      "\n                    Weet je zeker dat je de tunnel wilt vernietigen op coordinaten " +
+                        _vm._s(
+                          _vm.dialogs.collapse.tunnel_coordinates.x +
+                            ":" +
+                            _vm.dialogs.collapse.tunnel_coordinates.y
+                        ) +
+                        "?\n                "
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelCollapse }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.collapse.loading
+                          },
+                          on: { click: _vm.onClickConfirmCollapse }
+                        },
+                        [
+                          _vm._v(
+                            "\n                        Collapse tunnel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
       _vm._v(" "),
       _c("v-dialog", {
         attrs: { width: "600" },
         model: {
-          value: _vm.dialogs.place_tunnel.show,
+          value: _vm.dialogs.confirm_collapse.show,
           callback: function($$v) {
-            _vm.$set(_vm.dialogs.place_tunnel, "show", $$v)
+            _vm.$set(_vm.dialogs.confirm_collapse, "show", $$v)
           },
-          expression: "dialogs.place_tunnel.show"
+          expression: "dialogs.confirm_collapse.show"
         }
-      })
+      }),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "600" },
+          model: {
+            value: _vm.dialogs.place_tunnel.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.place_tunnel, "show", $$v)
+            },
+            expression: "dialogs.place_tunnel.show"
+          }
+        },
+        [
+          _vm.dialogs.place_tunnel.card_index !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelPlaceTunnel }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("h3", { staticClass: "dialog-title" }, [
+                    _vm._v("Tunnel kaart spelen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "dialog-text nm" }, [
+                    _c("div", { staticClass: "card-info" }, [
+                      _c("div", {
+                        staticClass: "card-info__card",
+                        class: { inverted: _vm.dialogs.place_tunnel.inverted },
+                        style: {
+                          backgroundImage:
+                            "url(" + _vm.placeTunnelDialogCard.image_url + ")"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "card-info__content" }, [
+                        _c("div", { staticClass: "card-info__description" }, [
+                          _c(
+                            "div",
+                            { staticClass: "card-info__description-text" },
+                            [
+                              _vm._v(
+                                "\n                                    Gebruik deze tunnel kaart om de tunnel op het speelveld uit te breiden in de gewenste richting.\n                                "
+                              )
+                            ]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("div", { staticClass: "card-info__actions" }, [
+                          _c(
+                            "div",
+                            { staticClass: "card-info__actions-buttons" },
+                            [
+                              _c(
+                                "div",
+                                {
+                                  staticClass: "card-info__actions-buttons-left"
+                                },
+                                [
+                                  _c(
+                                    "span",
+                                    { staticClass: "tooltip-wrapper" },
+                                    [
+                                      _c(
+                                        "v-btn",
+                                        {
+                                          staticClass: "icon-only",
+                                          attrs: { dark: "" },
+                                          on: { click: _vm.onClickInvertCard }
+                                        },
+                                        [
+                                          _c("i", {
+                                            staticClass: "fas fa-sync-alt"
+                                          })
+                                        ]
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "div",
+                                {
+                                  staticClass:
+                                    "card-info__actions-buttons-right"
+                                },
+                                [
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { dark: "" },
+                                      on: {
+                                        click: _vm.onClickConfirmPlaceTunnel
+                                      }
+                                    },
+                                    [
+                                      _c("i", { staticClass: "fas fa-road" }),
+                                      _vm._v(
+                                        "\n                                            Plaats tunnel\n                                        "
+                                      )
+                                    ]
+                                  )
+                                ],
+                                1
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ])
+            : _vm._e()
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { width: "800" },
+          model: {
+            value: _vm.dialogs.confirm_place_tunnel.show,
+            callback: function($$v) {
+              _vm.$set(_vm.dialogs.confirm_place_tunnel, "show", $$v)
+            },
+            expression: "dialogs.confirm_place_tunnel.show"
+          }
+        },
+        [
+          _vm.dialogs.confirm_place_tunnel.card_index !== null &&
+          _vm.dialogs.confirm_place_tunnel.tunnel_coordinates !== null
+            ? _c("div", { staticClass: "dialog dark" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass: "dialog__close-button",
+                    on: { click: _vm.onClickCancelConfirmPlaceTunnel }
+                  },
+                  [_c("i", { staticClass: "fas fa-times" })]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-content" }, [
+                  _c("div", { staticClass: "dialog-title" }, [
+                    _vm._v("Tunnel plaatsen")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { attrs: { id: "place-tunnel" } }, [
+                    _c("div", { attrs: { id: "place-tunnel__preview" } }, [
+                      _c(
+                        "div",
+                        { attrs: { id: "preview" } },
+                        _vm._l(
+                          _vm.dialogs.confirm_place_tunnel.preview,
+                          function(row, ri) {
+                            return _c(
+                              "div",
+                              { key: ri, staticClass: "preview-row" },
+                              _vm._l(
+                                _vm.dialogs.confirm_place_tunnel.preview[ri],
+                                function(col, ci) {
+                                  return _c(
+                                    "div",
+                                    { key: ci, staticClass: "preview-col" },
+                                    [
+                                      col !== null
+                                        ? _c("div", {
+                                            staticClass: "preview-card",
+                                            class: { inverted: col.inverted },
+                                            style: {
+                                              backgroundImage:
+                                                "url(" +
+                                                _vm.getCardImageById(
+                                                  col.card_id
+                                                ) +
+                                                ")"
+                                            }
+                                          })
+                                        : _vm._e()
+                                    ]
+                                  )
+                                }
+                              ),
+                              0
+                            )
+                          }
+                        ),
+                        0
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { attrs: { id: "place-tunnel__text" } }, [
+                      _vm._v(
+                        "\n                        Weet je zeker dat je de tunnel op de geselecteerde coordinaten (" +
+                          _vm._s(
+                            _vm.dialogs.confirm_place_tunnel.tunnel_coordinates
+                              .x +
+                              "," +
+                              _vm.dialogs.confirm_place_tunnel
+                                .tunnel_coordinates.y
+                          ) +
+                          ") wilt plaatsen?\n                    "
+                      )
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "dialog-controls" }, [
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__left" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: { text: "", dark: "" },
+                          on: { click: _vm.onClickCancelConfirmPlaceTunnel }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-arrow-left" }),
+                          _vm._v(
+                            "\n                        Annuleren\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "dialog-controls__right" },
+                    [
+                      _c(
+                        "v-btn",
+                        {
+                          attrs: {
+                            dark: "",
+                            loading: _vm.dialogs.confirm_place_tunnel.loading
+                          },
+                          on: { click: _vm.onClickConfirmConfirmPlaceTunnel }
+                        },
+                        [
+                          _c("i", { staticClass: "fas fa-road" }),
+                          _vm._v(
+                            "\n                        Plaats tunnel\n                    "
+                          )
+                        ]
+                      )
+                    ],
+                    1
+                  )
+                ])
+              ])
+            : _vm._e()
+        ]
+      )
     ],
     1
   )

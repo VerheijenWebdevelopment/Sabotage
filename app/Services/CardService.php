@@ -81,82 +81,87 @@ class CardService implements ModelServiceContract
         // Generate action cards 
         //
 
-        // Sabotage cards
-        for ($i = 0; $i < 3; $i++)
-        {
-            $out[] = $action_sabotage_cart->id;
-            $out[] = $action_sabotage_light->id;
-            $out[] = $action_sabotage_pickaxe->id;
-        }
+        // // Sabotage cards
+        // for ($i = 0; $i < 3; $i++)
+        // {
+        //     $out[] = $action_sabotage_cart->id;
+        //     $out[] = $action_sabotage_light->id;
+        //     $out[] = $action_sabotage_pickaxe->id;
+        // }
 
-        // Recover cards
-        for ($i = 0; $i < 3; $i++)
-        {
-            $out[] = $action_recover_cart->id;
-            $out[] = $action_recover_light->id;
-            $out[] = $action_recover_pickaxe->id;
-        }
+        // // Recover cards
+        // for ($i = 0; $i < 3; $i++)
+        // {
+        //     $out[] = $action_recover_cart->id;
+        //     $out[] = $action_recover_light->id;
+        //     $out[] = $action_recover_pickaxe->id;
+        // }
         
-        // Combo recover cards
-        $recoverCombos = [
-            $action_recover_pickaxe_light,
-            $action_recover_pickaxe_cart,
-            $action_recover_light_cart,
-        ];
-        $out[] = $recoverCombos[rand(0, 2)]->id;
+        // // Combo recover cards
+        // $recoverCombos = [
+        //     $action_recover_pickaxe_light,
+        //     $action_recover_pickaxe_cart,
+        //     $action_recover_light_cart,
+        // ];
+        // $out[] = $recoverCombos[rand(0, 2)]->id;
 
         // Add 3 collapse cards
         $out[] = $action_collapse->id;
         $out[] = $action_collapse->id;
         $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
 
-        // Add 6 enlighten cards
-        $out[] = $action_enlighten->id;
-        $out[] = $action_enlighten->id;
-        $out[] = $action_enlighten->id;
-        $out[] = $action_enlighten->id;
-        $out[] = $action_enlighten->id;
-        $out[] = $action_enlighten->id;
+        // // Add 6 enlighten cards
+        // $out[] = $action_enlighten->id;
+        // $out[] = $action_enlighten->id;
+        // $out[] = $action_enlighten->id;
+        // $out[] = $action_enlighten->id;
+        // $out[] = $action_enlighten->id;
+        // $out[] = $action_enlighten->id;
 
-        // Add 4 thiefery cards
-        $out[] = $action_thief->id;
-        $out[] = $action_thief->id;
-        $out[] = $action_thief->id;
-        $out[] = $action_thief->id;
+        // // Add 4 thiefery cards
+        // $out[] = $action_thief->id;
+        // $out[] = $action_thief->id;
+        // $out[] = $action_thief->id;
+        // $out[] = $action_thief->id;
 
-        // Add 3 dont touch cards
-        $out[] = $action_dont_touch->id;
-        $out[] = $action_dont_touch->id;
-        $out[] = $action_dont_touch->id;
+        // // Add 3 dont touch cards
+        // $out[] = $action_dont_touch->id;
+        // $out[] = $action_dont_touch->id;
+        // $out[] = $action_dont_touch->id;
 
-        // Add 2 exchange hats cards
-        $out[] = $action_exchange_hats->id;
-        $out[] = $action_exchange_hats->id;
-        $out[] = $action_exchange_hats->id;
-        $out[] = $action_exchange_hats->id;
-        $out[] = $action_exchange_hats->id;
+        // // Add 2 exchange hats cards
+        // $out[] = $action_exchange_hats->id;
+        // $out[] = $action_exchange_hats->id;
+        // $out[] = $action_exchange_hats->id;
+        // $out[] = $action_exchange_hats->id;
+        // $out[] = $action_exchange_hats->id;
 
-        // Add 2 inspection cards
-        $out[] = $action_inspection->id;
-        $out[] = $action_inspection->id;
+        // // Add 2 inspection cards
+        // $out[] = $action_inspection->id;
+        // $out[] = $action_inspection->id;
 
-        // Add 2 exchange hands cards
-        $out[] = $action_exchange_hands->id;
-        $out[] = $action_exchange_hands->id;
-        $out[] = $action_exchange_hands->id;
-        $out[] = $action_exchange_hands->id;
-        $out[] = $action_exchange_hands->id;
+        // // Add 2 exchange hands cards
+        // $out[] = $action_exchange_hands->id;
+        // $out[] = $action_exchange_hands->id;
+        // $out[] = $action_exchange_hands->id;
+        // $out[] = $action_exchange_hands->id;
+        // $out[] = $action_exchange_hands->id;
 
-        // Add 3 imprison cards
-        $out[] = $action_imprison->id;
-        $out[] = $action_imprison->id;
-        $out[] = $action_imprison->id;
+        // // Add 3 imprison cards
+        // $out[] = $action_imprison->id;
+        // $out[] = $action_imprison->id;
+        // $out[] = $action_imprison->id;
 
-        // Add 4 free cards
-        $out[] = $action_free->id;
-        $out[] = $action_free->id;
-        $out[] = $action_free->id;
-        $out[] = $action_free->id;
+        // // Add 4 free cards
+        // $out[] = $action_free->id;
+        // $out[] = $action_free->id;
+        // $out[] = $action_free->id;
+        // $out[] = $action_free->id;
 
         //
         // Grab all tunnel cards
@@ -276,53 +281,53 @@ class CardService implements ModelServiceContract
         $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
 
-        // // Add the ladders and crystals to the tunnel cards randomly
-        // shuffle($tunnels);
-        // $ladders_placed = 0;
-        // $crystals_placed = 0;
-        // // Process all of the tunnels available
-        // for ($i = 0; $i < count($tunnels); $i++)
-        // {
-        //     // If we need more ladders
-        //     if ($ladders_placed < $num_ladders)
-        //     {
-        //         // If this tunnel has a ladder version
-        //         $ladder_version = $this->findByName($tunnels[$i]->name."_ladder");
-        //         if ($ladder_version)
-        //         {
-        //             // Add the ladder version to the output & up the counter
-        //             $out[] = $ladder_version->id;
-        //             $ladders_placed++;
-        //         }
-        //         // If we could not find the ladder version 
-        //         else
-        //         {
-        //             $out[] = $tunnels[$i]->id;
-        //         }
-        //     }
-        //     // If we need more crystals
-        //     else if ($crystals_placed < $num_crystals)
-        //     {
-        //         // If this tunnel has a crystal version
-        //         $crystal_version = $this->findByName($tunnels[$i]->name."_crystal");
-        //         if ($crystal_version)
-        //         {
-        //             // Add crystal version to the output & up the counter
-        //             $out[] = $crystal_version->id;
-        //             $crystals_placed++;
-        //         }
-        //         // If we could not find the crystal version
-        //         else
-        //         {
-        //             $out[] = $tunnels[$i]->id;
-        //         }
-        //     }
-        //     // If we're good on ladders & crystals
-        //     else
-        //     {
-        //         $out[] = $tunnels[$i]->id;
-        //     }
-        // }
+        // Add the ladders and crystals to the tunnel cards randomly
+        shuffle($tunnels);
+        $ladders_placed = 0;
+        $crystals_placed = 0;
+        // Process all of the tunnels available
+        for ($i = 0; $i < count($tunnels); $i++)
+        {
+            // If we need more ladders
+            if ($ladders_placed < $num_ladders)
+            {
+                // If this tunnel has a ladder version
+                $ladder_version = $this->findByName($tunnels[$i]->name."_ladder");
+                if ($ladder_version)
+                {
+                    // Add the ladder version to the output & up the counter
+                    $out[] = $ladder_version->id;
+                    $ladders_placed++;
+                }
+                // If we could not find the ladder version 
+                else
+                {
+                    $out[] = $tunnels[$i]->id;
+                }
+            }
+            // If we need more crystals
+            else if ($crystals_placed < $num_crystals)
+            {
+                // If this tunnel has a crystal version
+                $crystal_version = $this->findByName($tunnels[$i]->name."_crystal");
+                if ($crystal_version)
+                {
+                    // Add crystal version to the output & up the counter
+                    $out[] = $crystal_version->id;
+                    $crystals_placed++;
+                }
+                // If we could not find the crystal version
+                else
+                {
+                    $out[] = $tunnels[$i]->id;
+                }
+            }
+            // If we're good on ladders & crystals
+            else
+            {
+                $out[] = $tunnels[$i]->id;
+            }
+        }
 
         // Shuffle the output to make things random
         shuffle($out);

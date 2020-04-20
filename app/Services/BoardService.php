@@ -54,7 +54,7 @@ class BoardService
     public function placeCard(Game $game, Card $card, bool $inverted, $x, $y)
     {
         // Grab the current state of the board
-        $board = $game->board;
+        $board = $game->currentRound->board;
 
         // Add the card to the board & save the new board on the game
         $board[$y][$x] = [
@@ -75,8 +75,8 @@ class BoardService
         if ($x == (count($board[0]) -1)) $board = $this->addColumnToBoard($board, "right");
 
         // Save the updated board on the game
-        $game->board = $board;
-        $game->save();
+        $game->currentRound->board = $board;
+        $game->currentRound->save();
 
         // Return updated game
         return $board;
@@ -256,7 +256,7 @@ class BoardService
         // If one of the connecting tiles is the tile we're targetting, return true!
         foreach ($connected_tiles as $connected_tile)
         {
-            Log::debug("Connected tile: ".$connected_tile["rowIndex"].",".$connected_tile["columnIndex"]." (target: ".$targetCoords["rowIndex"].",".$targetCoords["columnIndex"].")");
+            // Log::debug("Connected tile: ".$connected_tile["rowIndex"].",".$connected_tile["columnIndex"]." (target: ".$targetCoords["rowIndex"].",".$targetCoords["columnIndex"].")");
             if ($connected_tile["rowIndex"] == $targetCoords["rowIndex"] && $connected_tile["columnIndex"] == $targetCoords["columnIndex"])
             {
                 return true;

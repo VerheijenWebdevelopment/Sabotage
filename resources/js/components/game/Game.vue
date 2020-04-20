@@ -899,12 +899,135 @@
 
         <!-- Collapse tunnel dialog -->
         <v-dialog v-model="dialogs.collapse.show" width="600">
+            <div class="dialog dark" v-if="dialogs.collapse.card_index !== null && dialogs.collapse.tunnel_coordinates !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelCollapse">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Instortgevaar</div>
+                    <!-- Text -->
+                    <div class="dialog-text centered">
+                        Weet je zeker dat je de tunnel wilt vernietigen op coordinaten {{ dialogs.collapse.tunnel_coordinates.x+":"+dialogs.collapse.tunnel_coordinates.y }}?
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelCollapse">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmCollapse" :loading="dialogs.collapse.loading">
+                            Collapse tunnel
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
+
+        <!-- Confirm collapse tunnel dialog -->
+        <v-dialog v-model="dialogs.confirm_collapse.show" width="600">
 
         </v-dialog>
 
         <!-- Place tunnel dialog -->
         <v-dialog v-model="dialogs.place_tunnel.show" width="600">
+            <div class="dialog dark" v-if="dialogs.place_tunnel.card_index !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelPlaceTunnel">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <h3 class="dialog-title">Tunnel kaart spelen</h3>
+                    <!-- Text -->
+                    <div class="dialog-text nm">
+                        <!-- Card information -->
+                        <div class="card-info">
+                            <div class="card-info__card" :class="{ inverted: dialogs.place_tunnel.inverted }" :style="{ backgroundImage: 'url('+placeTunnelDialogCard.image_url+')' }"></div>
+                            <div class="card-info__content">
+                                <!-- Description -->
+                                <div class="card-info__description">
+                                    <div class="card-info__description-text">
+                                        Gebruik deze tunnel kaart om de tunnel op het speelveld uit te breiden in de gewenste richting.
+                                    </div>
+                                </div>
+                                <!-- Actions -->
+                                <div class="card-info__actions">
+                                    <div class="card-info__actions-buttons">
+                                        <div class="card-info__actions-buttons-left">
+                                            <!-- Invert (tunnel) card -->
+                                            <span class="tooltip-wrapper">
+                                                <v-btn dark class="icon-only" @click="onClickInvertCard">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </v-btn>
+                                            </span>
+                                        </div>
+                                        <div class="card-info__actions-buttons-right">
+                                            <!-- Play card -->
+                                            <v-btn dark @click="onClickConfirmPlaceTunnel">
+                                                <i class="fas fa-road"></i>
+                                                Plaats tunnel
+                                            </v-btn>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </v-dialog>
 
+        <!-- Confirm place tunnel dialog -->
+        <v-dialog v-model="dialogs.confirm_place_tunnel.show" width="800">
+            <div class="dialog dark" v-if="dialogs.confirm_place_tunnel.card_index !== null && dialogs.confirm_place_tunnel.tunnel_coordinates !== null">
+                <!-- Close button -->
+                <div class="dialog__close-button" @click="onClickCancelConfirmPlaceTunnel">
+                    <i class="fas fa-times"></i>
+                </div>
+                <!-- Content -->
+                <div class="dialog-content">
+                    <!-- Title -->
+                    <div class="dialog-title">Tunnel plaatsen</div>
+                    <!-- Place tunnel -->
+                    <div id="place-tunnel">
+                        <div id="place-tunnel__preview">
+                            <div id="preview">
+                                <div class="preview-row" v-for="(row, ri) in dialogs.confirm_place_tunnel.preview" :key="ri">
+                                    <div class="preview-col" v-for="(col, ci) in dialogs.confirm_place_tunnel.preview[ri]" :key="ci">
+                                        <div class="preview-card" v-if="col !== null" :class="{ inverted: col.inverted }" :style="{ backgroundImage: 'url('+getCardImageById(col.card_id)+')' }"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="place-tunnel__text">
+                            Weet je zeker dat je de tunnel op de geselecteerde coordinaten ({{ dialogs.confirm_place_tunnel.tunnel_coordinates.x+","+dialogs.confirm_place_tunnel.tunnel_coordinates.y }}) wilt plaatsen?
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="dialog-controls">
+                    <div class="dialog-controls__left">
+                        <v-btn text dark @click="onClickCancelConfirmPlaceTunnel">
+                            <i class="fas fa-arrow-left"></i>
+                            Annuleren
+                        </v-btn>
+                    </div>
+                    <div class="dialog-controls__right">
+                        <v-btn dark @click="onClickConfirmConfirmPlaceTunnel" :loading="dialogs.confirm_place_tunnel.loading">
+                            <i class="fas fa-road"></i>
+                            Plaats tunnel
+                        </v-btn>
+                    </div>
+                </div>
+            </div>
         </v-dialog>
 
     </div>
@@ -1023,12 +1146,25 @@
                 collapse: {
                     show: false,
                     card_index: null,
-                    tile_coordinates: null,
+                },
+                confirm_collapse: {
+                    show: false,
+                    loading: false,
+                    card_index: null,
+                    tunnel_coordinates: null,
                 },
                 place_tunnel: {
                     show: false,
+                    inverted: false,
                     card_index: null,
-                    tile_coordinates: null,
+                },
+                confirm_place_tunnel: {
+                    show: false,
+                    loading: false,
+                    inverted: false,
+                    card_index: null,
+                    tunnel_coordinates: null,
+                    preview: null,
                 },
                 exchange_hands: {
                     show: false,
@@ -1427,6 +1563,7 @@
                 }
                 return false;
             },
+
         },
         methods: {
             initialize() {
@@ -1672,11 +1809,13 @@
             },
             onPlayerPlacedTunnel(e) {
                 console.log(this.tag+"[event] received event player placed tunnel:", e);
-
+                // Update the game board
+                this.mutableRound.board = e.game.current_round.board;
             },
             onPlayerCollapsedTunnel(e) {
                 console.log(this.tag+"[event] received event player collapsed tunnel:", e);
-
+                // Update the game board
+                this.mutableRound.board = e.game.current_round.board;
             },
             onPlayerWasAwardedGold(e) {
                 console.log(this.tag+"[event] received event player was awarded gold:", e);
@@ -1777,6 +1916,74 @@
                         }
                     }
                 }
+                // If we're in collapse tunnel mode
+                else if (this.modes.select_tunnel) {
+                    console.log(this.tag+" in collapse tunnel mode");
+
+                    // If the clicked tile contains a card
+                    if (this.mutableRound.board[e.rowIndex][e.columnIndex] !== null) {
+                        // Grab the card that's on the clicked tile
+                        let cardOnTile = this.getCardById(this.mutableRound.board[e.rowIndex][e.columnIndex].card_id);
+                        if (cardOnTile) {
+                            // If the card is a tunnel card
+                            if (cardOnTile.type === "tunnel") {
+                                // Disable select tunnel mode
+                                this.modes.select_tunnel = false;
+                                // Initialize & show the confirm collapse dialog
+                                this.dialogs.confirm_collapse.tunnel_coordinates = { x: e.columnIndex, y: e.rowIndex };
+                                this.dialogs.confirm_collapse.card_index = this.dialogs.view_card.index;
+                                this.dialogs.confirm_collapse.show = true;
+                            } else {
+                                this.$toasted.show("De kaart die je hebt geselecteerd is geen tunnel kaart!", { duration: 3000 });
+                            }
+                        } else {
+                            this.$toasted.show("We konden de kaart niet ophalen :( wtf", { duration: 3000 });
+                        }
+                    } else {
+                        this.$toasted.show("Er bevindt zich daar geen tunnel!", { duration: 3000 });
+                    }
+
+                }
+                // If we're in place tunnel mode
+                else if (this.modes.select_tile) {
+                    console.log(this.tag+" in place tunnel mode");
+
+                    // Determine what card is placed on the selected tile
+                    if (this.mutableRound.board[e.rowIndex][e.columnIndex] === null) {
+                        console.log(this.tag+" tile is free");
+
+                        // Make sure the tile is available
+                        if (this.tileHasConnectingCards(e.rowIndex, e.columnIndex)) {
+                            console.log(this.tag+" tile is available");
+
+                            // Grab the card we want to place
+                            let card = this.mutableHand[this.dialogs.place_tunnel.card_index].card;
+                            console.log(this.tag+" card we want to place: ", card);
+
+                            // Make sure the card can be placed on the selected tile
+                            if (this.cardCanBePlacedOnTile(e.rowIndex, e.columnIndex, card)) {
+                                console.log(this.tag+" card can be placed on the given tile!");
+
+                                this.modes.select_tile = false;
+                                this.dialogs.confirm_place_tunnel.tunnel_coordinates = { x: e.columnIndex, y: e.rowIndex };
+                                this.dialogs.confirm_place_tunnel.card_index = this.dialogs.place_tunnel.card_index;
+                                this.dialogs.confirm_place_tunnel.inverted = this.dialogs.place_tunnel.inverted;
+                                this.dialogs.confirm_place_tunnel.preview = this.generatePlaceTunnelPreview(e, card, this.dialogs.place_tunnel.inverted);
+                                this.dialogs.confirm_place_tunnel.show = true;
+
+                            } else {
+                                this.$toasted.show("De kaart past niet op de geselecteerde tunnel!", { duration: 3000 });
+                            }
+                        // Tile has no connecting cards
+                        } else {
+                            this.$toasted.show("Er liggen geen kaarten rondom de geselecteerde tegel!", { duration: 3000 });
+                        }
+                    // If the card is unavailable
+                    } else {
+                        this.$toasted.show("Er ligt al een kaart op de geselecteerde tegel!", { duration: 3000 });
+                    }
+
+                }
 
             },
             // Hand actions
@@ -1794,6 +2001,7 @@
                 // Show appropriate dialog depending on the selected card
                 if (card.type === "tunnel") {
                     this.dialogs.place_tunnel.card_index = index;
+                    this.dialogs.place_tunnel.inverted = false;
                     this.dialogs.place_tunnel.show = true;
                 } else {
                     if (card.name.includes("sabotage")) {
@@ -2540,6 +2748,118 @@
                         this.dialogs.exchange_hats.loading = false;
                     }.bind(this));
             },
+            // Collapse tunnel dialog
+            onClickCancelCollapse() {
+                console.log(this.tag+" clicked cancel collapse button");
+                this.dialogs.collapse.show = false;
+            },
+            onClickConfirmCollapse() {
+                console.log(this.tag+" clicked confirm collapse button");
+                // Start loading
+                this.dialogs.collapse.loading = true;
+                // Compose API payload
+                let data = {
+                    index: this.dialogs.collapse.card_index,
+                    target_coordinates: this.dialogs.collapse.tunnel_coordinates,
+                };
+                // Make API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // 
+
+                        // Hide & reset dialog
+                        this.dialogs.collapse.loading = false;
+                        this.dialogs.collapse.show = false;
+                        this.dialogs.tunnel_coordinates = null;
+                    }.bind(this))
+                    // Request failed 
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.collapse.loading = false;
+                    }.bind(this));
+            },
+            // Place tunnel dialog
+            onClickCancelPlaceTunnel() {
+                console.log(this.tag+" clicked cancel place tunnel button");
+                this.dialogs.place_tunnel.show = false;
+            },
+            onClickInvertCard() {
+                console.log(this.tag+" clicked invert card button");
+                this.dialogs.place_tunnel.inverted = !this.dialogs.place_tunnel.inverted;
+            },
+            onClickConfirmPlaceTunnel() {
+                console.log(this.tag+" clicked confirm place tunnel button");
+                // Hide dialog
+                this.dialogs.place_tunnel.show = false;
+                // Enable tile selection mode
+                this.modes.select_tile = true;
+            },
+            // Confirm place tunnel dialog
+            generatePlaceTunnelPreview(coordinates, card, inverted) {
+                let out = [];
+                // Determine the grid bounds
+                let startRowIndex = coordinates.rowIndex - 1;
+                let endRowIndex = coordinates.rowIndex + 1;
+                let startColumnIndex = coordinates.columnIndex - 1;
+                let endColumnIndex = coordinates.columnIndex + 1;
+                // Generate the preview grid
+                for (let ri = startRowIndex; ri <= endRowIndex; ri++) {
+                    let row = [];
+                    for (let ci = startColumnIndex; ci <= endColumnIndex; ci++) {
+                        if (ci === coordinates.columnIndex && ri === coordinates.rowIndex) {
+                            row.push({ card_id: card.id, inverted: inverted });
+                        } else {
+                            if (this.mutableRound.board[ri] !== undefined && this.mutableRound.board[ri][ci] !== undefined) {
+                                row.push(this.mutableRound.board[ri][ci]);
+                            } else {
+                                row.push(null);
+                            }
+                        }
+                    }
+                    out.push(row);
+                }
+                return out;
+            },
+            onClickCancelConfirmPlaceTunnel() {
+                console.log(this.tag+" clicked cancel confirm place tunnel button");
+                this.dialogs.confirm_place_tunnel.show = false;
+            },
+            onClickConfirmConfirmPlaceTunnel() {
+                console.log(this.tag+" clicked confirm confirm place tunnel button");
+                // Start loading
+                this.dialogs.confirm_place_tunnel.loading = true;
+                // Compose API request payload
+                let data = {
+                    index: this.dialogs.confirm_place_tunnel.card_index,
+                    inverted: this.dialogs.confirm_place_tunnel.inverted,
+                    target_coordinates: this.dialogs.confirm_place_tunnel.tunnel_coordinates,
+                };
+                console.log("data: ", data);
+                // Send API request
+                this.sendPerformActionRequest("play_card", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        // Update player's hand
+                        this.mutableHand.splice(this.dialogs.confirm_place_tunnel.card_index, 1);
+                        if (response.data.new_card) this.mutableHand.push({ card: response.data.new_card, selected: false });
+                        // Update board
+                        this.mutableRound.board = response.data.board;
+                        // Stop loading
+                        this.dialogs.confirm_place_tunnel.loading = false;
+                        // Hide & reset dialog
+                        this.dialogs.confirm_place_tunnel.show = false;
+                        this.dialogs.confirm_place_tunnel.inverted = false;
+                        this.dialogs.confirm_place_tunnel.tunnel_coordinates = false;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(response) {
+                        console.log(this.tag+" request failed: ", response.data);
+                        // Stop loading
+                        this.dialogs.confirm_place_tunnel.loading = false;
+                    }.bind(this));
+            },
             // All dialogs that require player / tool selection
             onClickSelectPlayer(dialog, player_id) {
                 if (dialog === "sabotage") {
@@ -2672,6 +2992,269 @@
                     }
                 }
                 return false;
+            },
+            getCardImageById(id) {
+                let card = this.getCardById(id);
+                if (card) {
+                    return card.image_url;
+                }
+                return "";
+            },
+            // Tunnel placement
+            tileHasCard(rowIndex, columnIndex) {
+                if (this.mutableRound.board[rowIndex] !== undefined && 
+                    this.mutableRound.board[rowIndex][columnIndex] !== undefined &&
+                    this.mutableRound.board[rowIndex][columnIndex] !== null) {
+                    return true;
+                }
+                return false;
+            },
+            tileHasConnectingCards(rowIndex, columnIndex) {
+                // console.log(this.tag+" checking if tile is available (row index: "+rowIndex+", colum index: "+columnIndex+")");
+                
+                // Check tile above
+                let tileAbove = [rowIndex-1, columnIndex];
+                let tileRight = [rowIndex, columnIndex+1];
+                let tileBelow = [rowIndex+1, columnIndex];
+                let tileLeft  = [rowIndex, columnIndex-1];
+
+                // Connected tiles we find
+                let connectedCards = [];
+
+                // Count the number of connected gold location tiles
+                let connectedGoldLocations = 0;
+
+                // Check tile above
+                if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileAbove[0]][tileAbove[1]].card_id);
+                    let inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("bottom")) || (inverted && card.open_positions.includes("top")))) {
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
+                    }
+                }
+
+                // Check tile to the right
+                if (this.tileHasCard(tileRight[0], tileRight[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
+                    let inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("left")) || (inverted && card.open_positions.includes("right")))) {
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
+                    }
+                }
+
+                // Check tile below
+                if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
+                    let inverted = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("top")) || (inverted && card.open_positions.includes("bottom")))) {
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
+                    }
+                }
+
+                // Check tile to the left
+                if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileLeft[0]][tileLeft[1]].card_id);
+                    let inverted = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
+                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("right")) || (inverted && card.open_positions.includes("left")))) {
+                        connectedCards.push(card);
+                        if (card.type === "gold_location") connectedGoldLocations += 1;
+                    }
+                }
+
+                // If we've found compatible connected cards
+                if (connectedCards.length > 0)
+                {
+                    // Make sure we're not connected to only gold locations; since that would allow illegal moves
+                    if (connectedCards.length === connectedGoldLocations)
+                    {
+                        // console.log(this.tag+" only gold locations connected");
+                        return false;
+                    }
+
+                    // Otherwise all is good
+                    return true;
+                }
+
+                // If we've reached this point the tile is available but has no connecting card
+                return false;
+
+            },
+            cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
+                console.log(this.tag+" checking if card can be placed on tile: ", rowIndex, columnIndex, card);
+
+                // Gather the required open positions based on the cards surrounding the selected coordinate
+                let requiredOpenPositions = [];
+                let requiredClosedPositions = [];
+
+                // Check card above
+                let coordsAbove = { rowIndex: rowIndex - 1, columnIndex: columnIndex };
+                // console.log("checking tile above: ", coordsAbove);
+                if (this.tileHasCard(coordsAbove.rowIndex, coordsAbove.columnIndex)) {
+                    // console.log(this.tag+" tile above taken");
+                    let card = this.getCardById(this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
+                    if (card) {
+                        // console.log(this.tag+" card found above: ", card);
+                        if (card.type === "start" || card.type === "gold_location") {
+                            requiredOpenPositions.push("top");
+                        } else {
+                            if (this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
+                                if (card.open_positions.includes("top")) {
+                                    requiredOpenPositions.push("top");
+                                } else {
+                                    requiredClosedPositions.push("top");
+                                }
+                            } else {
+                                if (card.open_positions.includes("bottom")) {
+                                    requiredOpenPositions.push("top");
+                                } else {
+                                    requiredClosedPositions.push("top");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check card to the right
+                let coordsRight = { rowIndex: rowIndex, columnIndex: columnIndex + 1 };
+                // console.log("checking tile to right", coordsRight);
+                if (this.tileHasCard(coordsRight.rowIndex, coordsRight.columnIndex)) {
+                    // console.log("tile right taken");
+                    let card = this.getCardById(this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
+                    if (card) {
+                        // console.log("card found right", card);
+                        if (card.type === "start" || card.type === "gold_location") {
+                            requiredOpenPositions.push("right");
+                        } else {
+                            if (this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
+                                if (card.open_positions.includes("right")) {
+                                    requiredOpenPositions.push("right");
+                                } else {
+                                    requiredClosedPositions.push("right");
+                                }
+                            } else {
+                                if (card.open_positions.includes("left")) {
+                                    requiredOpenPositions.push("right");
+                                } else {
+                                    requiredClosedPositions.push("right");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check card below
+                let coordsBelow = { rowIndex: rowIndex + 1, columnIndex: columnIndex };
+                // console.log("checking tile below", coordsBelow);
+                if (this.tileHasCard(coordsBelow.rowIndex, coordsBelow.columnIndex)) {
+                    // console.log("tile below taken");
+                    let card = this.getCardById(this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
+                    if (card) {
+                        // console.log("card found below", card);
+                        if (card.type === "start" || card.type === "gold_location") {
+                            requiredOpenPositions.push("bottom");
+                        } else {
+                            if (this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
+                                if (card.open_positions.includes("bottom")) {
+                                    requiredOpenPositions.push("bottom");
+                                } else {
+                                    requiredClosedPositions.push("bottom");
+                                }
+                            } else {
+                                if (card.open_positions.includes("top")) {
+                                    requiredOpenPositions.push("bottom");
+                                } else {
+                                    requiredClosedPositions.push("bottom");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check card to the left
+                let coordsLeft = { rowIndex: rowIndex, columnIndex: columnIndex - 1};
+                // console.log("checking tile to left", coordsLeft, this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columIndex));
+                if (this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex)) {
+                    // console.log("tile left taken");
+                    let card = this.getCardById(this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
+                    if (card) {
+                        // console.log("card found left", card);
+                        if (card.type === "start" || card.type === "gold_location") {
+                            requiredOpenPositions.push("left");
+                        } else {
+                            if (this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
+                                if (card.open_positions.includes("left")) {
+                                    requiredOpenPositions.push("left");
+                                } else {
+                                    requiredClosedPositions.push("left");
+                                }
+                            } else {
+                                if (card.open_positions.includes("right")) {
+                                    requiredOpenPositions.push("left");
+                                } else {
+                                    requiredClosedPositions.push("left");
+                                }
+                            }
+                        }                     
+                    }
+                }
+
+                // console.log(this.tag+" required open positions: ", requiredOpenPositions);
+                // console.log(this.tag+" required closed positions: ", requiredClosedPositions);
+
+                // If the card meets the requirements (in it's current state)
+                let meetsRequirements = true;
+                if (!this.dialogs.view_card.inverted) {
+                    // console.log(this.tag+" checking if (non-inverted) card fits on the tile");
+                    // Validate against the required open & closed positions
+                    for (let i = 0; i < requiredOpenPositions.length; i++) {
+                        if (!card.open_positions.includes(requiredOpenPositions[i])) {
+                            meetsRequirements = false;
+                            break;
+                        }
+                    }
+                    for (let i = 0; i < requiredClosedPositions.length; i++) {
+                        if (card.open_positions.includes(requiredClosedPositions[i])) {
+                            meetsRequirements = false;
+                            break;
+                        }
+                    }
+                } else {
+                    // console.log(this.tag+" checking if (inverted) card fits on the tile");
+                    // Invert the card's open positions
+                    let invertedOpenPositions = [];
+                    for (let i = 0; i < card.open_positions.length; i++) {
+                        if (card.open_positions[i] === "top") {
+                            invertedOpenPositions.push("bottom");
+                        } else if (card.open_positions[i] === "right") {
+                            invertedOpenPositions.push("left");
+                        } else if (card.open_positions[i] === "bottom") {
+                            invertedOpenPositions.push("top");
+                        } else if (card.open_positions[i] === "left") {
+                            invertedOpenPositions.push("right");
+                        }
+                    }
+                    // Validate against the required open & closed positions
+                    for (let i = 0; i < requiredOpenPositions.length; i++) {
+                        if (!invertedOpenPositions.includes(requiredOpenPositions[i])) {
+                            meetsRequirements = false;
+                            break;
+                        }
+                    }
+                    for (let i = 0; i < requiredClosedPositions.length; i++) {
+                        if (invertedOpenPositions.includes(requiredClosedPositions[i])) {
+                            meetsRequirements = false;
+                            break;
+                        }
+                    }
+                }
+
+                // console.log(this.tag+" tile meets requirements: ", meetsRequirements);
+                // Return result
+                return meetsRequirements;
+
             },
         },
         mounted() {
@@ -3059,5 +3642,120 @@
         border-radius: 3px;
         box-sizing: border-box;
         background-color: hsl(0, 0%, 5%);
+    }
+    .card-info {
+        display: flex;
+        flex-direction: row;
+        .card-info__card {
+            height: 200px;
+            flex: 0 0 130px;
+            border-radius: 3px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            transition: all .3s;
+            &.inverted {
+                transform: rotate(180deg);
+            }
+        }
+        .card-info__content {
+            flex: 1;
+            display: flex;
+            margin: 0 0 0 30px;
+            flex-direction: column;
+            .card-info__description {
+                flex: 1;
+                .card-info__description-label {
+                    font-size: .9em;
+                    margin: 0 0 5px 0;
+                    color: rgba(255, 255, 255, 0.45);
+                }
+                .card-info__description-text {
+
+                }
+            }
+            .card-info__actions {
+                .card-info__actions-text {
+
+                }
+                .card-info__actions-buttons {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    .v-btn {
+                        margin: 0 15px 0 0;
+                        &:last-child {
+                            margin: 0;
+                        }
+                    }
+                    .tooltip-wrapper {
+                        padding: 0 15px 0 0;
+                    }
+                    .card-info__actions-buttons-left {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                    }
+                    .card-info__actions-buttons-right {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: flex-end;
+                    }
+                }
+            }
+        }
+    }
+    #place-tunnel {
+        display: flex;
+        flex-direction: row;
+        #place-tunnel__preview {
+            margin: 0 30px 0 0;
+            #preview {
+                width: 195px;
+                height: 300px;
+                border: 1px dashed rgba(255, 255, 255, .1);
+                .preview-row {
+                    display: flex;
+                    flex-direction: row;
+                    border-bottom: 1px dashed rgba(255, 255, 255, .1);
+                    &:last-child {
+                        border-bottom: 0;
+                    }
+                    .preview-col {
+                        height: 100px;
+                        flex: 0 0 65px;
+                        overflow: hidden;
+                        position: relative;
+                        border-right: 1px dashed rgba(255, 255, 255, .1);
+                        &:last-child {
+                            border-right: 0;
+                        }
+                        .preview-card {
+                            top: 0;
+                            left: 0;
+                            width: 65px;
+                            height: 100px;
+                            border-radius: 3px;
+                            position: absolute;
+                            background-size: contain;
+                            background-repeat: no-repeat;
+                            background-position: center center;
+                            &.inverted {
+                                transform: rotate(180deg);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #place-tunnel__text {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
     }
 </style>
