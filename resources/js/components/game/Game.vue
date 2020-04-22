@@ -25,6 +25,19 @@
                 <!-- Main game phase -->
                 <div id="game-ui" v-if="mutableRound.phase === 'main'">
                     
+                    <!-- Round info -->
+                    <div id="game-ui__round-info">
+                        <div id="round-info__current-round">Ronde #{{ mutableRound.round_number }}</div>
+                        <div id="round-info__current-turn">Beurt {{ mutableRound.turn_number }}</div>
+                    </div>
+
+                    <!-- Your turn -->
+                    <div id="game-ui__my-turn__wrapper" v-if="itsMyTurn">
+                        <div id="game-ui__my-turn">
+                            Jij bent aan de beurt!
+                        </div>
+                    </div>
+
                     <!-- Game board -->
                     <div id="game-ui__board">
                         <game-board
@@ -1980,7 +1993,7 @@
                     if (this.mutableRound.board[e.rowIndex][e.columnIndex] === null) {
                         console.log(this.tag+" tile is free");
 
-                        // Make sure the tile is available
+                        // Make sure the tile has at least one card connected to it
                         if (this.tileHasConnectingCards(e.rowIndex, e.columnIndex)) {
                             console.log(this.tag+" tile is available");
 
@@ -1992,12 +2005,20 @@
                             if (this.cardCanBePlacedOnTile(e.rowIndex, e.columnIndex, card)) {
                                 console.log(this.tag+" card can be placed on the given tile!");
 
-                                this.modes.select_tile = false;
-                                this.dialogs.confirm_place_tunnel.tunnel_coordinates = { x: e.columnIndex, y: e.rowIndex };
-                                this.dialogs.confirm_place_tunnel.card_index = this.dialogs.place_tunnel.card_index;
-                                this.dialogs.confirm_place_tunnel.inverted = this.dialogs.place_tunnel.inverted;
-                                this.dialogs.confirm_place_tunnel.preview = this.generatePlaceTunnelPreview(e, card, this.dialogs.place_tunnel.inverted);
-                                this.dialogs.confirm_place_tunnel.show = true;
+                                if (this.tileIsReachable(e.rowIndex, e.columnIndex)) {
+
+
+                                    this.modes.select_tile = false;
+                                    this.dialogs.confirm_place_tunnel.tunnel_coordinates = { x: e.columnIndex, y: e.rowIndex };
+                                    this.dialogs.confirm_place_tunnel.card_index = this.dialogs.place_tunnel.card_index;
+                                    this.dialogs.confirm_place_tunnel.inverted = this.dialogs.place_tunnel.inverted;
+                                    this.dialogs.confirm_place_tunnel.preview = this.generatePlaceTunnelPreview(e, card, this.dialogs.place_tunnel.inverted);
+                                    this.dialogs.confirm_place_tunnel.show = true;
+
+                                } else {
+                                    this.$toasted.show("Deze tegel is niet bereikbaar!", { duration: 3000 });
+                                }
+
 
                             } else {
                                 this.$toasted.show("De kaart past niet op de geselecteerde tunnel!", { duration: 3000 });
@@ -3061,38 +3082,41 @@
                 let tileBelow = [rowIndex+1, columnIndex];
                 let tileLeft  = [rowIndex, columnIndex-1];
 
-                // Connected tiles we find
-                let connectedCards = [];
+                // Count the number of connected cards we find
+                let connectedCards = 0;
 
                 // Count the number of connected gold location tiles
                 let connectedGoldLocations = 0;
 
-                // Check tile above
-                if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
+                // Check card above
+                if (this.tileHasCard(tileAbove[0], tileAbove[1]))
+                {
                     let card = this.getCardById(this.mutableRound.board[tileAbove[0]][tileAbove[1]].card_id);
-                    let inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
-                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("bottom")) || (inverted && card.open_positions.includes("top")))) {
-                        connectedCards.push(card);
+                    if (card)
+                    {
+                        connectedCards += 1;
                         if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
 
                 // Check tile to the right
-                if (this.tileHasCard(tileRight[0], tileRight[1])) {
+                if (this.tileHasCard(tileRight[0], tileRight[1]))
+                {
                     let card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
-                    let inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
-                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("left")) || (inverted && card.open_positions.includes("right")))) {
-                        connectedCards.push(card);
+                    if (card)
+                    {
+                        connectedCards += 1;
                         if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
 
                 // Check tile below
-                if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+                if (this.tileHasCard(tileBelow[0], tileBelow[1]))
+                {
                     let card = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
-                    let inverted = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
-                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("top")) || (inverted && card.open_positions.includes("bottom")))) {
-                        connectedCards.push(card);
+                    if (card)
+                    {
+                        connectedCards += 1;
                         if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
@@ -3100,30 +3124,82 @@
                 // Check tile to the left
                 if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
                     let card = this.getCardById(this.mutableRound.board[tileLeft[0]][tileLeft[1]].card_id);
-                    let inverted = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
-                    if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("right")) || (inverted && card.open_positions.includes("left")))) {
-                        connectedCards.push(card);
+                    if (card)
+                    {
+                        connectedCards += 1;
                         if (card.type === "gold_location") connectedGoldLocations += 1;
                     }
                 }
 
-                // If we've found compatible connected cards
-                if (connectedCards.length > 0)
+                // If we found connected cards
+                if (connectedCards > 0)
                 {
-                    // Make sure we're not connected to only gold locations; since that would allow illegal moves
-                    if (connectedCards.length === connectedGoldLocations)
+                    // But all the connected cards we're gold locations
+                    if (connectedCards == connectedGoldLocations)
                     {
-                        // console.log(this.tag+" only gold locations connected");
+                        // We can't allow that
                         return false;
                     }
 
-                    // Otherwise all is good
+                    // Otherwise we're good!
                     return true;
                 }
 
-                // If we've reached this point the tile is available but has no connecting card
+                // If we did not find any connected cards
                 return false;
 
+
+                // // Check tile above; if it has a card
+                // if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
+                //     let card = this.getCardById(this.mutableRound.board[tileAbove[0]][tileAbove[1]].card_id);
+                //     let inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
+                //     // If the connected card can be connected to
+                //     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("bottom")) || (inverted && card.open_positions.includes("top")))) {
+                //         connectedCards.push(card);
+                //         if (card.type === "gold_location") connectedGoldLocations += 1;
+                //     }
+                // }
+                // // Check tile to the right; if it has a card
+                // if (this.tileHasCard(tileRight[0], tileRight[1])) {
+                //     let card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
+                //     let inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
+                //     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("left")) || (inverted && card.open_positions.includes("right")))) {
+                //         connectedCards.push(card);
+                //         if (card.type === "gold_location") connectedGoldLocations += 1;
+                //     }
+                // }
+                // // Check tile below; if it has a card
+                // if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+                //     let card = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
+                //     let inverted = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
+                //     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("top")) || (inverted && card.open_positions.includes("bottom")))) {
+                //         connectedCards.push(card);
+                //         if (card.type === "gold_location") connectedGoldLocations += 1;
+                //     }
+                // }
+                // // Check tile to the left; if it has a card
+                // if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+                //     let card = this.getCardById(this.mutableRound.board[tileLeft[0]][tileLeft[1]].card_id);
+                //     let inverted = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
+                //     if (card && (card.type === "gold_location" || card.type === "start" || (!inverted && card.open_positions.includes("right")) || (inverted && card.open_positions.includes("left")))) {
+                //         connectedCards.push(card);
+                //         if (card.type === "gold_location") connectedGoldLocations += 1;
+                //     }
+                // }
+                // // If we've found compatible connected cards
+                // if (connectedCards.length > 0)
+                // {
+                //     // Make sure we're not connected to only gold locations; since that would allow illegal moves
+                //     if (connectedCards.length === connectedGoldLocations)
+                //     {
+                //         // console.log(this.tag+" only gold locations connected");
+                //         return false;
+                //     }
+                //     // Otherwise all is good
+                //     return true;
+                // }
+                // // If we've reached this point the tile is available but has no connecting card
+                // return false;
             },
             cardCanBePlacedOnTile(rowIndex, columnIndex, card) {
                 console.log(this.tag+" checking if card can be placed on tile: ", rowIndex, columnIndex, card);
@@ -3140,7 +3216,7 @@
                     let card = this.getCardById(this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].card_id);
                     if (card) {
                         // console.log(this.tag+" card found above: ", card);
-                        if (card.type === "start" || card.type === "gold_location") {
+                        if (card.type === "start" || card.type === "gold_location" || card.type === "coal" || card.type === "gold") {
                             requiredOpenPositions.push("top");
                         } else {
                             if (this.mutableRound.board[coordsAbove.rowIndex][coordsAbove.columnIndex].inverted) {
@@ -3168,7 +3244,7 @@
                     let card = this.getCardById(this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].card_id);
                     if (card) {
                         // console.log("card found right", card);
-                        if (card.type === "start" || card.type === "gold_location") {
+                        if (card.type === "start" || card.type === "gold_location" || card.type === "coal" || card.type === "gold") {
                             requiredOpenPositions.push("right");
                         } else {
                             if (this.mutableRound.board[coordsRight.rowIndex][coordsRight.columnIndex].inverted) {
@@ -3196,7 +3272,7 @@
                     let card = this.getCardById(this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].card_id);
                     if (card) {
                         // console.log("card found below", card);
-                        if (card.type === "start" || card.type === "gold_location") {
+                        if (card.type === "start" || card.type === "gold_location" || card.type === "coal" || card.type === "gold") {
                             requiredOpenPositions.push("bottom");
                         } else {
                             if (this.mutableRound.board[coordsBelow.rowIndex][coordsBelow.columnIndex].inverted) {
@@ -3218,13 +3294,13 @@
 
                 // Check card to the left
                 let coordsLeft = { rowIndex: rowIndex, columnIndex: columnIndex - 1};
-                // console.log("checking tile to left", coordsLeft, this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columIndex));
+                // console.log("checking tile to left", coordsLeft, this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex], this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex));
                 if (this.tileHasCard(coordsLeft.rowIndex, coordsLeft.columnIndex)) {
                     // console.log("tile left taken");
                     let card = this.getCardById(this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].card_id);
                     if (card) {
                         // console.log("card found left", card);
-                        if (card.type === "start" || card.type === "gold_location") {
+                        if (card.type === "start" || card.type === "gold_location" || card.type === "coal" || card.type === "gold") {
                             requiredOpenPositions.push("left");
                         } else {
                             if (this.mutableRound.board[coordsLeft.rowIndex][coordsLeft.columnIndex].inverted) {
@@ -3299,6 +3375,188 @@
                 return meetsRequirements;
 
             },
+            tileIsReachable(rowIndex, columnIndex) {
+
+                // Attempt to recursively reach a ladder
+                let reachedLadder = this.traverseToLadder([rowIndex, columnIndex], null);
+
+                // If we've reached the ladder; return true!
+                if (reachedLadder) {
+                    console.log("REACHED A LADDER");
+                    return true;
+                }
+
+                console.log("FAILED TO REACH LADDER");
+
+                // Otherwise falsy
+                return false;
+
+            },
+            traverseToLadder(currentCoordinates, previousCoordinates) {
+
+                console.log("traversing to "+currentCoordinates[0]+":"+currentCoordinates[1]+", prev: ", previousCoordinates);
+
+                // Check the tiles surrounding the current coordinates for connected cards
+                let connected_tiles = [];
+
+                // Check tile above
+                let tileAbove = [currentCoordinates[0]-1, currentCoordinates[1]];
+                if (this.tileHasCard(tileAbove[0], tileAbove[1])) {
+                    // Grab the card
+                    let card = this.getCardById(this.mutableRound.board[tileAbove[0]][tileAbove[1]].card_id);
+                    // If the card is a start card; we've found our ladder so return true
+                    if (card.type === "start") {
+                        return true;
+                    // Otherwise; if it's not a gold location related card
+                    } else if (card.type !== "gold_location" && card.type !== "gold" && card.type !== "coal") {
+                        // Check if the card is inverted or not
+                        let inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
+                        // Determine the connected "open position" of the card above
+                        let connected_position = inverted ? "top" : "bottom";
+                        // If the card is connected to the current coordinates
+                        if (card.open_positions.includes(connected_position)) {
+                            console.log("[+] Card above is connected");
+                            // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
+                            if (card.has_ladder && (card.ladder_position === connected_position || card.open_positions.includes("center"))) {
+                                // Found our ladder; whooha
+                                return true;
+                            // If we did not find our ladder;
+                            } else {
+                                // But this card is traversable
+                                if (card.open_positions.includes("center")) {
+                                    // Add the coordinates to the connected_tiles list
+                                    connected_tiles.push(tileAbove);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check tile to the right
+                let tileRight = [currentCoordinates[0], currentCoordinates[1]+1];
+                if (this.tileHasCard(tileRight[0], tileRight[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
+                    if (card.type === "start") {
+                        return true;
+                    } else {
+                        let inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
+                        let connected_position = inverted ? "right" : "left";
+                        // If the card is connected to the current coordinates
+                        if (card.open_positions.includes(connected_position)) {
+                            console.log("[-] Card above is connected");
+                            // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
+                            if (card.has_ladder && (card.ladder_position === connected_position || card.open_positions.includes("center"))) {
+                                console.log("[+] Found our ladder!");
+                                // Found our ladder; whooha
+                                return true;
+                            // If we did not find our ladder;
+                            } else {
+                                // But this card is traversable
+                                if (card.open_positions.includes("center")) {
+                                    console.log("[+] Added tile to the right to traversable tiles")
+                                    // Add the coordinates to the connected_tiles list
+                                    connected_tiles.push(tileRight);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check tile below
+                let tileBelow = [currentCoordinates[0]+1, currentCoordinates[1]];
+                if (this.tileHasCard(tileBelow[0], tileBelow[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
+                    if (card.type === "start") {
+                        return true;
+                    } else {
+                        let inverted = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
+                        let connected_position = inverted ? "bottom" : "top";
+                        // If the card is connected to the current coordinates
+                        if (card.open_positions.includes(connected_position)) {
+                            console.log("[-] Card below is connected");
+                            // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
+                            if (card.has_ladder && (card.ladder_position === connected_position || card.open_positions.includes("center"))) {
+                                console.log("[+] Found our ladder!");
+                                // Found our ladder; whooha
+                                return true;
+                            // If we did not find our ladder;
+                            } else {
+                                // But this card is traversable
+                                if (card.open_positions.includes("center")) {
+                                    console.log("[+] Added tile below to traversable tiles")
+                                    // Add the coordinates to the connected_tiles list
+                                    connected_tiles.push(tileBelow);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Check tile to the left
+                let tileLeft = [currentCoordinates[0], currentCoordinates[1]-1];
+                if (this.tileHasCard(tileLeft[0], tileLeft[1])) {
+                    let card = this.getCardById(this.mutableRound.board[tileLeft[0]][tileLeft[1]].card_id);
+                    console.log("[-] tile to left has card: ", card);
+                    if (card.type === "start") {
+                        return true;
+                    } else {
+                        let inverted = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
+                        let connected_position = inverted ? "left" : "right";
+                        // If the card is connected to the current coordinates
+                        if (card.open_positions.includes(connected_position)) {
+                            console.log("[-] Card to the left is connected");
+                            // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
+                            if (card.has_ladder && (card.ladder_position === connected_position || card.open_positions.includes("center"))) {
+                                console.log("[+] Found our ladder!");
+                                // Found our ladder; whooha
+                                return true;
+                            // If we did not find our ladder;
+                            } else {
+                                // But this card is traversable
+                                if (card.open_positions.includes("center")) {
+                                    console.log("[+] Added tile to the left to traversable tiles")
+                                    // Add the coordinates to the connected_tiles list
+                                    connected_tiles.push(tileLeft);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If we found some connected tiles
+                if (connected_tiles.length > 0)
+                {
+                    console.log("[-] Traversing "+connected_tiles.length+" connected tiles");
+                    // Update the previous coordinates
+                    let prevCoords = previousCoordinates === null ? [] : previousCoordinates;
+                    prevCoords.push(currentCoordinates);
+                    // Loop through all of the connected tiles
+                    for (let i = 0; i < connected_tiles.length; i++) {
+                        // Make sure the tile has not been traversed yet
+                        if (!this.tileHasBeenTraversed(connected_tiles[i], prevCoords)) {
+                            // If this method returns true for the connected tile
+                            if (this.traverseToLadder(connected_tiles[i], prevCoords)) {
+                                // Pass the message along; ahhh the magic of recursive programming (and the fucking curse)
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                // Return false by default
+                return false;
+
+            },
+            tileHasBeenTraversed(coordinates, previousCoordinates) {
+                if (previousCoordinates !== null && previousCoordinates.length > 0) {
+                    for (let i = 0; i < previousCoordinates.length; i++) {
+                        if (previousCoordinates[i][0] === coordinates[0] && previousCoordinates[i][1] === coordinates[1]) {
+
+                        }
+                    }
+                }
+                return false;
+            },
         },
         mounted() {
             this.initialize();
@@ -3345,6 +3603,34 @@
         display: flex;
         position: relative;
         flex-direction: column;
+        #game-ui__round-info {
+            top: 30px;
+            left: 30px;
+            position: absolute;
+            #round-info__current-round {
+                font-size: 2em;
+                font-weight: 500;
+            }
+            #round-info__current-turn {
+                font-size: .9em;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.5);
+            }
+        }
+        #game-ui__my-turn__wrapper {
+            left: 0;
+            top: 30px;
+            width: 100%;
+            display: flex;
+            position: absolute;
+            flex-direction: row;
+            justify-content: center;
+            #game-ui__my-turn {
+                font-size: 1.5em;
+                font-weight: 500;
+                border-bottom: 2px solid #ffd900;
+            }
+        }
         #game-ui__board {
             flex: 1;
         }
