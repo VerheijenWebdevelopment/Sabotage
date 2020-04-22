@@ -216,64 +216,77 @@ class CardService implements ModelServiceContract
         // Gather the tunnels seperately first so we can post-process them
         $tunnels = [];
 
-        // Dead ends with 1 tile
-        $singleNoCenters = [
-            $tunnel_single_one,
-            $tunnel_single_two,
-            $tunnel_single_three,
-            $tunnel_single_four,
-        ];
-        $tunnels[] = $singleNoCenters[rand(0, 3)];
-        $tunnels[] = $singleNoCenters[rand(0, 3)];
+        // // Dead ends with 1 tile
+        // $singleNoCenters = [
+        //     $tunnel_single_one,
+        //     $tunnel_single_two,
+        //     $tunnel_single_three,
+        //     $tunnel_single_four,
+        // ];
+        // $tunnels[] = $singleNoCenters[rand(0, 3)];
+        // $tunnels[] = $singleNoCenters[rand(0, 3)];
 
-        // Dead ends with 2 tiles
-        $doubleNoCenters = [
-            $tunnel_single_center_one,
-            $tunnel_single_center_two,
-            $tunnel_single_center_three,
-            $tunnel_single_center_four,
-            $tunnel_double_one,
-            $tunnel_double_two,
-            $tunnel_double_three,
-            $tunnel_double_four,
-            $tunnel_double_five,
-            $tunnel_double_six,
-        ];
-        $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        // // Dead ends with 2 tiles
+        // $doubleNoCenters = [
+        //     $tunnel_single_center_one,
+        //     $tunnel_single_center_two,
+        //     $tunnel_single_center_three,
+        //     $tunnel_single_center_four,
+        //     $tunnel_double_one,
+        //     $tunnel_double_two,
+        //     $tunnel_double_three,
+        //     $tunnel_double_four,
+        //     $tunnel_double_five,
+        //     $tunnel_double_six,
+        // ];
+        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
 
-        // Dead ends with 3 tiles
-        $tripleNoCenters = [
-            $tunnel_triple_one,
-            $tunnel_triple_two,
-            $tunnel_triple_three,
-            $tunnel_triple_four,
-        ];
-        $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        // // Dead ends with 3 tiles
+        // $tripleNoCenters = [
+        //     $tunnel_triple_one,
+        //     $tunnel_triple_two,
+        //     $tunnel_triple_three,
+        //     $tunnel_triple_four,
+        // ];
+        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
 
-        // Dead ends with 4 tiles
-        $tunnels[] = $tunnel_quadruple;
+        // // Dead ends with 4 tiles
+        // $tunnels[] = $tunnel_quadruple;
 
-        // Connected tunnel 2 tiles 
-        $tunnels[] = $tunnel_double_center_one;
-        $tunnels[] = $tunnel_double_center_two;
-        $tunnels[] = $tunnel_double_center_three;
-        $tunnels[] = $tunnel_double_center_four;
-        $tunnels[] = $tunnel_double_center_five;
-        $tunnels[] = $tunnel_double_center_six;
+        // // Connected tunnel 2 tiles 
+        // $tunnels[] = $tunnel_double_center_one;
+        // $tunnels[] = $tunnel_double_center_two;
+        // $tunnels[] = $tunnel_double_center_three;
+        // $tunnels[] = $tunnel_double_center_four;
+        // $tunnels[] = $tunnel_double_center_five;
+        // $tunnels[] = $tunnel_double_center_six;
 
-        // Connected tunnel 3 tiles
-        $tunnels[] = $tunnel_triple_center_one;
-        $tunnels[] = $tunnel_triple_center_two;
-        $tunnels[] = $tunnel_triple_center_three;
-        $tunnels[] = $tunnel_triple_center_four;
+        // // Connected tunnel 3 tiles
+        // $tunnels[] = $tunnel_triple_center_one;
+        // $tunnels[] = $tunnel_triple_center_two;
+        // $tunnels[] = $tunnel_triple_center_three;
+        // $tunnels[] = $tunnel_triple_center_four;
 
         // Connected tunnel 4 tiles
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
+        $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;

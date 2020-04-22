@@ -838,7 +838,7 @@ class GameService implements ModelServiceContract
             foreach ($reached_gold_locations as $gold_location)
             {
                 // If the gold location had not been revealed yet
-                if (!array_key_exists($gold_location, $game->reached_gold_locations))
+                if (!array_key_exists($gold_location, $game->currentRound->reached_gold_locations))
                 {
                     // Replace the gold location card in question with the revealed gold location card (coal/gold card)
                     $game = Board::revealGoldLocation($game, $gold_location);
@@ -1057,77 +1057,113 @@ class GameService implements ModelServiceContract
         }
     }
 
+    private function determineBaseReward(array $winningPlayers)
+    {
+        $winners = count($winningPlayers);
+
+        switch ($winners)
+        {
+            case 1:
+                return 5;
+            case 2:
+                return 4;
+            case 3:
+                return 3;
+            case 4:
+                return 2;
+            default:
+                return 1;
+        }
+    }
+
+    private function determineReward(Role $role, int $baseReward, Game $game)
+    {
+        if ($role->name == "chef")
+        {
+            return $baseReward - 1;
+        }
+        else if ($role->name == "geologist")
+        {
+            return Board::countReachableCrystals($game);
+        }
+        else
+        {
+            return $baseReward;
+        }
+    }
+
     private function endRound(Game $game, Player $player)
     {
         // Enter the 'rewards' phase
-        $game->phase = "rewards";
+        $game->currentRound->phase = "rewards";
 
-        // Determine which team has won
-        $gold_found = array_key_exists($game->gold_location, $game->reached_gold_locations);
-        $winningTeam = $gold_found ? "golddiggers" : "saboteurs";
-        $game->winning_team = $winningTeam;
+        // Determine whether or not the gold has been found
+        $gold_found = array_key_exists($game->currentRound->gold_location, $game->currentRound->reached_gold_locations);
 
-        // If the golddiggers won; they will get to choose a reward card and the player
-        // who found the gold gets to choose; so set the turn to that player's number
-        if ($winningTeam == "golddiggers")
+        // Determine the winning teams & save them on the current round
+        $winningTeams = [];
+        if ($gold_found)
         {
-            // If the player that finished the board (current player) is a golddigger; give them the turn
-            if ($player->role->name == "digger")
+            // TODO: Determine which teams can reach the gold (after adding door support to tunnels)
+            $winningTeams[] = "blue_digger";    
+            $winningTeams[] = "green_digger";    
+            $winningTeams[] = "chef";    
+        }
+        else
+        {
+            $winningTeams[] = "saboteur";
+        }
+        $winningTeams[] = "profiteer";
+        $winningTeams[] = "geologist";
+        $game->currentRound->winning_teams = $winningTeams;
+        
+        // Determine the winning players
+        $winningPlayers = [];
+        foreach ($game->players as $player)
+        {
+            if (in_array($player->role->name, $winningTeams))
             {
-                $game->players_turn = $player->player_number;
-            }
-            // If the player that finished had another role; first golddigger we find gets the turn
-            else
-            {
-                foreach ($game->players as $player) {
-                    if ($player->role->name == "digger") {
-                        $game->players_turn = $player->player_number;
-                        break;
-                    }
-                }
+                $winningPlayers[] = $player->id;
             }
         }
 
-        // Generate reward cards
-        $rewardCards = $winningTeam == "saboteurs" ? [] : Cards::generateRewardCards($game);
-        $game->reward_deck = $rewardCards;
-        $game->num_cards_reward_deck = count($rewardCards);
+        // Determine gold reward for each player
+        $baseReward = $this->determineBaseReward($winningPlayers);
 
-        // Generate saboteur gold reward
-        $saboteurReward = $winningTeam == "golddiggers" ? 0 : $this->determineSaboteurGoldReward($game);
-        $game->saboteur_reward = $saboteurReward;
-        
-        // Generate revealed players array
+        // Determine revealed players data (including rewards)
         $revealedPlayers = [];
         foreach ($game->players as $player)
         {
-            // If the saboteurs won & the player is a saboteur; award them their gold instantly
-            if ($winningTeam == "saboteurs" && $player->role->name == "saboteur")
-            {
-                $newScore = $player->score + $saboteurReward;
-                $player->score = $newScore;
-                $player->save();
-            }
+            // Determine if this player has won
+            $winner = in_array($player->id, $winningPlayers);
 
-            // Add entry to revealed players
+            // Determine the reward this player should be awarded
+            $reward = $winner ? $this->determineReward($player->role, $baseReward, $game) : 0;
+
+            // Save reward on the player
+            $player->score += $reward;
+            $player->save();
+
+            // Compose an entry for the reward / revealed player data we're sending to the frontend
             $revealedPlayers[] = [
                 "player" => $player,
                 "role" => $player->role,
-                "winner" => ($winningTeam == "saboteurs" && $player->role->name == "saboteur") || ($winningTeam == "golddiggers" && $player->role->name == "digger"),
+                "winner" => $winner,
+                "reward" => $reward,
                 "ready" => false,
-                "selected_reward" => false,
-                "gold_awarded" => ($winningTeam == "saboteurs" && $player->role->name == "saboteur") ? $saboteurReward : 0,
-                "gold_reward_card" => null,
+                "can_steal" => (!$player->in_jail && $player->thief_activated),
+                "has_stolen" => false,
             ];
         }
-        $game->revealed_players = $revealedPlayers;
+        $game->currentRound->revealed_players = $revealedPlayers;
 
         // Save changes we made to the game
-        $game->save();
+        $game->currentRound->save();
 
-        // If the saboteurs won and we're in the last round
-        if ($winningTeam == "saboteurs" && $game->round == 3)
+        // If this is the last round
+        if ($game->currentRound->round_number == $game->settings->num_rounds)
         {
+            // End the game
             $this->endGame($game);
         }
         // Otherwise; broadcast the round ended event
@@ -1135,36 +1171,13 @@ class GameService implements ModelServiceContract
         {
             // Compose the data we want to send to the client (all updates we've done basically except for the deck)
             $data = [
-                "winning_team" => $winningTeam,
-                "saboteur_reward" => $saboteurReward,
+                "gold_found" => $gold_found,
+                "winning_teams" => $winningTeams,
                 "revealed_players" => $revealedPlayers,
-                "num_cards_reward_deck" => count($rewardCards),
             ];
 
             // Broadcast event to all players (including the one who initiated this process)
             broadcast(new RoundEnded($game, $data));
-        }
-    }
-
-    private function determineSaboteurGoldReward(Game $game)
-    {
-        // Determine the amount of saboteurs were in play
-        $numSaboteurs = 0;
-        foreach ($game->players as $player)
-        {
-            if ($player->role->name == "saboteur") $numSaboteurs++;
-        }
-
-        // Return the amount of gold to award according to the rules..
-        switch ($numSaboteurs)
-        {
-            case 1:
-                return 4;
-            case 2:
-            case 3:
-                return 3;
-            default:
-                return 2;
         }
     }
 
@@ -1224,11 +1237,6 @@ class GameService implements ModelServiceContract
 
         // Re-prepare the game for the next round
         $game = $this->prepareGame($game);
-
-        // Up the round count by one
-        $game->round = $game->round + 1;
-        $game->players_turn = 1;
-        $game->save();
 
         // Broadcast event to all players
         broadcast(new NewRoundStarted($game));

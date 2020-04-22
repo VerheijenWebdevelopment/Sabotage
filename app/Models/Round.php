@@ -25,7 +25,6 @@ class Round extends Model
         "reached_gold_locations",
         "winning_teams",
         "revealed_players",
-        "current",
     ];
     protected $hidden = [
         "deck",

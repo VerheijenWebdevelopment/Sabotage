@@ -347,15 +347,15 @@ class BoardService
     public function revealGoldLocation(Game $game, int $goldLocation)
     {
         // Determine if the revealed gold locations contains gold or not
-        $contains_gold = $goldLocation == $game->gold_location ? true : false;
+        $contains_gold = $goldLocation == $game->currentRound->gold_location ? true : false;
 
         // Add the gold location to the list of revealed gold locations
-        $reachedGoldLocations = $game->reached_gold_locations;
+        $reachedGoldLocations = $game->currentRound->reached_gold_locations;
         $reachedGoldLocations[$goldLocation] = $contains_gold;
-        $game->reached_gold_locations = $reachedGoldLocations;
+        $game->currentRound->reached_gold_locations = $reachedGoldLocations;
 
         // Determine the coordinates of the start card & all of the gold location cards
-        $startCardCoords = $this->findCardCoordsByName("start", $game->board);
+        $startCardCoords = $this->findCardCoordsByName("start", $game->currentRound->board);
         $goldCardCoords = $this->determineGoldLocationCoords($startCardCoords);
 
         // Grab the coal & gold cards
@@ -366,17 +366,88 @@ class BoardService
         $goldLocationCoords = $goldCardCoords[$goldLocation];
 
         // Update the gold location's card on the board
-        $board = $game->board;
+        $board = $game->currentRound->board;
         $board[$goldLocationCoords["rowIndex"]][$goldLocationCoords["columnIndex"]] = [
             "card_id" => $contains_gold ? $goldCard->id : $coalCard->id,
             "inverted" => false,
         ];
-        $game->board = $board;
+        $game->currentRound->board = $board;
 
-        // Save changes we made to the game
-        $game->save();
+        // Save changes we made to the current round
+        $game->currentRound->save();
 
         // Return the updated game
         return $game;
+    }
+
+    public function countReachableCrystals(Game $game)
+    {
+        // Find all cards containing crystals that are reachable
+        $crystals = [];
+
+        // Process all cards on the board
+        $board = $game->currentRound->board;
+        for ($rowIndex = 0; $rowIndex < count($board); $rowIndex++)
+        {
+            for ($columnIndex = 0; $columnIndex < count($board[$rowIndex]); $columnIndex++)
+            {
+                if (!is_null($board[$rowIndex][$columnIndex]))
+                {
+                    $card = Card::find($board[$rowIndex][$columnIndex]["card_id"]);
+                    if ($card && $card->type == "tunnel" && $card->has_crystal && $this->tileIsReachable($rowIndex, $columnIndex, $board))
+                    {
+                        $crystals[] = [
+                            "rowIndex" => $rowIndex,
+                            "columnIndex" => $columnIndex,
+                        ];
+                    }
+                }
+            }
+        }
+
+        return count($crystals);
+    }
+
+    private function tileIsReachable($rowIndex, $columnIndex, array $board)
+    {
+        // Compose a coordinate set for our target tile
+        $targetCoords = [
+            "rowIndex" => $rowIndex,
+            "columnIndex" => $columnIndex,
+        ];
+
+        // Gather all coordinates which contain a ladder and therefor a starting point for our pathfinding algorithm
+        $startCoordinates = [];
+        for ($i = 0; $i < count($board); $i++)
+        {
+            for ($j = 0; $j < count($board[$i]); $j++)
+            {
+                if (!is_null($board[$i][$j]))
+                {
+                    $card = Card::find($board[$i][$j]["card_id"]);
+                    if ($card && ($card->type == "start" || ($card->type == "tunnel" && $card->has_ladder)))
+                    {
+                        $startCoordinates[] = [
+                            "rowIndex" => $i,
+                            "columnIndex" => $j,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Attempt to reach the target coordinate from each of the starting tiles
+        foreach ($startCoordinates as $startCoords)
+        {
+            // If we manage to traverse to the target coordinates
+            if ($this->traverseToTarget($startCoords, [], $targetCoords, $board))
+            {
+                // Tile is indeed reachable
+                return true;
+            }
+        }
+
+        // If we've reached this point the tile is not traversable
+        return false;
     }
 }
