@@ -2038,6 +2038,10 @@
             // Hand actions
             onClickPlayCard() {
                 console.log(this.tag+" clicked play card button");
+                // If a mode is currently enabled; disable it
+                if (this.modes.select_tile) this.modes.select_tile = false;
+                if (this.modes.select_tunnel) this.modes.select_tunnel = false;
+                if (this.modes.select_gold_location) this.modes.select_gold_location = false;
                 // Grab the card's index & data
                 let card, index;
                 for (let i = 0; i < this.mutableHand.length; i++) {
@@ -3548,10 +3552,12 @@
 
             },
             tileHasBeenTraversed(coordinates, previousCoordinates) {
+                console.log("-- checking if coordinates have been traversed", coordinates, previousCoordinates);
                 if (previousCoordinates !== null && previousCoordinates.length > 0) {
                     for (let i = 0; i < previousCoordinates.length; i++) {
+                        console.log("checking|"+previousCoordinates[i][0]+"=="+coordinates[0]+"|"+previousCoordinates[i][1]+"=="+coordinates[1]);
                         if (previousCoordinates[i][0] === coordinates[0] && previousCoordinates[i][1] === coordinates[1]) {
-
+                            return true;
                         }
                     }
                 }
