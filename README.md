@@ -1,3 +1,32 @@
+# Saboteur
+
+Digitale versie van het spelletje Saboteur (de uitbreiding).
+
+## Dependencies
+
+- [beyondcode/laravel-websockets](https://github.com/beyondcode/laravel-websockets)
+- [cviebrock/eloquent-sluggable](https://github.com/cviebrock/eloquent-sluggable)
+- [intervention/image](https://github.com/Intervention/image)
+- [laracasts/flash](https://github.com/laracasts/flash)
+- [pusher/pusher-php-server](https://github.com/pusher/pusher-http-php)
+- [webpatser/laravel-uuid](https://github.com/webpatser/laravel-uuid)
+
+## To Do
+
+- [ ] Deur support voor tunnels
+- [ ] --> Card generation (like crystals & ladders)
+- [ ] --> Update winning team determination logic
+- [ ] --> Update tile traversal logic
+- [ ] Configuration upgrade
+- [ ] --> Set how many cards to randomly take at the beginning of a round
+- [ ] --> Set number of crystal cards to randomly generate
+- [ ] --> Set number of ladder cards to randomly generate
+- [ ] --> Select cards & amounts to put in the deck
+- [ ] --> Configuration presets (save, update, delete)
+- [ ] Custom avatar support
+- [ ] Track player who ended the round
+- [ ] --> Update first to act during end of round (which thief gets first go at stealing)
+
 <p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
 
 <p align="center">
