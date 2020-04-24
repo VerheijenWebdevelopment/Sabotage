@@ -157,12 +157,76 @@
 
                 <!-- End of round (reward) phase -->
                 <div id="round-over-ui" v-if="mutableRound.phase === 'rewards'">
-                    End of round
+                    
+                    <!-- Title & subtitle -->
+                    <h1 id="round-over-ui__title">Ronde #{{ mutableRound.round_number }} is voorbij</h1>
+                    <h2 id="round-over-ui__subtitle">{{ roundOverWinnersText }}</h2>
+                    
+                    <!-- Revealed players -->
+                    <div id="round-over-ui__players">
+                        <div class="player-wrapper" v-for="(revealedPlayer, rpi) in mutableRound.revealed_players" :key="rpi">
+                            <div class="player" :class="{ 'winner': revealedPlayer.winner }">
+                                <div class="player-username">{{ getUsernameByPlayerId(revealedPlayer.player.id) }}</div>
+                                <div class="player-role__wrapper">
+                                    <div class="player-role" :class="{ green: revealedPlayer.role.name === 'green_digger', blue: revealedPlayer.role.name === 'blue_digger' }">
+                                        {{ revealedPlayer.role.label }}
+                                    </div>
+                                </div>
+                                <div class="player-reward">
+                                    <span class="gold">{{ revealedPlayer.reward }} goud</span> gevonden
+                                </div>
+                                <div class="player-ready">
+                                    <span class="ready" v-if="revealedPlayer.ready">Ready!</span>
+                                    <span class="not-ready" v-if="!revealedPlayer.ready">Nog niet klaar</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Steal gold from a player -->
+                    <div id="round-over-ui__steal-gold" v-if="canStealGoldFromPlayer">
+
+                        <!-- Waiting on turn (to steal) -->
+                        <div id="steal-gold__waiting" v-if="!itsMyTurn && !revealedMe.has_stolen">
+                            Zodra je aan de beurt bent kan je goud stelen van een medespeler.
+                        </div>
+
+                        <!-- Steal -->
+                        <div id="steal-gold" v-if="itsMyTurn && !revealedMe.has_stolen">
+
+                        </div>
+
+                        <!-- Gold stolen -->
+                        <div id="steal-gold__done" v-if="revealedMe.has_stolen">
+                            Je hebt goud gejat, jij sneaky kaboutertje.
+                        </div>
+
+                    </div>
+
+                    <!-- Ready for next turn -->
+                    <div id="round-over-ui__ready-up" v-if="canReadyUpForNextRound">
+                        <!-- Title -->
+                        <h3 id="ready-up__title" v-if="!revealedMe.ready">Klaar voor de volgende ronde?</h3>
+                        <!-- Not ready yet -->
+                        <div id="ready-up__not-ready" v-if="!revealedMe.ready">
+                            <v-btn small color="success" dark @click="onClickReadyForNextRound" :loading="rewards.loading" :disabled="rewards.loading">
+                                <i class="fas fa-check"></i>
+                                Ik ben er klaar voor.
+                            </v-btn>
+                        </div>
+                        <!-- Ready -->
+                        <div id="ready-up__ready" v-if="revealedMe.ready">
+                            Jij bent er klaar voor, als een eindbaas.
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- End of game phase -->
                 <div id="game-over-ui" v-if="mutableRound.phase === 'endgame'">
+
                     End of game
+
                 </div>
 
             </div>
@@ -1236,8 +1300,6 @@
             rewards: {
                 loading: false,
                 gold_found: false,
-                winning_teams: [],
-                revealed_players: [],
             },
             winners: [],
         }),
@@ -1315,14 +1377,14 @@
             },
             // View card dialog
             viewCardDialogCard() {
-                if (this.dialogs.view_card.index !== null) {
+                if (this.dialogs.view_card.index !== null && this.mutableHand[this.dialogs.view_card.index] !== undefined) {
                     return this.mutableHand[this.dialogs.view_card.index].card;
                 }
                 return false;
             },
             // Fold card dialog
             foldCardDialogCard() {
-                if (this.dialogs.fold_card.index !== null) {
+                if (this.dialogs.fold_card.index !== null && this.mutableHand[this.dialogs.fold_card.index] !== undefined) {
                     return this.mutableHand[this.dialogs.fold_card.index].card;
                 }
                 return false;
@@ -1331,7 +1393,9 @@
             foldCardsDialogCards() {
                 let out = [];
                 for (let i = 0; i < this.dialogs.fold_cards.indices.length; i++) {
-                    out.push(this.mutableHand[this.dialogs.fold_cards.indices[i]].card);
+                    if (this.mutableHand[this.dialogs.fold_cards.indices[i]] !== undefined) {
+                        out.push(this.mutableHand[this.dialogs.fold_cards.indices[i]].card);
+                    }
                 }
                 return out;
             },
@@ -1355,7 +1419,7 @@
             },
             // Sabotage dialog
             sabotageDialogCard() {
-                if (this.dialogs.sabotage.card_index !== null) {
+                if (this.dialogs.sabotage.card_index !== null && this.mutableHand[this.dialogs.sabotage.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.sabotage.card_index].card;
                 }
                 return false;
@@ -1415,7 +1479,7 @@
             },
             // Recover dialog
             recoverDialogCard() {
-                if (this.dialogs.recover.card_index !== null) {
+                if (this.dialogs.recover.card_index !== null && this.mutableHand[this.dialogs.recover.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.recover.card_index].card;
                 }
                 return false;
@@ -1474,7 +1538,7 @@
             },
             // Imprison dialog
             imprisonDialogCard() {
-                if (this.dialogs.imprison.card_index !== null) {
+                if (this.dialogs.imprison.card_index !== null && this.mutableHand[this.dialogs.imprison.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.imprison.card_index].card;
                 }
                 return false;
@@ -1484,7 +1548,7 @@
             },
             // Free dialog
             freeDialogCard() {
-                if (this.dialogs.free.card_index !== null) {
+                if (this.dialogs.free.card_index !== null && this.mutableHand[this.dialogs.free.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.free.card_index].card;
                 }
                 return false;
@@ -1501,7 +1565,7 @@
             },
             // Dont touch dialog
             dontTouchDialogCard() {
-                if (this.dialogs.dont_touch.card_index !== null) {
+                if (this.dialogs.dont_touch.card_index !== null && this.mutableHand[this.dialogs.dont_touch.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.dont_touch.card_index].card;
                 }
                 return false;
@@ -1518,7 +1582,7 @@
             },
             // Confirm enlighten dialog
             confirmEnlightenDialogCard() {
-                if (this.dialogs.confirm_enlighten.card_index !== null) {
+                if (this.dialogs.confirm_enlighten.card_index !== null && this.mutableHand[this.dialogs.confirm_enlighten.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.confirm_enlighten.card_index].card;
                 }
                 return false;
@@ -1561,7 +1625,7 @@
             },
             // Exchange hands dialog
             exchangeHandsDialogCard() {
-                if (this.dialogs.exchange_hands.card_index !== null) {
+                if (this.dialogs.exchange_hands.card_index !== null && this.mutableHand[this.dialogs.exchange_hands.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.exchange_hands.card_index].card;
                 }
                 return false;
@@ -1580,7 +1644,7 @@
             },
             // Exchange hats dialog
             exchangeHatsDialogCard() {
-                if (this.dialogs.exchange_hats.card_index !== null) {
+                if (this.dialogs.exchange_hats.card_index !== null && this.mutableHand[this.dialogs.exchange_hats.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.exchange_hats.card_index].card;
                 }
                 return false;
@@ -1599,19 +1663,71 @@
             },
             // Collapse tunnel dialog
             collapseDialogCard() {
-                if (this.dialogs.collapse.card_index !== null) {
+                if (this.dialogs.collapse.card_index !== null && this.mutableHand[this.dialogs.collapse.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.collapse.card_index].card;
                 }
                 return false;
             },
             // Place tunnel dialog
             placeTunnelDialogCard() {
-                if (this.dialogs.place_tunnel.card_index !== null) {
+                if (this.dialogs.place_tunnel.card_index !== null && this.mutableHand[this.dialogs.place_tunnel.card_index] !== undefined) {
                     return this.mutableHand[this.dialogs.place_tunnel.card_index].card;
                 }
                 return false;
             },
-
+            // Round over
+            roundOverWinnersText() {
+                let out = "De ";
+                if (this.mutableRound.winning_teams.length === 1) {
+                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                } else if (this.mutableRound.winning_teams.length === 2) {
+                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                    out += " en ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
+                } else if (this.mutableRound.winning_teams.length === 3) {
+                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                    out += ", ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
+                    out += " en ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[2]);
+                } else if (this.mutableRound.winning_teams.length === 4) {
+                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                    out += ", ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
+                    out += ", ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[2]);
+                    out += " en ";
+                    out += this.teamToPlural(this.mutableRound.winning_teams[3]);
+                }
+                out += " hebben gewonnen!";
+                return out;
+            },
+            revealedMe() {
+                if (this.mutableRound.revealed_players !== null && this.mutableRound.revealed_players.length > 0) {
+                    for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                        if (this.mutableRound.revealed_players[i].player.id === this.mutablePlayer.id) {
+                            return this.mutableRound.revealed_players[i];
+                        }
+                    }
+                }
+                return false;
+            },
+            canStealGoldFromPlayer() {
+                if (this.revealedMe) {
+                    return this.revealedMe.can_steal;
+                }
+                return false;
+            },
+            canReadyUpForNextRound() {
+                if (this.revealedMe) {
+                    if (this.revealedMe.can_steal) {
+                        return this.revealedMe.has_stolen;
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            },
         },
         methods: {
             initialize() {
@@ -1639,6 +1755,17 @@
                         this.mutablePlayers.push(this.game.players[i]);
                     }
                 }
+                // If we're in the rewards phase
+                if (this.mutableRound.phase === "rewards") {
+                    // Determine if the gold has been found
+                    for (let [key, value] of Object.entries(this.mutableRound.reached_gold_locations)) {
+                        if (value === true) {
+                            this.rewards.gold_found = true;
+                            break;
+                        }
+                    }
+                }
+                // Initialize the player's hand (as we need to preprocess this data before we can use it)
                 this.initializeHand(this.hand);
             },
             initializeHand(hand) {
@@ -1903,11 +2030,13 @@
 
                     // Set the player who is at turn
                     this.mutableRound.players_turn = e.game.current_round.player_turn;
-    
-                    // Save the updated mutable game
+
+                    // Set whether or not the gold has been found
                     this.rewards.gold_found = e.data.gold_found;
-                    this.rewards.winning_teams = e.data.winning_teams;
-                    this.rewards.revealed_players = e.data.revealed_players;
+
+                    // Save the updated mutable round properties
+                    this.mutableRound.winning_teams = e.data.winning_teams;
+                    this.mutableRound.revealed_players = e.data.revealed_players;
                     
                 }.bind(this), 2000);
 
@@ -1916,9 +2045,9 @@
                 console.log(this.tag+"[event] received event player ready for next round:", e);
                 
                 // Update the player's ready status
-                for (let i = 0; i < this.rewards.revealed_players.length; i++) {
-                    if (this.rewards.revealed_players[i].player.id === e.player.id) {
-                        this.rewards.revealed_players[i].ready = true;
+                for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                    if (this.mutableRound.revealed_players[i].player.id === e.player.id) {
+                        this.mutableRound.revealed_players[i].ready = true;
                         break;
                     }
                 }
@@ -1948,6 +2077,11 @@
             },
             onClickHandCard(index) {
                 console.log(this.tag+" clicked hand card: ", index);
+                // If a mode is currently enabled; disable it
+                if (this.modes.select_tile) this.modes.select_tile = false;
+                if (this.modes.select_tunnel) this.modes.select_tunnel = false;
+                if (this.modes.select_gold_location) this.modes.select_gold_location = false;
+                // Invert the selected status of the hand card
                 this.mutableHand[index].selected = ! this.mutableHand[index].selected;
             },
             onClickBoardTile(e) {
@@ -2078,10 +2212,6 @@
             // Hand actions
             onClickPlayCard() {
                 console.log(this.tag+" clicked play card button");
-                // If a mode is currently enabled; disable it
-                if (this.modes.select_tile) this.modes.select_tile = false;
-                if (this.modes.select_tunnel) this.modes.select_tunnel = false;
-                if (this.modes.select_gold_location) this.modes.select_gold_location = false;
                 // Grab the card's index & data
                 let card, index;
                 for (let i = 0; i < this.mutableHand.length; i++) {
@@ -3047,6 +3177,46 @@
                     }
                 }
             },
+            // Rewards
+            teamToPlural(team) {
+                if (team === "saboteur") {
+                    return "saboteurs";
+                } else if (team === "profiteer") {
+                    return "profiteurs";
+                } else if (team === "geologist") {
+                    return "geologen";
+                } else if (team === "green_digger") {
+                    return "goudzoekers (team groen)";
+                } else if (team === "blue_digger") {
+                    return "goudzoekers (team blauw)";
+                }
+                return "";
+            },
+            onClickReadyForNextRound() {
+                console.log(this.tag+" clicked ready for next round button");
+                // Start loading
+                this.rewards.loading = true;
+                // Send API request
+                this.sendPerformActionRequest("flag_ready")
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" succesfully flagged player as ready", response);
+                        // Stop loading
+                        this.rewards.loading = false;
+                        // Update the player's ready state
+                        for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                            if (this.mutableRound.revealed_players[i].player.id === this.mutablePlayer.id) {
+                                this.mutableRound.revealed_players[i].ready = true;
+                                break;
+                            }
+                        }
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(error) {
+                        console.warn(this.tag+" failed to flag player as ready, error: ", error);
+                        this.rewards.loading = false;
+                    }.bind(this));
+            },
             // API interaction
             sendPerformActionRequest(action, data) {
                 return new Promise(function(resolve, reject) {
@@ -3107,6 +3277,14 @@
                     return card.image_url;
                 }
                 return "";
+            },
+            getUsernameByPlayerId(playerId) {
+                for (let i = 0; i < this.mutablePlayers.length; i++) {
+                    if (this.mutablePlayers[i].id === playerId) {
+                        return this.mutablePlayers[i].user.username;
+                    }
+                }
+                return "-";
             },
             // Tunnel placement
             tileHasCard(rowIndex, columnIndex) {
@@ -3373,11 +3551,12 @@
                     if (card.type === "start") {
                         return true;
                     // Otherwise; if it's not a gold location related card
-                    } else if (card.type !== "gold_location" && card.type !== "gold" && card.type !== "coal") {
+                    } else if (card.type !== "gold_location" || card.type !== "gold" || card.type !== "coal") {
                         // Check if the card is inverted or not
                         let inverted = this.mutableRound.board[tileAbove[0]][tileAbove[1]].inverted;
                         // Determine the connected "open position" of the card above
                         let connected_position = inverted ? "top" : "bottom";
+                        console.log("-- card above: ", card, card.open_positions);
                         // If the card is connected to the current coordinates
                         if (card.open_positions.includes(connected_position)) {
                             // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
@@ -3402,7 +3581,7 @@
                     let card = this.getCardById(this.mutableRound.board[tileRight[0]][tileRight[1]].card_id);
                     if (card.type === "start") {
                         return true;
-                    } else if (card.type !== "gold_location" && card.type !== "gold" && card.type !== "coal") {
+                    } else if (card.type !== "gold_location" || card.type !== "gold" || card.type !== "coal") {
                         let inverted = this.mutableRound.board[tileRight[0]][tileRight[1]].inverted;
                         let connected_position = inverted ? "right" : "left";
                         // If the card is connected to the current coordinates
@@ -3429,9 +3608,10 @@
                     let card = this.getCardById(this.mutableRound.board[tileBelow[0]][tileBelow[1]].card_id);
                     if (card.type === "start") {
                         return true;
-                    } else if (card.type !== "gold_location" && card.type !== "gold" && card.type !== "coal") {
+                    } else if (card.type !== "gold_location" || card.type !== "gold" || card.type !== "coal") {
                         let inverted = this.mutableRound.board[tileBelow[0]][tileBelow[1]].inverted;
                         let connected_position = inverted ? "bottom" : "top";
+                        console.log("-- card below: ", card, card.open_positions);
                         // If the card is connected to the current coordinates
                         if (card.open_positions.includes(connected_position)) {
                             // If the card has a ladder & the ladder is either located on the connected position or the center tile is available (making all possible ladder positions reachable)
@@ -3457,7 +3637,7 @@
                     // console.log("[-] tile to left has card: ", card);
                     if (card.type === "start") {
                         return true;
-                    } else if (card.type !== "gold_location" && card.type !== "gold" && card.type !== "coal") {
+                    } else if (card.type !== "gold_location" || card.type !== "gold" || card.type !== "coal") {
                         let inverted = this.mutableRound.board[tileLeft[0]][tileLeft[1]].inverted;
                         let connected_position = inverted ? "left" : "right";
                         // If the card is connected to the current coordinates
@@ -3477,6 +3657,8 @@
                         }
                     }
                 }
+
+                console.log("-- connected tiles: ", connected_tiles);
 
                 // If we found some connected tiles
                 if (connected_tiles.length > 0) {
@@ -3765,6 +3947,112 @@
     #round-over-ui {
         width: 100%;
         height: 100%;
+        display: flex;
+        padding: 100px 50px;
+        align-items: center;
+        flex-direction: column;
+        box-sizing: border-box;
+        #round-over-ui__title {
+            text-align: center;
+        }
+        #round-over-ui__subtitle {
+            font-size: .9em;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        #round-over-ui__players {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: center;
+            margin: 50px -15px -30px -15px;
+            .player-wrapper {
+                flex: 0 0 250px;
+                box-sizing: border-box;
+                padding: 0 15px 30px 15px;
+                .player {
+                    width: 100%;
+                    padding: 20px;
+                    color: #000000;
+                    border-radius: 3px;
+                    box-sizing: border-box;
+                    background-color: #ffffff;
+                    &.winner {
+                        margin: -5px;
+                        border: 5px solid #00a100;
+                    }
+                    .player-username {
+                        text-align: center;
+                        font-size: 1.2em;
+                    }
+                    .player-avatar {
+                        width: 100px;
+                        height: 100px;
+                        margin: 15px auto;
+                        border-radius: 50px;
+                        background-color: hsl(0, 0%, 95%);
+                    }
+                    .player-role__wrapper {
+                        margin: 2px 0;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: center;
+                        .player-role {
+                            color: #fff;
+                            font-size: .7em;
+                            padding: 2px 5px;
+                            text-align: center;
+                            border-radius: 3px;
+                            display: inline-block;
+                            box-sizing: border-box;
+                            background-color: #333;
+                            text-transform: uppercase;
+                        }
+                    }
+                    .player-reward {
+                        margin: 20px 0;
+                        text-align: center;
+                        .gold {
+                            color: #db9600;
+                            font-weight: 500;
+                        }
+                    }
+                    .player-ready {
+                        text-align: center;
+                        .ready {
+                            color: #39b410;
+                        }
+                        .not-ready {
+                            color: #b20404;
+                        }
+                    }
+                }
+            }
+        }
+        #round-over-ui__ready-up {
+            margin: 50px 0 0 0;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            #ready-up__title {
+                text-align: center;
+            }
+            #ready-up__not-ready {
+                .v-btn {
+                    margin: 0;
+                }
+            }
+            #ready-up__ready {
+                border-radius: 3px;
+                padding: 10px 15px;
+                box-sizing: border-box;
+                background-color: #111111;
+            }
+        }
+        // #round-over-ui__
     }
     #game-over-ui {
         width: 100%;

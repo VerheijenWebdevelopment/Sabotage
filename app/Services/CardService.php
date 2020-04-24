@@ -105,15 +105,15 @@ class CardService implements ModelServiceContract
         // ];
         // $out[] = $recoverCombos[rand(0, 2)]->id;
 
-        // Add 3 collapse cards
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
-        $out[] = $action_collapse->id;
+        // // Add 3 collapse cards
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
+        // $out[] = $action_collapse->id;
 
         // // Add 6 enlighten cards
         // $out[] = $action_enlighten->id;

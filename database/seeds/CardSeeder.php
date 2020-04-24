@@ -30,7 +30,8 @@ class CardSeeder extends Seeder
             "type" => "gold_location",
             "text" => "Gold Location",
             "name" => "gold_location",
-            "description" => "Possible location of shiny gold."
+            "description" => "Possible location of shiny gold.",
+            "open_positions" => ["top", "right", "bottom", "left", "center"],
         ]);
 
         $gold_location_coal_card = Card::create([

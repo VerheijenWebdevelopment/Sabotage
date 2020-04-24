@@ -350,7 +350,7 @@ class BoardService
         $contains_gold = $goldLocation == $game->currentRound->gold_location ? true : false;
 
         // Add the gold location to the list of revealed gold locations
-        $reachedGoldLocations = $game->currentRound->reached_gold_locations;
+        $reachedGoldLocations = (array) $game->currentRound->reached_gold_locations;
         $reachedGoldLocations[$goldLocation] = $contains_gold;
         $game->currentRound->reached_gold_locations = $reachedGoldLocations;
 

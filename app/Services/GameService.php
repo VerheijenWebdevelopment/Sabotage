@@ -13,6 +13,7 @@ use GameMessages;
 use App\Models\User;
 use App\Models\Card;
 use App\Models\Game;
+use App\Models\Role;
 use App\Models\Player;
 use App\Models\GameChatMessage;
 
@@ -1013,28 +1014,56 @@ class GameService implements ModelServiceContract
         // If we're in the game phase
         if ($game->currentRound->phase == "role_selection" || $game->currentRound->phase == "main")
         {
-            // Simply go clockwise; so + 1
-            $newPlayerNumber = $game->currentRound->players_turn + 1;
+            // Start by checking the next player in line
+            $i = 1;
 
-            // If we've reached a ghost; go back to player one
-            if ($newPlayerNumber > $game->players->count()) $newPlayerNumber = 1;
+            // Keep looping until we find the next player to have the turn; infinite loop is broken by the return
+            while(true)
+            {
+                // Determine the next player to check's number
+                $newPlayerNumber = $game->currentRound->players_turn + $i;
+                if ($newPlayerNumber > $game->players->count()) $newPlayerNumber = 1;
 
-            // Return the new player's number
-            return $newPlayerNumber;
+                // Grab the player
+                $newPlayer = $this->getPlayerByNumber($newPlayerNumber, $game);
+
+                // If the player still has cards in his/her hand; we found the next player to have a turn
+                if (count($newPlayer->hand)) return $newPlayerNumber;
+
+                // Otherwise keep going and process the next player in line
+                $i++;
+            }
         }
-        // If we're in the rewards phase and the winning team are the goldiggers (otherwise rewards are instant and there are no turns)
-        else if ($game->currentRound->phase == "rewards" && $game->currentRound->winning_team == "golddiggers")
+        // If we're in the rewards phase
+        else if ($game->currentRound->phase == "rewards")
         {
-            // Generate an array of players keyed by their player number for easy peasy access
-            $players = [];
-            foreach ($game->players as $player) $players[$player->player_number] = $player;
-
-            // No we go counter clockwise and we only give the turn to golddiggers; she taaaake my mooooney
-            return $this->findNextGoldDigger($game->currentRound->players_turn, $players);
+            // Check if there are players who get to steal someones gold
+            $thiefs = [];
+            foreach ($game->currentRound->revealed_players as $revealedPlayer)
+            {
+                // Return the first one we find; fuck order.. CHAOS!
+                if ($revealedPlayer["can_steal"] && !$revealedPlayer["has_stolen"])
+                {
+                    return $revealedPlayer["player"]->player_number;
+                }
+            }
         }
 
         // If we're in another phase; i'm pretty sure we're fucked bigtime; let's just return the first player
         return 1;
+    }
+    
+    private function getPlayerByNumber($number, Game $game)
+    {
+        foreach ($game->players as $player)
+        {
+            if ($player->player_number == $number)
+            {
+                return $player;
+            }
+        }
+
+        return false;
     }
 
     private function findNextGoldDigger($currentPlayerNumber, $players)
@@ -1184,26 +1213,26 @@ class GameService implements ModelServiceContract
     private function flagPlayerAsReadyForNextRound(Game $game, Player $player)
     {
         // Update the game's revealed players array
-        $revealedPlayers = $game->revealed_players;
+        $revealedPlayers = (array) $game->currentRound->revealed_players;
         for ($i = 0; $i < count($revealedPlayers); $i++) {
-            if ($revealedPlayers[$i]["player"]->id == $player->id) {
-                $revealedPlayers[$i]["ready"] = true;
+            if ($revealedPlayers[$i]->player->id == $player->id) {
+                $revealedPlayers[$i]->ready = true;
                 break;
             }
         }
 
         // Save the updated array on the game
-        $game->revealed_players = $revealedPlayers;
-        $game->save();
+        $game->currentRound->revealed_players = $revealedPlayers;
+        $game->currentRound->save();
 
         // Broadcast to all other players that the player is ready
         broadcast(new PlayerIsReadyForNextRound($game, $player))->toOthers();
 
         // Determine how many players are ready
         $numPlayersReady = 0;
-        foreach ($game->revealed_players as $revealedPlayer)
+        foreach ($game->currentRound->revealed_players as $revealedPlayer)
         {
-            if ($revealedPlayer["ready"])
+            if ($revealedPlayer->ready)
             {
                 $numPlayersReady += 1;
             }
@@ -1300,7 +1329,7 @@ class GameService implements ModelServiceContract
 
         return false;
     }
-
+    
     public function playerIsInGame(Player $player, Game $game)
     {
         foreach (Players::getAllForGame($game) as $p)
