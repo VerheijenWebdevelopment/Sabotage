@@ -124,10 +124,10 @@ class CardService implements ModelServiceContract
         // $out[] = $action_enlighten->id;
 
         // // Add 4 thiefery cards
-        // $out[] = $action_thief->id;
-        // $out[] = $action_thief->id;
-        // $out[] = $action_thief->id;
-        // $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
+        $out[] = $action_thief->id;
 
         // // Add 3 dont touch cards
         // $out[] = $action_dont_touch->id;

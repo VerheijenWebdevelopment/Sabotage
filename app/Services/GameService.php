@@ -32,6 +32,7 @@ use App\Events\Game\PlayerPlacedTunnel;
 use App\Events\Game\PlayerCollapsedTunnel;
 use App\Events\Game\PlayerHandChanged;
 use App\Events\Game\PlayerRoleChanged;
+use App\Events\Game\PlayerStoleGold;
 use App\Events\Game\TurnEnded;
 use App\Events\Game\RoundEnded;
 use App\Events\Game\GameEnded;
@@ -295,22 +296,22 @@ class GameService implements ModelServiceContract
             // -----------------------------------------------------
 
             // Player has selected gold reward card
-            case "select_gold_reward_card":
+            case "steal_gold":
 
                 // Validate data
                 if (is_null($data)) throw new Exception("Missing required data");
-                if (!array_key_exists("index", $data)) throw new Exception("Missing reward card index");
+                if (!array_key_exists("player_id", $data)) throw new Exception("Missing target player id");
 
-                // Perform the operation; returns the selected reward card
-                $output = $this->performSelectGoldRewardCard($game, $player, $data["index"]);
-
+                // Perform the operation
+                $this->performStealGold($game, $player, $data["player_id"]);
+                
             break;
             
             // Player is ready for the next round
             case "flag_ready":
 
                 // Perform operation
-                $game = $this->flagPlayerAsReadyForNextRound($game, $player);
+                $this->flagPlayerAsReadyForNextRound($game, $player);
                 
                 // Skip the end turn & end round logic
                 return [];
@@ -337,6 +338,43 @@ class GameService implements ModelServiceContract
 
         // Return the output from the action we've performed
         return $output;
+    }
+
+    private function performStealGold(Game $game, Player $player, int $targetPlayerId)
+    {
+        // Grab the player we're stealing gold from
+        $targetPlayer = Players::find($targetPlayerId);
+        if (!$targetPlayer) throw new Exception("Target player ID was invalid");
+        if ($targetPlayer->score === 0) throw new Exception("Target player does not have any gold to steal");
+
+        // Steal one gold from the target player
+        $targetPlayer->score -= 1;
+        $targetPlayer->save();
+
+        // Grab a not-preloaded version of the current player
+        $cleanPlayer = Player::find($player->id);
+        
+        // Add it to our own reward
+        $cleanPlayer->score += 1;
+        $cleanPlayer->save();
+
+        // Update the current round's revealed players
+        $revealedPlayers = (array) $game->currentRound->revealed_players;
+        for ($i = 0; $i < count($revealedPlayers); $i++) {
+            if ($revealedPlayers[$i]->player->id === $player->id) {
+                $revealedPlayers[$i]->player->score += 1;
+                $revealedPlayers[$i]->reward += 1;
+                $revealedPlayers[$i]->has_stolen = true;
+            } else if ($revealedPlayers[$i]->player->id === $targetPlayer->id) {
+                $revealedPlayers[$i]->player->score -= 1;
+                $revealedPlayers[$i]->reward -= 1;
+            }
+        }
+        $game->currentRound->revealed_players = $revealedPlayers;
+        $game->currentRound->save();
+
+        // Broadcast event to other players
+        broadcast(new PlayerStoleGold($game, $player, $targetPlayer))->toOthers();
     }
 
     private function performRoleCardSelected(Game $game, Player $player, int $cardIndex)
@@ -839,7 +877,7 @@ class GameService implements ModelServiceContract
             foreach ($reached_gold_locations as $gold_location)
             {
                 // If the gold location had not been revealed yet
-                if (!array_key_exists($gold_location, $game->currentRound->reached_gold_locations))
+                if (!array_key_exists($gold_location, (array) $game->currentRound->reached_gold_locations))
                 {
                     // Replace the gold location card in question with the revealed gold location card (coal/gold card)
                     $game = Board::revealGoldLocation($game, $gold_location);
@@ -852,88 +890,6 @@ class GameService implements ModelServiceContract
 
         // Return the updated game
         return $game;
-    }
-
-    private function performSelectGoldRewardCard(Game $game, Player $player, int $cardIndex)
-    {
-        // Grab the reward card that's associated with the selected card
-        $rewardCard = Cards::find($game->reward_deck[$cardIndex]);
-        if (!$rewardCard) throw new Exception("Failed to retrieve the selected reward card");
-
-        // Remove the card from the deck
-        $newDeck = $game->reward_deck;
-        unset($newDeck[$cardIndex]);
-
-        // Save the new deck
-        $game = Game::find($game->id);
-        $game->reward_deck = array_values($newDeck);
-        $game->num_cards_reward_deck = count($newDeck);
-        $game->save();
-
-        // Determine the reward based on the selected card
-        $reward = 0;
-        switch ($rewardCard->name)
-        {
-            case "reward_one_gold":
-                $reward = 1;
-            break;
-            case "reward_two_gold":
-                $reward = 2;
-            break;
-            case "reward_three_gold":
-                $reward = 3;
-            break;
-            case "reward_four_gold":
-                $reward = 4;
-            break;
-        }
-
-        // Award the player their reward
-        $player = Player::find($player->id);
-        $player->score = $player->score + $reward;
-        $player->save();
-
-        // Update the revealed players entry for the player
-        $revealedPlayers = $game->revealed_players;
-        for ($i = 0; $i < count($revealedPlayers); $i++)
-        {
-            if ($revealedPlayers[$i]["player"]->id == $player->id)
-            {
-                $revealedPlayers[$i]["gold_awarded"] = $reward;
-                $revealedPlayers[$i]["gold_reward_card"] = $rewardCard;
-                $revealedPlayers[$i]["selected_reward"] = true;
-                break;
-            }
-        }
-        $game->revealed_players = $revealedPlayers;
-        $game->save();
-
-        // Broadcast event to all other players what the foshizzle just happened
-        broadcast(new PlayerWasAwardedGold($game, $player, $reward, $rewardCard))->toOthers();
-
-        // Determine the number of gold diggers that are playing and the number of gold diggers that have picked their reward
-        $num_diggers = 0;
-        $num_diggers_rewarded = 0;
-        foreach ($revealedPlayers as $revealedPlayer)
-        {
-            if ($revealedPlayer["player"]->role->name == "digger") 
-            {
-                $num_diggers += 1;
-                if ($revealedPlayer["selected_reward"]) $num_diggers_rewarded += 1;
-            }
-        }
-
-        // If all golddiggers have now selected their reward and this is the third round; end the game
-        if ($num_diggers == $num_diggers_rewarded && $game->round == 3)
-        {
-            $this->endGame($game);
-        }
-
-        // Return the data
-        return [
-            "reward_card" => $rewardCard,
-            "reward" => $reward,
-        ];
     }
 
     private function drawCard(Game $game, Player $player = null)
@@ -1042,9 +998,9 @@ class GameService implements ModelServiceContract
             foreach ($game->currentRound->revealed_players as $revealedPlayer)
             {
                 // Return the first one we find; fuck order.. CHAOS!
-                if ($revealedPlayer["can_steal"] && !$revealedPlayer["has_stolen"])
+                if ($revealedPlayer->can_steal && !$revealedPlayer->has_stolen)
                 {
-                    return $revealedPlayer["player"]->player_number;
+                    return $revealedPlayer->player->player_number;
                 }
             }
         }
@@ -1127,7 +1083,7 @@ class GameService implements ModelServiceContract
         $game->currentRound->phase = "rewards";
 
         // Determine whether or not the gold has been found
-        $gold_found = array_key_exists($game->currentRound->gold_location, $game->currentRound->reached_gold_locations);
+        $gold_found = array_key_exists($game->currentRound->gold_location, (array) $game->currentRound->reached_gold_locations);
 
         // Determine the winning teams & save them on the current round
         $winningTeams = [];
@@ -1186,18 +1142,26 @@ class GameService implements ModelServiceContract
         }
         $game->currentRound->revealed_players = $revealedPlayers;
 
+        // Determine what player to give the first turn
+        $firstPlayerNumber = 1;
+        foreach ($revealedPlayers as $revealedPlayer)
+        {
+            if ($revealedPlayer["can_steal"]) $firstPlayerNumber = $revealedPlayer["player"]->player_number;
+        }
+        $game->currentRound->players_turn = $firstPlayerNumber;
+
         // Save changes we made to the game
         $game->currentRound->save();
 
-        // If this is the last round
-        if ($game->currentRound->round_number == $game->settings->num_rounds)
-        {
-            // End the game
-            $this->endGame($game);
-        }
-        // Otherwise; broadcast the round ended event
-        else
-        {
+        // // If this is the last round
+        // if ($game->currentRound->round_number == $game->settings->num_rounds)
+        // {
+        //     // End the game
+        //     $this->endGame($game);
+        // }
+        // // Otherwise; broadcast the round ended event
+        // else
+        // {
             // Compose the data we want to send to the client (all updates we've done basically except for the deck)
             $data = [
                 "gold_found" => $gold_found,
@@ -1207,7 +1171,7 @@ class GameService implements ModelServiceContract
 
             // Broadcast event to all players (including the one who initiated this process)
             broadcast(new RoundEnded($game, $data));
-        }
+        // }
     }
 
     private function flagPlayerAsReadyForNextRound(Game $game, Player $player)
@@ -1251,24 +1215,33 @@ class GameService implements ModelServiceContract
 
     private function startNewRound(Game $game)
     {
-        // Reset the players
-        foreach ($game->players as $player)
+        // If this is the last round
+        if ($game->currentRound->round_number == $game->settings->num_rounds)
         {
-            $player->role_id = null;
-            $player->cart_available = true;
-            $player->light_available = true;
-            $player->pickaxe_available = true;
-            $player->in_jail = false;
-            $player->thief_activated = false;
-            $player->hand = [];
-            $player->save();
+            // End the game
+            $this->endGame($game);
         }
-
-        // Re-prepare the game for the next round
-        $game = $this->prepareGame($game);
-
-        // Broadcast event to all players
-        broadcast(new NewRoundStarted($game));
+        else
+        {
+            // Reset the players
+            foreach ($game->players as $player)
+            {
+                $player->role_id = null;
+                $player->cart_available = true;
+                $player->light_available = true;
+                $player->pickaxe_available = true;
+                $player->in_jail = false;
+                $player->thief_activated = false;
+                $player->hand = [];
+                $player->save();
+            }
+    
+            // Re-prepare the game for the next round
+            $game = $this->prepareGame($game);
+    
+            // Broadcast event to all players
+            broadcast(new NewRoundStarted($game));
+        }
     }
 
     private function endGame(Game $game)

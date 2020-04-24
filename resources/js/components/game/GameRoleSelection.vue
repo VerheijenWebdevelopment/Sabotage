@@ -203,7 +203,7 @@
                         cursor: pointer;
                         background-color: hsl(0, 0%, 95%);
                         .role-card__icon {
-                            animation: rotation .2s infinite linear;
+                            animation: rotation 2s infinite linear;
                         }
                     }
                     .role-card__icon {

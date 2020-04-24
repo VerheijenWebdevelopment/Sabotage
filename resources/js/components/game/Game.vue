@@ -187,17 +187,37 @@
                     <div id="round-over-ui__steal-gold" v-if="canStealGoldFromPlayer">
 
                         <!-- Waiting on turn (to steal) -->
-                        <div id="steal-gold__waiting" v-if="!itsMyTurn && !revealedMe.has_stolen">
+                        <div id="steal-gold__waiting" v-if="showThiefWaitingForTurn">
                             Zodra je aan de beurt bent kan je goud stelen van een medespeler.
                         </div>
 
-                        <!-- Steal -->
-                        <div id="steal-gold" v-if="itsMyTurn && !revealedMe.has_stolen">
+                        <!-- No gold to steal -->
+                        <div id="steal-gold__not-possible" v-if="showThiefNoGold">
+                            Helaas valt er weinig te stelen deze ronde, better luck next time jij sneaky kaboutertje.
+                        </div>
 
+                        <!-- Steal -->
+                        <div id="steal-gold" v-if="showThiefActions">
+                            <div class="select-player">
+                                <div class="select-player__title">Selecteer de gebruiker waarvan je 1 goud wilt stelen</div>
+                                <div class="select-player__list">
+                                    <div class="select-player__list-item" v-for="(player, pi) in thiefTargets" :key="pi">
+                                        <div class="player-option" :class="{ selected: rewards.thief_target_id === player.id }" @click="onClickSelectThiefTarget(player.id)">
+                                            {{ player.user.username }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="steal-gold__action">
+                                <v-btn small dark @click="onClickStealGold" :loading="rewards.loading" :disabled="stealButtonDisabled">
+                                    <i class="fas fa-hand-middle-finger"></i>
+                                    Steel 1 goud
+                                </v-btn>
+                            </div>
                         </div>
 
                         <!-- Gold stolen -->
-                        <div id="steal-gold__done" v-if="revealedMe.has_stolen">
+                        <div id="steal-gold__done" v-if="showThiefHasStolen">
                             Je hebt goud gejat, jij sneaky kaboutertje.
                         </div>
 
@@ -225,7 +245,29 @@
                 <!-- End of game phase -->
                 <div id="game-over-ui" v-if="mutableRound.phase === 'endgame'">
 
-                    End of game
+                    <!-- Title -->
+                    <h1 id="game-over-ui__title">Game Over</h1>
+
+                    <!-- Winners -->
+                    <div id="game-over-ui__winners">
+                        <div id="game-over-ui__winners-title">{{ winnersTitle }}</div>
+                        <div id="game-over-ui__winners-list">
+                            <div class="winner-wrapper" v-for="(winner, wi) in winnerData" :key="wi">
+                                <div class="winner">
+                                    <div class="winner-name">{{ winner.user.username }}</div>
+                                    <div class="winner-avatar" :style="{ backgroundImage: 'url('+winner.user.avatar_url+')' }"></div>
+                                    <div class="winner-score">{{ winner.score }} goud</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div id="game-over-ui__actions">
+                        <v-btn :href="lobbyHref" color="white">
+                            Terug naar de lobby
+                        </v-btn>
+                    </div>
 
                 </div>
 
@@ -1151,6 +1193,7 @@
             "cards",
             "icons",
             "apiEndpoints",
+            "lobbyHref",
         ],
         data: () => ({
             tag: "[game]",
@@ -1300,6 +1343,7 @@
             rewards: {
                 loading: false,
                 gold_found: false,
+                thief_target_id: null,
             },
             winners: [],
         }),
@@ -1347,7 +1391,11 @@
                 return this.selectedHandCards.length;
             },
             showCardActions() {
-                return this.numSelectedHandCards > 0 && this.numSelectedHandCards < 4;
+                if (this.itsMyTurn) {
+                    return this.numSelectedHandCards > 0 && this.numSelectedHandCards < 4;
+                } else {
+                    return this.numSelectedHandCards === 1;
+                }
             },
             showCardActionPlay() {
                 if (this.numSelectedHandCards === 1 && this.itsMyTurn) {
@@ -1677,30 +1725,69 @@
             },
             // Round over
             roundOverWinnersText() {
+
+                let updatedWinners = this.mutableRound.winning_teams;
+                if (updatedWinners.includes("blue_digger") && updatedWinners.includes("green_digger")) {
+                    let blueDiggerIndex = updatedWinners.indexOf("blue_digger");
+                    updatedWinners.splice(blueDiggerIndex, 1);
+                    let greenDiggerIndex = updatedWinners.indexOf("green_digger");
+                    updatedWinners.splice(greenDiggerIndex, 1);
+                    updatedWinners.unshift("goudzoekers");
+                }
+
+                let optionalWinners = ["profiteer", "geologist", "chef"];
+                for (let i = 0; i < optionalWinners.length; i++) {
+                    if (updatedWinners.includes(optionalWinners[i])) {
+                        let hasMatchingWinner = false;
+                        for (let j = 0; j < this.mutableRound.revealed_players.length; j++) {
+                            if (this.mutableRound.revealed_players[j].role.name === optionalWinners[i]) {
+                                hasMatchingWinner = true;
+                                break;
+                            }
+                        }
+                        if (!hasMatchingWinner) {
+                            let index = updatedWinners.indexOf(optionalWinners[i]);
+                            updatedWinners.splice(index, 1);
+                        }
+                    }
+                }
+
                 let out = "De ";
-                if (this.mutableRound.winning_teams.length === 1) {
-                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
-                } else if (this.mutableRound.winning_teams.length === 2) {
-                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                if (updatedWinners.length === 1) {
+                    out += this.teamToPlural(updatedWinners[0]);
+                } else if (updatedWinners.length === 2) {
+                    out += this.teamToPlural(updatedWinners[0]);
                     out += " en ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
-                } else if (this.mutableRound.winning_teams.length === 3) {
-                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                    out += this.teamToPlural(updatedWinners[1]);
+                } else if (updatedWinners.length === 3) {
+                    out += this.teamToPlural(updatedWinners[0]);
                     out += ", ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
+                    out += this.teamToPlural(updatedWinners[1]);
                     out += " en ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[2]);
-                } else if (this.mutableRound.winning_teams.length === 4) {
-                    out += this.teamToPlural(this.mutableRound.winning_teams[0]);
+                    out += this.teamToPlural(updatedWinners[2]);
+                } else if (updatedWinners.length === 4) {
+                    out += this.teamToPlural(updatedWinners[0]);
                     out += ", ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[1]);
+                    out += this.teamToPlural(updatedWinners[1]);
                     out += ", ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[2]);
+                    out += this.teamToPlural(updatedWinners[2]);
                     out += " en ";
-                    out += this.teamToPlural(this.mutableRound.winning_teams[3]);
+                    out += this.teamToPlural(updatedWinners[3]);
+                } else if (updatedWinners.length === 5) {
+                    out += this.teamToPlural(updatedWinners[0]);
+                    out += ", ";
+                    out += this.teamToPlural(updatedWinners[1]);
+                    out += ", ";
+                    out += this.teamToPlural(updatedWinners[2]);
+                    out += ", ";
+                    out += this.teamToPlural(updatedWinners[3]);
+                    out += " en ";
+                    out += this.teamToPlural(updatedWinners[5]);
                 }
                 out += " hebben gewonnen!";
+
                 return out;
+
             },
             revealedMe() {
                 if (this.mutableRound.revealed_players !== null && this.mutableRound.revealed_players.length > 0) {
@@ -1711,6 +1798,15 @@
                     }
                 }
                 return false;
+            },
+            revealedPlayersExceptMe() {
+                let out = [];
+                for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                    if (this.mutableRound.revealed_players[i].player.id !== this.mutablePlayer.id) {
+                        out.push(this.mutableRound.revealed_players[i]);
+                    }
+                }
+                return out;
             },
             canStealGoldFromPlayer() {
                 if (this.revealedMe) {
@@ -1727,6 +1823,67 @@
                     }
                 }
                 return false;
+            },
+            thereIsGoldToSteal() {
+                for (let i = 0; i < this.revealedPlayersExceptMe.length; i++) {
+                    if (this.revealedPlayersExceptMe[i].reward > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            showThiefWaitingForTurn() {
+                return !this.itsMyTurn && !this.revealedMe.has_stolen && this.thereIsGoldToSteal;
+            },
+            showThiefActions() {
+                return this.itsMyTurn && !this.revealedMe.has_stolen && this.thereIsGoldToSteal && this.thiefTargets.length > 0;
+            },
+            otherThiefsHaveNotStolenYet() {
+                for (let i = 0; i < this.revealedPlayersExceptMe.length; i++) {
+                    if (this.revealedPlayersExceptMe[i].can_steal && !this.revealedPlayersExceptMe[i].has_stolen) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            showThiefNoGold() {
+                return !this.thereIsGoldToSteal && !this.otherThiefsHaveNotStolenYet && !this.revealedMe.has_stolen;
+            },
+            showThiefHasStolen() {
+                return this.revealedMe.has_stolen;
+            },
+            thiefTargets() {
+                let out = [];
+                for (let i = 0; i < this.revealedPlayersExceptMe.length; i++) {
+                    if (this.revealedPlayersExceptMe[i].reward > 0) {
+                        for (let j = 0; j < this.mutablePlayers.length; j++) {
+                            if (this.mutablePlayers[j].id === this.revealedPlayersExceptMe[i].player.id) {
+                                out.push(this.mutablePlayers[j]);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return out;
+            },
+            stealButtonDisabled() {
+                return this.rewards.thief_target_id === null;
+            },
+            // Game over
+            winnersTitle() {
+                return this.winners.length === 0 ? "Winnaar" : "Winnaars";
+            },
+            winnerData() {
+                let out = [];
+                for (let i = 0; i < this.winners.length; i++) {
+                    for (let j = 0; j < this.mutablePlayers.length; j++) {
+                        if (this.mutablePlayers[j].id === this.winners[i]) {
+                            out.push(this.mutablePlayers[j]);
+                            break;
+                        }
+                    }
+                }
+                return out;
             },
         },
         methods: {
@@ -1800,7 +1957,7 @@
                     .listen('Game\\GoldLocationRevealed', this.onGoldLocationRevealed)
                     .listen('Game\\PlayerPlacedTunnel', this.onPlayerPlacedTunnel)
                     .listen('Game\\PlayerCollapsedTunnel', this.onPlayerCollapsedTunnel)
-                    .listen('Game\\PlayerWasAwardedGold', this.onPlayerWasAwardedGold)
+                    .listen('Game\\PlayerStoleGold', this.onPlayerStoleGold)
                     .listen('Game\\TurnEnded', this.onTurnEnded)
                     .listen('Game\\PlayerIsReadyForNextRound', this.onPlayerReadyForNextRound)
                     .listen('Game\\NewRoundStarted', this.onNewRoundStarted)
@@ -1992,8 +2149,18 @@
                 // Update the game board
                 this.mutableRound.board = e.game.current_round.board;
             },
-            onPlayerWasAwardedGold(e) {
-                console.log(this.tag+"[event] received event player was awarded gold:", e);
+            onPlayerStoleGold(e) {
+                console.log(this.tag+"[event] received event 'player stole gold': ", e);
+
+                // Update revealed players
+                for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                    if (this.mutableRound.revealed_players[i].player.id === e.player.id) {
+                        this.mutableRound.revealed_players[i].reward += 1;
+                        this.mutableRound.revealed_players[i].has_stolen = true;
+                    } else if (this.mutableRound.revealed_players[i].player.id === e.target_player.id) {
+                        this.mutableRound.revealed_players[i].reward -= 1;
+                    }
+                }
 
             },
             onPlayerRoleChanged(e) {
@@ -2015,6 +2182,8 @@
             onTurnEnded(e) {
                 console.log(this.tag+"[event] received event turn ended:", e);
                 
+                // Update round's state
+                this.mutableRound.turn_number = e.game.current_round.turn_number;
                 this.mutableRound.players_turn = e.game.current_round.players_turn;
                 this.mutableRound.num_cards_in_deck = e.game.current_round.num_cards_in_deck;
 
@@ -2029,7 +2198,7 @@
                     this.mutableRound.phase = "rewards";
 
                     // Set the player who is at turn
-                    this.mutableRound.players_turn = e.game.current_round.player_turn;
+                    this.mutableRound.players_turn = e.game.current_round.players_turn;
 
                     // Set whether or not the gold has been found
                     this.rewards.gold_found = e.data.gold_found;
@@ -3190,7 +3359,7 @@
                 } else if (team === "blue_digger") {
                     return "goudzoekers (team blauw)";
                 }
-                return "";
+                return team;
             },
             onClickReadyForNextRound() {
                 console.log(this.tag+" clicked ready for next round button");
@@ -3214,6 +3383,46 @@
                     // Request failed
                     .catch(function(error) {
                         console.warn(this.tag+" failed to flag player as ready, error: ", error);
+                        this.rewards.loading = false;
+                    }.bind(this));
+            },
+            onClickSelectThiefTarget(id) {
+                console.log(this.tag+" clicked select thief target button, id: ", id);
+                if (this.rewards.thief_target_id === id) {
+                    this.rewards.thief_target_id = null;
+                } else {
+                    this.rewards.thief_target_id = id;
+                }
+            },
+            onClickStealGold() {
+                console.log(this.tag+" clicked steal gold button");
+                // Start loading
+                this.rewards.loading = true;
+                // Compose API request payload
+                let data = {
+                    player_id: this.rewards.thief_target_id,
+                };
+                // Send API request
+                this.sendPerformActionRequest("steal_gold", data)
+                    // Request succeeded
+                    .then(function(response) {
+                        console.log(this.tag+" request succeeded", response.data);
+                        // Update revealed players
+                        for (let i = 0; i < this.mutableRound.revealed_players.length; i++) {
+                            if (this.mutableRound.revealed_players[i].player.id === this.mutablePlayer.id) {
+                                this.mutableRound.revealed_players[i].reward += 1;
+                                this.mutableRound.revealed_players[i].has_stolen = true;
+                            } else if (this.mutableRound.revealed_players[i].player.id === this.rewards.thief_target_id) {
+                                this.mutableRound.revealed_players[i].reward -= 1;
+                            }
+                        }
+                        // Stop loading
+                        this.rewards.loading = false;
+                    }.bind(this))
+                    // Request failed
+                    .catch(function(error) {
+                        console.log(this.tag+" request failed", error.data);
+                        // Stop loading
                         this.rewards.loading = false;
                     }.bind(this));
             },
@@ -3741,6 +3950,7 @@
         #game-ui__round-info {
             top: 30px;
             left: 30px;
+            z-index: 2000;
             position: absolute;
             #round-info__current-round {
                 font-size: 2em;
@@ -3756,6 +3966,7 @@
             left: 0;
             top: 30px;
             width: 100%;
+            z-index: 2000;
             display: flex;
             position: absolute;
             flex-direction: row;
@@ -4052,11 +4263,122 @@
                 background-color: #111111;
             }
         }
-        // #round-over-ui__
+        #round-over-ui__steal-gold {
+            display: flex;
+            margin: 50px 0 0 0;
+            flex-direction: column;
+            #steal-gold__waiting {
+                border-radius: 3px;
+                padding: 10px 15px;
+                box-sizing: border-box;
+                background-color: #111111;
+            }
+            #steal-gold {
+                .select-player {
+                    width: 100%;
+                    .select-player__title {
+                        text-align: center;
+                    }
+                    .select-player__list {
+                        width: 100%;
+                        margin: 0 0 -30px 0;
+                        justify-content: center;
+                        .select-player__list-item {
+                            flex: 0 0 auto;
+                            .player-option {
+                                padding: 5px 15px;
+                                .v-btn {
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                #steal-gold__action {
+                    margin: 30px 0 0 0;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+            #steal-gold__done {
+                border-radius: 3px;
+                padding: 10px 15px;
+                box-sizing: border-box;
+                background-color: #111111;
+            }
+        }
     }
     #game-over-ui {
         width: 100%;
         height: 100%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        #game-over-ui__title {
+            text-align: center;
+        }
+        #game-over-ui__winners {
+            margin: 30px 0 0 0;
+            #game-over-ui__winners-title {
+                font-size: 1.5em;
+                font-weight: 500;
+                text-align: center;
+                margin: 50px 0 10px 0;
+                text-transform: uppercase;
+            }
+            #game-over-ui__winners-list {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                margin: 0 -15px -30px -15px;
+                .winner-wrapper {
+                    flex: 0 0 200px;
+                    box-sizing: border-box;
+                    padding: 0 15px 30px 15px;
+                    .winner {
+                        width: 200px;
+                        padding: 15px;
+                        display: flex;
+                        color: #000000;
+                        border-radius: 3px;
+                        align-items: center;
+                        flex-direction: column;
+                        box-sizing: border-box;
+                        justify-content: center;
+                        background-color: #fff;
+                        .winner-title {
+                            font-size: 1.1em;
+                            font-weight: 500;
+                            text-align: center;
+                        }
+                        .winner-avatar {
+                            width: 100px;
+                            margin: 10px 0;
+                            flex: 0 0 100px;
+                            border-radius: 5px;
+                            background-size: contain;
+                            background-repeat: no-repeat;
+                            background-position: center center;
+                        }
+                        .winner-score {
+                            text-align: center;
+                            color: #c79200;
+                        }
+                    }
+                }
+            }
+        }
+        #game-over-ui__actions {
+            margin: 30px 0 0 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
     }
     #my-role-dialog {
         display: flex;

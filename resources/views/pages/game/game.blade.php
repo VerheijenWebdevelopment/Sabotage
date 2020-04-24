@@ -15,7 +15,8 @@
         :roles="{{ $roles->toJson() }}"
         :cards="{{ $cards->toJson() }}"
         :icons="{{ $icons->toJson() }}"
-        :api-endpoints="{{ $apiEndpoints->toJson() }}">
+        :api-endpoints="{{ $apiEndpoints->toJson() }}"
+        lobby-href="{{ route('lobby') }}">
     </game>
 
 @stop
