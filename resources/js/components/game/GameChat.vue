@@ -110,7 +110,7 @@
                         return this.game.players[i].user.username;
                     }
                 }
-                return "Unknown";
+                return "system";
             },
             scrollToBottom() {
                 let container = this.$refs.container;

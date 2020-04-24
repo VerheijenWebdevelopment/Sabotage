@@ -7047,7 +7047,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      return "Unknown";
+      return "system";
     },
     scrollToBottom: function scrollToBottom() {
       var container = this.$refs.container;

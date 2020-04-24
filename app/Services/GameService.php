@@ -16,9 +16,9 @@ use App\Models\Game;
 use App\Models\Role;
 use App\Models\Player;
 use App\Models\GameChatMessage;
-
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
+use App\Http\Requests\Api\Game\SendGameMessageRequest;
 
 use App\Events\Game\PlayerSelectedRole;
 use App\Events\Game\PlayerToolBlocked;
@@ -40,8 +40,6 @@ use App\Events\Game\GoldLocationRevealed;
 use App\Events\Game\PlayerIsReadyForNextRound;
 use App\Events\Game\PlayerWasAwardedGold;
 use App\Events\Game\NewRoundStarted;
-
-use App\Http\Requests\Api\Game\SendGameMessageRequest;
 
 class GameService implements ModelServiceContract
 {
@@ -375,6 +373,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to other players
         broadcast(new PlayerStoleGold($game, $player, $targetPlayer))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft 1 goud gestolen van ".$targetPlayer->user->username, $game);
     }
 
     private function performRoleCardSelected(Game $game, Player $player, int $cardIndex)
@@ -422,6 +423,9 @@ class GameService implements ModelServiceContract
         // Draw a new card
         $card = $this->drawCard($game, $player);
 
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft een kaart afgelegd.", $game);
+
         // Return (preloaded version of) the drawn card
         return $card ? Cards::preload($card) : false;
     }
@@ -433,6 +437,9 @@ class GameService implements ModelServiceContract
 
         // Draw new cards
         $cards = $this->drawCards($game, $player, count($indices));
+        
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft ".count($indices)." kaarten afgelegd.", $game);
 
         // Return drawn cards
         return $cards;
@@ -463,6 +470,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to the other players
         broadcast(new PlayerToolRecovered($game, $player, $player, $tool))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft 2 kaarten afgelegd en zijn/haar ".$tool." hersteld.", $game);
 
         // Return drawn cards
         return $cards;
@@ -628,6 +638,9 @@ class GameService implements ModelServiceContract
         // Broadcast event to the target player
         broadcast(new PlayerHandChanged($game, $targetPlayer, $targetPlayer->hand, $player));
 
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft zijn kaarten geruild met ".$targetPlayer->user->username.".", $game);
+
         // Return player's hand
         return $player->hand;
     }
@@ -655,6 +668,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to the target player informing them what the fudgesicle just happened
         broadcast(new PlayerRoleChanged($game, $targetPlayer, $role, $player));
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft ervoor gezorgd dat ".$targetPlayer->user->username." een nieuwe rol heeft gekregen.", $game);
     }
 
     private function playInspectionCard(Game $game, Player $player, Card $card, array $data)
@@ -662,6 +678,9 @@ class GameService implements ModelServiceContract
         // Grab the player we're targetting
         $targetPlayer = Players::find($data["player_id"]);
         if (!$targetPlayer) throw new Exception("Received target player's ID is invalid");
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft de rol van ".$targetPlayer->user->username." bekeken.", $game);
 
         // Return the target player's role
         return $targetPlayer->role;
@@ -675,6 +694,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to other players
         broadcast(new PlayerIsThief($game, $player));
+        
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft een dief kaart gespeeld, boefje.", $game);
     }
 
     private function playDontTouchCard(Game $game, Player $player, Card $card, array $data)
@@ -689,6 +711,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to other players
         broadcast(new PlayerNoLongerThief($game, $player, $targetPlayer))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." zei swieber niet stelen en nu is ".$targetPlayer->user->username." geen dief meer.", $game);
     }
 
     private function playImprisonCard(Game $game, Player $player, Card $card, array $data)
@@ -703,6 +728,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to other players
         broadcast(new PlayerImprisoned($game, $player, $targetPlayer))->toOthers();
+        
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft ".$targetPlayer->user->username." in de gevangenis gegooid.", $game);
     }
 
     private function playFreeCard(Game $game, Player $player, Card $card, array $data)
@@ -717,6 +745,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to other player
         broadcast(new PlayerFreed($game, $player, $targetPlayer));
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft ".$targetPlayer->user->username." uit de gevangenis bevrijd.", $game);
     }
 
     private function playSabotageCard(Game $game, Player $player, Card $card, array $data)
@@ -774,6 +805,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to the other players
         broadcast(new PlayerToolBlocked($game, $player, $targetPlayer, $tool))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft de ".$tool." van ".$targetPlayer->user->username." geblokkeerd.", $game);
     }
 
     private function playRecoverCard(Game $game, Player $player, Card $card, array $data)
@@ -831,12 +865,18 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to the other players
         broadcast(new PlayerToolRecovered($game, $player, $targetPlayer, $tool))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft de ".$tool." van ".$targetPlayer->user->username." hersteld.", $game);
     }
 
     private function playEnlightenCard(Game $game, Player $player, int $goldLocation)
     {
         // Inform other players whats going on
         broadcast(new PlayerCheckedGoldLocation($game, $player, $goldLocation))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft de ".$goldLocation."e goud locatie bekeken.", $game);
 
         // Return whether or not the target gold location contains gold or not
         return $game->gold_location == $goldLocation;
@@ -857,6 +897,9 @@ class GameService implements ModelServiceContract
         // Broadcast event to all other players
         broadcast(new PlayerCollapsedTunnel($game, $player, (array) $data["target_coordinates"]))->toOthers();
 
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft de tunnel op ".$data["target_coordinates"]->x.":".$data["target_coordinates"]->y." vernietigd.", $game);
+
         // Return the updated board
         return $board;
     }
@@ -868,6 +911,9 @@ class GameService implements ModelServiceContract
 
         // Broadcast event to all other players to inform them of the update
         broadcast(new PlayerPlacedTunnel($game, $player, $card, (array) $data["target_coordinates"], $data["inverted"]))->toOthers();
+
+        // Send system message
+        GameMessages::sendSystemMessage($player->user->username." heeft een tunnel geplaatst op ".$data["target_coordinates"]->x.":".$data["target_coordinates"]->y.".", $game);
 
         // Check if we've reached a gold location
         $reached_gold_locations = Board::goldLocationsReached($board);

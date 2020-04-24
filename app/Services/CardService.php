@@ -41,7 +41,7 @@ class CardService implements ModelServiceContract
 
         return false;
     }
-
+    
     public function generateDeck(Game $game)
     {
         $out = [];
