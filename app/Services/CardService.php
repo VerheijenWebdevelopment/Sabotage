@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use Image;
-
 use App\Models\Card;
 use App\Models\Game;
-
 use App\Traits\ModelServiceGetters;
 use App\Contracts\ModelServiceContract;
 
@@ -25,7 +23,8 @@ class CardService implements ModelServiceContract
 
     public function preload($instance)
     {
-        $instance->image_url = route("api.cards.generate-image", $instance->id);
+        // $instance->image_url = route("api.cards.generate-image", $instance->id);
+        $instance->image_url = asset($instance->image_url);
 
         return $instance;
     }
@@ -364,7 +363,7 @@ class CardService implements ModelServiceContract
         // If we failed to find a card
         if (!$card)
         {
-            $image->text("Unknown card", ($w/2), ($h/2), function($font) {
+            $image->text("Onbekende kaart", ($w/2), ($h/2), function($font) {
                 $font->size(24);
                 $font->align("center");
                 $font->valign("center");
@@ -390,7 +389,7 @@ class CardService implements ModelServiceContract
             // If we're dealing with a gold location card
             elseif ($card->type == "gold_location")
             {
-                $image->text("Gold Location", ($w/2), ($h/2), function($font) {
+                $image->text("Goud Locatie", ($w/2), ($h/2), function($font) {
                     $font->size(24);
                     $font->align("center");
                     $font->valign("center");
@@ -402,7 +401,7 @@ class CardService implements ModelServiceContract
             elseif ($card->type == "coal")
             {
                 $image = $this->addTunnel($image, $card);
-                $image->text("Coal", ($w/2), ($h/2), function($font) {
+                $image->text("Steenkool", ($w/2), ($h/2), function($font) {
                     $font->size(24);
                     $font->align("center");
                     $font->valign("center");
@@ -414,7 +413,7 @@ class CardService implements ModelServiceContract
             elseif ($card->type == "gold")
             {
                 $image = $this->addTunnel($image, $card);
-                $image->text("Gold", ($w/2), ($h/2), function($font) {
+                $image->text("Goud", ($w/2), ($h/2), function($font) {
                     $font->size(24);
                     $font->align("center");
                     $font->valign("center");
@@ -425,7 +424,7 @@ class CardService implements ModelServiceContract
             // If we're dealing with an action card
             elseif ($card->type == "action")
             {
-                $image = $this->addHeaderText($image, "Action Card");
+                $image = $this->addHeaderText($image, "Actie Kaart");
                 $image = $this->addCardLabelText($image, $card->text);
                 $image = $this->addActionIcon($image, $card);
             }

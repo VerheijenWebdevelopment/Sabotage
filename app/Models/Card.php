@@ -18,6 +18,10 @@ class Card extends Model
         "crystal_location",
         "has_ladder",
         "ladder_location",
+        "has_door",
+        "door_color",
+        "door_position",
+        "image_url",
     ];
 
     //
