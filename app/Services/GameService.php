@@ -1366,7 +1366,8 @@ class GameService implements ModelServiceContract
         if ($game->currentRound->phase == "main")
         {
             // Round ends when there are no cards left in the deck & player's hands or the gold has been found
-            return (count($game->currentRound->deck) == 0 && $this->playersOutOfCards($game)) || array_key_exists($game->currentRound->gold_location, $game->currentRound->reached_gold_locations);
+            $reachedGoldLocations = (array) $game->currentRound->reached_gold_locations;
+            return (count($game->currentRound->deck) == 0 && $this->playersOutOfCards($game)) || array_key_exists($game->currentRound->gold_location, $reachedGoldLocations);
         }
         
         // Return false
