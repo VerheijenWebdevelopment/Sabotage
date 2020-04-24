@@ -80,47 +80,42 @@ class CardService implements ModelServiceContract
         // Generate action cards 
         //
 
-        // // Sabotage cards
-        // for ($i = 0; $i < 3; $i++)
-        // {
-        //     $out[] = $action_sabotage_cart->id;
-        //     $out[] = $action_sabotage_light->id;
-        //     $out[] = $action_sabotage_pickaxe->id;
-        // }
+        // Sabotage cards
+        for ($i = 0; $i < 3; $i++)
+        {
+            $out[] = $action_sabotage_cart->id;
+            $out[] = $action_sabotage_light->id;
+            $out[] = $action_sabotage_pickaxe->id;
+        }
 
-        // // Recover cards
-        // for ($i = 0; $i < 3; $i++)
-        // {
-        //     $out[] = $action_recover_cart->id;
-        //     $out[] = $action_recover_light->id;
-        //     $out[] = $action_recover_pickaxe->id;
-        // }
+        // Recover cards
+        for ($i = 0; $i < 3; $i++)
+        {
+            $out[] = $action_recover_cart->id;
+            $out[] = $action_recover_light->id;
+            $out[] = $action_recover_pickaxe->id;
+        }
         
-        // // Combo recover cards
-        // $recoverCombos = [
-        //     $action_recover_pickaxe_light,
-        //     $action_recover_pickaxe_cart,
-        //     $action_recover_light_cart,
-        // ];
-        // $out[] = $recoverCombos[rand(0, 2)]->id;
+        // Combo recover cards
+        $recoverCombos = [
+            $action_recover_pickaxe_light,
+            $action_recover_pickaxe_cart,
+            $action_recover_light_cart,
+        ];
+        $out[] = $recoverCombos[rand(0, 2)]->id;
 
-        // // Add 3 collapse cards
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
-        // $out[] = $action_collapse->id;
+        // Add 3 collapse cards
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
+        $out[] = $action_collapse->id;
 
-        // // Add 6 enlighten cards
-        // $out[] = $action_enlighten->id;
-        // $out[] = $action_enlighten->id;
-        // $out[] = $action_enlighten->id;
-        // $out[] = $action_enlighten->id;
-        // $out[] = $action_enlighten->id;
-        // $out[] = $action_enlighten->id;
+        // Add 6 enlighten cards
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
+        $out[] = $action_enlighten->id;
 
         // // Add 4 thiefery cards
         $out[] = $action_thief->id;
@@ -128,39 +123,33 @@ class CardService implements ModelServiceContract
         $out[] = $action_thief->id;
         $out[] = $action_thief->id;
 
-        // // Add 3 dont touch cards
-        // $out[] = $action_dont_touch->id;
-        // $out[] = $action_dont_touch->id;
-        // $out[] = $action_dont_touch->id;
+        // Add 3 dont touch cards
+        $out[] = $action_dont_touch->id;
+        $out[] = $action_dont_touch->id;
+        $out[] = $action_dont_touch->id;
 
-        // // Add 2 exchange hats cards
-        // $out[] = $action_exchange_hats->id;
-        // $out[] = $action_exchange_hats->id;
-        // $out[] = $action_exchange_hats->id;
-        // $out[] = $action_exchange_hats->id;
-        // $out[] = $action_exchange_hats->id;
+        // Add 2 exchange hats cards
+        $out[] = $action_exchange_hats->id;
+        $out[] = $action_exchange_hats->id;
 
-        // // Add 2 inspection cards
-        // $out[] = $action_inspection->id;
-        // $out[] = $action_inspection->id;
+        // Add 2 inspection cards
+        $out[] = $action_inspection->id;
+        $out[] = $action_inspection->id;
 
-        // // Add 2 exchange hands cards
-        // $out[] = $action_exchange_hands->id;
-        // $out[] = $action_exchange_hands->id;
-        // $out[] = $action_exchange_hands->id;
-        // $out[] = $action_exchange_hands->id;
-        // $out[] = $action_exchange_hands->id;
+        // Add 2 exchange hands cards
+        $out[] = $action_exchange_hands->id;
+        $out[] = $action_exchange_hands->id;
 
-        // // Add 3 imprison cards
-        // $out[] = $action_imprison->id;
-        // $out[] = $action_imprison->id;
-        // $out[] = $action_imprison->id;
+        // Add 3 imprison cards
+        $out[] = $action_imprison->id;
+        $out[] = $action_imprison->id;
+        $out[] = $action_imprison->id;
 
-        // // Add 4 free cards
-        // $out[] = $action_free->id;
-        // $out[] = $action_free->id;
-        // $out[] = $action_free->id;
-        // $out[] = $action_free->id;
+        // Add 4 free cards
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
+        $out[] = $action_free->id;
 
         //
         // Grab all tunnel cards
@@ -215,77 +204,64 @@ class CardService implements ModelServiceContract
         // Gather the tunnels seperately first so we can post-process them
         $tunnels = [];
 
-        // // Dead ends with 1 tile
-        // $singleNoCenters = [
-        //     $tunnel_single_one,
-        //     $tunnel_single_two,
-        //     $tunnel_single_three,
-        //     $tunnel_single_four,
-        // ];
-        // $tunnels[] = $singleNoCenters[rand(0, 3)];
-        // $tunnels[] = $singleNoCenters[rand(0, 3)];
+        // Dead ends with 1 tile
+        $singleNoCenters = [
+            $tunnel_single_one,
+            $tunnel_single_two,
+            $tunnel_single_three,
+            $tunnel_single_four,
+        ];
+        $tunnels[] = $singleNoCenters[rand(0, 3)];
+        $tunnels[] = $singleNoCenters[rand(0, 3)];
 
-        // // Dead ends with 2 tiles
-        // $doubleNoCenters = [
-        //     $tunnel_single_center_one,
-        //     $tunnel_single_center_two,
-        //     $tunnel_single_center_three,
-        //     $tunnel_single_center_four,
-        //     $tunnel_double_one,
-        //     $tunnel_double_two,
-        //     $tunnel_double_three,
-        //     $tunnel_double_four,
-        //     $tunnel_double_five,
-        //     $tunnel_double_six,
-        // ];
-        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
-        // $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        // Dead ends with 2 tiles
+        $doubleNoCenters = [
+            $tunnel_single_center_one,
+            $tunnel_single_center_two,
+            $tunnel_single_center_three,
+            $tunnel_single_center_four,
+            $tunnel_double_one,
+            $tunnel_double_two,
+            $tunnel_double_three,
+            $tunnel_double_four,
+            $tunnel_double_five,
+            $tunnel_double_six,
+        ];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
+        $tunnels[] = $doubleNoCenters[rand(0, 5)];
 
-        // // Dead ends with 3 tiles
-        // $tripleNoCenters = [
-        //     $tunnel_triple_one,
-        //     $tunnel_triple_two,
-        //     $tunnel_triple_three,
-        //     $tunnel_triple_four,
-        // ];
-        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
-        // $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        // Dead ends with 3 tiles
+        $tripleNoCenters = [
+            $tunnel_triple_one,
+            $tunnel_triple_two,
+            $tunnel_triple_three,
+            $tunnel_triple_four,
+        ];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
+        $tunnels[] = $tripleNoCenters[rand(0, 3)];
 
-        // // Dead ends with 4 tiles
-        // $tunnels[] = $tunnel_quadruple;
+        // Dead ends with 4 tiles
+        $tunnels[] = $tunnel_quadruple;
 
-        // // Connected tunnel 2 tiles 
-        // $tunnels[] = $tunnel_double_center_one;
-        // $tunnels[] = $tunnel_double_center_two;
-        // $tunnels[] = $tunnel_double_center_three;
-        // $tunnels[] = $tunnel_double_center_four;
-        // $tunnels[] = $tunnel_double_center_five;
-        // $tunnels[] = $tunnel_double_center_six;
+        // Connected tunnel 2 tiles 
+        $tunnels[] = $tunnel_double_center_one;
+        $tunnels[] = $tunnel_double_center_two;
+        $tunnels[] = $tunnel_double_center_three;
+        $tunnels[] = $tunnel_double_center_four;
+        $tunnels[] = $tunnel_double_center_five;
+        $tunnels[] = $tunnel_double_center_six;
 
-        // // Connected tunnel 3 tiles
-        // $tunnels[] = $tunnel_triple_center_one;
-        // $tunnels[] = $tunnel_triple_center_two;
-        // $tunnels[] = $tunnel_triple_center_three;
-        // $tunnels[] = $tunnel_triple_center_four;
+        // Connected tunnel 3 tiles
+        $tunnels[] = $tunnel_triple_center_one;
+        $tunnels[] = $tunnel_triple_center_two;
+        $tunnels[] = $tunnel_triple_center_three;
+        $tunnels[] = $tunnel_triple_center_four;
 
         // Connected tunnel 4 tiles
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
-        $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
         $tunnels[] = $tunnel_quadruple_center;
@@ -343,6 +319,9 @@ class CardService implements ModelServiceContract
 
         // Shuffle the output to make things random
         shuffle($out);
+
+        // Remove 10 cards
+        array_splice($out, 0, 10);
 
         // Return the generated list of card id's
         return $out;

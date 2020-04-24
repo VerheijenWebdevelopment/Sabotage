@@ -1153,25 +1153,15 @@ class GameService implements ModelServiceContract
         // Save changes we made to the game
         $game->currentRound->save();
 
-        // // If this is the last round
-        // if ($game->currentRound->round_number == $game->settings->num_rounds)
-        // {
-        //     // End the game
-        //     $this->endGame($game);
-        // }
-        // // Otherwise; broadcast the round ended event
-        // else
-        // {
-            // Compose the data we want to send to the client (all updates we've done basically except for the deck)
-            $data = [
-                "gold_found" => $gold_found,
-                "winning_teams" => $winningTeams,
-                "revealed_players" => $revealedPlayers,
-            ];
+        // Compose the data we want to send to the client (all updates we've done basically except for the deck)
+        $data = [
+            "gold_found" => $gold_found,
+            "winning_teams" => $winningTeams,
+            "revealed_players" => $revealedPlayers,
+        ];
 
-            // Broadcast event to all players (including the one who initiated this process)
-            broadcast(new RoundEnded($game, $data));
-        // }
+        // Broadcast event to all players (including the one who initiated this process)
+        broadcast(new RoundEnded($game, $data));
     }
 
     private function flagPlayerAsReadyForNextRound(Game $game, Player $player)
